@@ -1,0 +1,23 @@
+Message-ID:  14905392.1072121654520.JavaMail.evans@thyme
+Date: Mon, 27 Aug 2001 14:28:43 -0700 (PDT)
+From: debra.bailey@enron.com
+To: debra.bailey@enron.com, lloyd.will@enron.com, a..allen@enron.com, 
+	w..white@enron.com, casey.evans@enron.com, corry.bentley@enron.com, 
+	todd.busby@enron.com, andy.rodriquez@enron.com
+Subject: Spark Gap Business Lead Weekly Meeting
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+Objective:
+
+East Desk weekly meeting to coordinate requirements among Project Spark Gap business leads, review action items and project status.  Usually meeting will only be 30 minutes from 1:00 to 1:30.  Today we will go longer due to project start-up.  
+
+Agenda:
+
+1)  Review Spark Gap Project Implementation Plan - Bailey/Will (15 min)
+2)  Review Work Breakdown Structure - Bailey (10 min)
+3)  Review Spark Gap Requirements List - Business Leads (30 min)
+4)  Assign Preliminary Working Groups to develop Requirements - All (15 min)
+5) Review EES Systems Drawing and Schedule - Busby (15 min)
+6) Next Steps/Wrap-up - Bailey (5 min)  

@@ -1,0 +1,38 @@
+Message-ID:  19341355.1072121654429.JavaMail.evans@thyme
+Date: Wed, 29 Aug 2001 11:01:02 -0700 (PDT)
+From: keith.considine@enron.com
+To: keith.considine@enron.com, guillermo.arana@enron.com, 
+	keith.considine@enron.com, brian.fogarty@enron.com, 
+	brian.gillis@enron.com, c..gossett@enron.com, todd.hall@enron.com, 
+	frank.hayden@enron.com, william.kelly@enron.com, 
+	sam.leuschen@enron.com, scott.mills@enron.com, 
+	edward.sacks@enron.com, gary.stadler@enron.com, 
+	fergus.trenholme@enron.com, tom.victorio@enron.com, 
+	w..white@enron.com, shona.wilson@enron.com
+Subject: Curve Validation Meeting
+Mime-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_21619_13646925.1072121654408"
+
+------=_Part_21619_13646925.1072121654408
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+All-
+
+Our next validation meeting will be Thursday, September 6th from 9-10 a.m. in EB3587.  No meeting will be held tomorrow given yesterday's demonstration meeting.
+
+For the next meeting we will discuss the draft validation process and take any comments/questions on the tools being developed.  Please review the process and presentation materials before the next meeting, and feel free to forward any iterim comments/questions to me as you have them.  
+
+Draft validation process
+ 
+
+Presentation materials from 8/28/01 demonstration
+The demostration of tools that are being developed for curve selection and validation including: curve grabber, stale curve queries, historical bands and others.
+
+   
+
+Regards 
+
+KC
+------=_Part_21619_13646925.1072121654408--

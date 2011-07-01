@@ -1,0 +1,11 @@
+Message-ID:  26632750.1072121655061.JavaMail.evans@thyme
+Date: Thu, 12 Jul 2001 09:06:17 -0700 (PDT)
+From: m.hall@enron.com
+To: m.hall@enron.com, c..gossett@enron.com, w..white@enron.com, 
+	sam.leuschen@enron.com
+Subject: lunch today rescheduled with Bob Hall
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+Meet in the lobby at 11:30am. 
