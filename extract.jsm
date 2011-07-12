@@ -114,6 +114,34 @@ function extract(email, now) {
     }
   }
   
+  alts = getRepAlternatives(bundle, "duration.full.hour.to.minutes", ["(\\d{1,2})","(\\d{1,2})", "(\\d{2})"]);
+  for (var alt in alts) {
+    res = new RegExp(alts[alt].pattern).exec(email);
+    if (res) {
+        res[1] = parseInt(res[1]);
+        if (res[1] < 8) {
+          guess.hour = res[1] + 12;
+        } else {
+          guess.hour = res[1];
+        }
+        guess.minute = 0;
+    }
+  }
+  
+  alts = getRepAlternatives(bundle, "duration.minutes.to.minutes", ["(\\d{1,2})", "(\\d{2})","(\\d{1,2})", "(\\d{2})"]);
+  for (var alt in alts) {
+    res = new RegExp(alts[alt].pattern).exec(email);
+    if (res) {
+        res[1] = parseInt(res[1]);
+        if (res[1] < 8) {
+          guess.hour = res[1] + 12;
+        } else {
+          guess.hour = res[1];
+        }
+        guess.minute = parseInt(res[2]);
+    }
+  }
+  
   // hour:minutes
   alts = getRepAlternatives(bundle, "hour.minutes", ["(\\d{1,2})","(\\d{2})"]);
   for (var alt in alts) {
@@ -144,7 +172,8 @@ function extract(email, now) {
   for (var alt in alts) {
     res = new RegExp(alts[alt].pattern).exec(email);
     if (res) {
-      guess.hour = parseInt(res[1]) + 12;
+      guess.hour = parseInt(res[1]);
+      if (guess.hour < 12) guess.hour += 12;
       guess.minutes = parseInt(res[2]);
     }
   }
@@ -162,12 +191,12 @@ function extract(email, now) {
     let re = alts[alt].pattern.replace(marker, "|", "g");
     let positions = alts[alt].positions;
 
-    res = new RegExp(re).exec(email);
+    res = new RegExp(re, "i").exec(email);
     
     if (res) {
       guess.day = parseInt(res[positions[2]]);
       for (let i = 0; i < 12; i++) {
-        if (months[i].split("|").indexOf(res[positions[1]]) != -1) {
+        if (months[i].unescape().split("|").indexOf(res[positions[1]].toLowerCase()) != -1) {
           guess.month = i + 1;
         }
       }
@@ -181,12 +210,12 @@ function extract(email, now) {
     let re = alts[alt].pattern.replace(marker, "|", "g");
     let positions = alts[alt].positions;
 
-    res = new RegExp(re).exec(email);
+    res = new RegExp(re, "i").exec(email);
     
     if (res) {
       guess.day = parseInt(res[positions[1]]);
       for (let i = 0; i < 12; i++) {
-        if (months[i].split("|").indexOf(res[positions[2]]) != -1) {
+        if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
           guess.month = i + 1;
         }
       }
@@ -201,6 +230,11 @@ function extract(email, now) {
 // XXX should replace all special characters for regexp not just .
 String.prototype.sanitize = function() {
   let res = this.replace(/([^\\])([\.])/g, "$1\\$2");
+  return res;
+}
+
+String.prototype.unescape = function() {
+  let res = this.replace(/\\([\.])/g, "$1");
   return res;
 }
 
