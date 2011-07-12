@@ -1,0 +1,31 @@
+Message-ID: <9991633.1072119843509.JavaMail.evans@thyme>
+Date: Wed, 27 Jun 2001 14:30:31 -0700 (PDT)
+From: karima.husain@enron.com
+To: karima.husain@enron.com, bob.bowen@enron.com, joe.hunter@enron.com, 
+	chris.abel@enron.com, thomas.araujo@enron.com, 
+	david.baumbach@enron.com, r..brackett@enron.com, a..brown@enron.com, 
+	thu.dang@enron.com, c..giron@enron.com, sheila.glover@enron.com, 
+	c..gossett@enron.com, j..hanson@enron.com, willie.harrell@enron.com, 
+	nancy.hernandez@enron.com, chad.ihrig@enron.com, 
+	john.jacobsen@enron.com, kam.keiser@enron.com, jill.lafave@enron.com, 
+	s..lim@enron.com, kelly.lombardi@enron.com, m..love@enron.com, 
+	shari.mao@enron.com, errol.mclaughlin@enron.com, 
+	frank.prejean@enron.com, patrick.scales@enron.com, 
+	d..sorenson@enron.com, kevin.sweeney@enron.com, 
+	john.swinney@enron.com, sue.vasan@enron.com, 
+	steve.venturatos@enron.com, zhiyong.wei@enron.com, 
+	jeremy.wong@enron.com
+Subject: Status meeting:  ERMT database migration to Oracle 8i
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+All,
+
+Please plan to attend the project status meeting for the ERMT database migration to Oracle 8i, scheduled for July 14.  If you're unable to attend, please send a representative on your behalf.
+
+Thanks & regards,
+
+Karima Husain
+Project Manager, TAGG/ERMS
+(713) 345-7252

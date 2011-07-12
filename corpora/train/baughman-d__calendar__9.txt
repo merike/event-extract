@@ -1,0 +1,29 @@
+Message-ID: <26301084.1072120008931.JavaMail.evans@thyme>
+Date: Mon, 29 Oct 2001 07:36:13 -0800 (PST)
+From: corry.bentley@enron.com
+To: corry.bentley@enron.com, lloyd.will@enron.com, debra.bailey@enron.com, 
+	don.baughman@enron.com, juan.hernandez@enron.com, 
+	david.poston@enron.com, steve.nat@enron.com, dean.laurent@enron.com, 
+	l..garcia@enron.com, jason.choate@enron.com
+Subject: OATI
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+
+
+AGENDA:
+9:00A  to 11:00A
+Kevin Burns will be here from OATI to provide specifications and describe in more detail the functionality of Web Trader.  
+11:30 to 2:00 PM 
+Our goal is to have representatives from the 24-Hour Group and the IT Group bring specific questions for Kevin.   
+Let's determine if WebTrader can be flexible enough to replace the P&L (Delphi) application, interact with Enpower, and provide a good detailed database for historical information.  Most importantly, is this application fast and efficient enough to add value to the 24-hour group.
+
+Call me with any questions or to discuss.  853-0421
+
+Thanks,
+
+Corry
+
+
+

@@ -1,5 +1,6 @@
 /* Experiment on how far you can get with simple regular expressions
-   94/120 apparently
+   94/120 test set
+   166/205 train/bunch-1 set
  */
 
 var corSum = 0;

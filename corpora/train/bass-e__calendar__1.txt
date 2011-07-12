@@ -1,0 +1,14 @@
+Message-ID: <7789106.1072119990022.JavaMail.evans@thyme>
+Date: Mon, 4 Feb 2002 09:27:45 -0800 (PST)
+From: ed.mcmichael@enron.com
+To: ed.mcmichael@enron.com, eric.bass@enron.com, jonathan.mckay@enron.com, 
+	h..lewis@enron.com, mathew.smith@enron.com, frank.ermis@enron.com, 
+	dutch.quigley@enron.com, keith.considine@enron.com
+Subject: Updated: Gas Curves Validation
+Cc: shona.wilson@enron.com
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Bcc: shona.wilson@enron.com
+
+This meeting has been rescheduled for today at 2:00.

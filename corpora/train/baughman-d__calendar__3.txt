@@ -1,0 +1,26 @@
+Message-ID: <3333237.1072120008748.JavaMail.evans@thyme>
+Date: Mon, 28 Jan 2002 19:00:42 -0800 (PST)
+From: steve.nat@enron.com
+To: steve.nat@enron.com, don.baughman@enron.com, lisa.burnett@enron.com, 
+	l..day@enron.com, jeffrey.miller@enron.com, jason.choate@enron.com, 
+	patrick.hanse@enron.com, corry.bentley@enron.com, 
+	debra.bailey@enron.com, lloyd.will@enron.com, 
+	robert.benson@enron.com, dana.davis@enron.com, j..sturm@enron.com, 
+	david.poston@enron.com, duong.luu@enron.com, steve.nat@enron.com, 
+	arun.balasundaram@enron.com, norman.lee@enron.com
+Subject: Power Trading Systems Requirements
+Mime-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_2839_18697006.1072120008727"
+
+------=_Part_2839_18697006.1072120008727
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+
+As promised, please find the attached agenda for our follow-up meeting regarding CPM and additional P&L requirements.  See you at 1:00...
+
+Steve
+
+ 
+------=_Part_2839_18697006.1072120008727--

@@ -1,0 +1,53 @@
+Message-ID: <14118174.1072119843148.JavaMail.evans@thyme>
+Date: Fri, 31 Aug 2001 13:50:06 -0700 (PDT)
+From: keith.considine@enron.com
+To: keith.considine@enron.com, kristin.albrecht@enron.com, lisa.best@enron.com, 
+	clara.carrington@enron.com, keith.considine@enron.com, 
+	sheila.glover@enron.com, kam.keiser@enron.com, scott.mills@enron.com, 
+	e..moscoso@enron.com, david.port@enron.com, kathy.reeves@enron.com, 
+	tom.victorio@enron.com, wayne.vinson@enron.com, 
+	shona.wilson@enron.com
+Subject: VaR Meeting
+Mime-Version: 1.0
+Content-Type: multipart/mixed; 
+	boundary="----=_Part_1438_366191.1072119843127"
+
+------=_Part_1438_366191.1072119843127
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+
+
+All-
+
+Our next meeting is September 7 - Friday.  The VaR presentation was this morning and is included below.  With this in mind, now is good time to refocus on the task force objectives and deliverables listed below and come up with our action steps.  
+
+The dial in number is 713.345.3786
+
+
+Objectives
+Ensure accuracy of the VaR number reported for all Enron business groups by:
+Increasing understanding of the models, processes and systems involved in computing VaR
+Identifying relevant input parameters used in the VaR computation and understanding how these are determined and fed into the VaR engine
+Developing ways to easily identify exceptions / errors in the VaR computation process
+Clarify roles and responsibilities in the VaR computation and reporting processes
+Summarize and document findings by developing training materials for all concerned parties
+
+Deliverables
+Detailed documentation of systems, processes and information flows related to the VaR computation
+VaR validation methodology
+Operational validation - eg. exception reporting mechanism
+Daily Change Analysis Report
+Informational or Data validation - eg. Being able to explain daily VaR movements
+Model validation - Back-testing, validation of parameters (curves, factors, correlations, etc)
+List of roles and responsibilities for all concerned groups
+Training materials for risk team members
+Recommendations for future maintenance (of task force activities) and improvements
+
+
+
+ 
+
+Have a good Labor Day!
+
+Keith
+------=_Part_1438_366191.1072119843127--
