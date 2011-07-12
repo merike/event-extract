@@ -49,7 +49,8 @@ function findNow(email) {
   }
   now.year = parseInt(res[3]);
   now.hour = parseInt(res[4]);
-  now.minute = parseInt(res[5]);
+//   hardly correct unless sent exactly at meeting start
+//   now.minute = parseInt(res[5]);
   
   return now;
 }
