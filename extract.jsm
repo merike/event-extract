@@ -84,7 +84,8 @@ var extractor = {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
         res[1] = parseInt(res[1]);
-        guess.day = res[1];
+        if (this.isValidDay(res[1]))
+          guess.day = res[1];
       }
     }
     
@@ -93,7 +94,9 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        guess.hour = parseInt(res[1]);
+        res[1] = parseInt(res[1]);
+        if (this.isValidHour(res[1]))
+          guess.hour = res[1];
         guess.minute = 0;
       }
     }
@@ -102,7 +105,9 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        guess.hour = parseInt(res[1]) + 12;
+        res[1] = parseInt(res[1]);
+        if (this.isValidHour(res[1]))
+          guess.hour = res[1] + 12;
         guess.minute = 0;
       }
     }
@@ -112,10 +117,12 @@ var extractor = {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
           res[1] = parseInt(res[1]);
-          if (res[1] < 8) {
-            guess.hour = res[1] + 12;
-          } else {
-            guess.hour = res[1];
+          if (this.isValidHour(res[1])) {
+            if (res[1] < 8) {
+              guess.hour = res[1] + 12;
+            } else {
+              guess.hour = res[1];
+            }
           }
           guess.minute = 0;
       }
@@ -126,10 +133,12 @@ var extractor = {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
           res[1] = parseInt(res[1]);
-          if (res[1] < 8) {
-            guess.hour = res[1] + 12;
-          } else {
-            guess.hour = res[1];
+          if (this.isValidHour(res[1])) {
+            if (res[1] < 8) {
+              guess.hour = res[1] + 12;
+            } else {
+              guess.hour = res[1];
+            }
           }
           guess.minute = 0;
       }
@@ -140,12 +149,16 @@ var extractor = {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
           res[1] = parseInt(res[1]);
-          if (res[1] < 8) {
-            guess.hour = res[1] + 12;
-          } else {
-            guess.hour = res[1];
+          if (this.isValidHour(res[1])) {
+            if (res[1] < 8) {
+              guess.hour = res[1] + 12;
+            } else {
+              guess.hour = res[1];
+            }
           }
-          guess.minute = parseInt(res[2]);
+          res[2] = parseInt(res[2]);
+          if (this.isValidMinute(res[2]))
+            guess.minute = parseInt(res[2]);
       }
     }
     
@@ -156,13 +169,16 @@ var extractor = {
       if (res) {
         res[1] = parseInt(res[1]);
         // unlikely meeting time, XXX should consider working hours
-        if (res[1] < 8) {
-          guess.hour = res[1] + 12;
-        } else {
-          guess.hour = res[1];
+        if (this.isValidHour(res[1])) {
+          if (res[1] < 8) {
+            guess.hour = res[1] + 12;
+          } else {
+            guess.hour = res[1];
+          }
         }
         res[2] = parseInt(res[2]);
-        guess.minute = res[2];
+        if (this.isValidMinute(res[2]))
+          guess.minute = res[2];
       }
     }
 
@@ -170,8 +186,12 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        guess.hour = parseInt(res[1]);
-        guess.minutes = parseInt(res[2]);
+        res[1] = parseInt(res[1]);
+        if (this.isValidHour(res[1]))
+          guess.hour = parseInt(res[1]);
+        res[2] = parseInt(res[2]);
+        if (this.isValidMinute(res[2]))
+        guess.minutes = res[2];
       }
     }
     
@@ -180,8 +200,12 @@ var extractor = {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
         guess.hour = parseInt(res[1]);
-        if (guess.hour < 12) guess.hour += 12;
-        guess.minutes = parseInt(res[2]);
+        if (this.isValidHour(res[1])) {
+          if (guess.hour < 12) guess.hour += 12;
+        }
+        res[2] = parseInt(res[2]);
+        if (this.isValidMinute(res[2]))
+          guess.minutes = parseInt(res[2]);
       }
     }
 
@@ -201,7 +225,9 @@ var extractor = {
       res = new RegExp(re, "i").exec(email);
       
       if (res) {
-        guess.day = parseInt(res[positions[2]]);
+        res[positions[2]] = parseInt(res[positions[2]]);
+        if (this.isValidDay(res[positions[2]]))
+          guess.day = res[positions[2]];
         for (let i = 0; i < 12; i++) {
           if (months[i].unescape().split("|").indexOf(res[positions[1]].toLowerCase()) != -1) {
             guess.month = i + 1;
@@ -220,7 +246,9 @@ var extractor = {
       res = new RegExp(re, "i").exec(email);
       
       if (res) {
-        guess.day = parseInt(res[positions[1]]);
+        res[positions[1]] = parseInt(res[positions[1]]);
+        if (this.isValidDay(res[positions[1]]))
+          guess.day = res[positions[1]];
         for (let i = 0; i < 12; i++) {
           if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
             guess.month = i + 1;
@@ -275,6 +303,21 @@ var extractor = {
     }
     
     return positions;
+  },
+  
+  isValidDay: function isValidDay(day) {
+    if (day >= 1 && day <= 31) return true;
+    else return false;
+  },
+  
+  isValidHour: function isValidHour(hour) {
+    if (hour >= 0 && hour <= 23) return true;
+    else return false;
+  },
+  
+  isValidMinute: function isValidMinute(minute) {
+    if (minute >= 0 && minute <= 59) return true;
+    else return false;
   }
 }
 
