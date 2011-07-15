@@ -18,6 +18,9 @@ Components.utils.import("file:/media/Meedia/tty/lt/event-extract/extract.jsm");
 file.initWithPath(arguments[0]);
 fileCor.initWithPath(arguments[0] + "../" + file.leafName + "_cor");
 
+if (arguments[1])
+  extractor.setLocale(arguments[1]);
+
 var mails = file.directoryEntries;
 var ans = fileCor.directoryEntries;
 var array = [];
@@ -28,8 +31,8 @@ while (mails.hasMoreElements()) {
   var answer = readFile(corFile);
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
-  var now = findNow(info.contents);
-  var guess = extract(info.contents, now);
+  var now = extractor.findNow(info.contents);
+  var guess = extractor.extract(info.contents, now);
   compare(expected, guess);
   dump("\n---------------------------------------------------------\n");
 }
