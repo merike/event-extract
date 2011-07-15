@@ -3,11 +3,11 @@ var marker = "--MARK--";
 
 var extractor = {
   locale: "en-US",
-  
+
   setLocale: function setLocale(locale) {
     this.locale = locale;
   },
-  
+
   findNow: function findNow(email) {
     var now = {};
     
