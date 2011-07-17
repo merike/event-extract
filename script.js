@@ -1,6 +1,7 @@
 /* Experiment on how far you can get with simple regular expressions
-   95/120 test set
-   177/205 train/bunch-1 set
+   95/120 79% test set
+   179/205 87% train/bunch-1 set
+   102/150 68% private et set
  */
 
 var corSum = 0;

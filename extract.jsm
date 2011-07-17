@@ -15,7 +15,7 @@ var extractor = {
     var re = /^Date:\s\w{3},\s+(\d{1,2})\s(\w{3})\s(\d{4})\s(\d{2}):(\d{1,2})/m;
     var res = re.exec(email);
 
-    now.day = parseInt(res[1]);
+    now.day = parseInt(res[1], 10);
     switch (res[2]) {
       case "Jan":
         now.month = 1;
@@ -54,10 +54,11 @@ var extractor = {
         now.month = 12;
         break;
     }
-    now.year = parseInt(res[3]);
-    now.hour = parseInt(res[4]);
+    now.year = parseInt(res[3], 10);
+  //   also not likely correct
+  //   now.hour = parseInt(res[4], 10);
   //   hardly correct unless sent exactly at meeting start
-  //   now.minute = parseInt(res[5]);
+  //   now.minute = parseInt(res[5], 10);
     
     return now;
   },
@@ -69,8 +70,9 @@ var extractor = {
     
     guess = now;
     // remove Date: and Sent: lines
-    email = email.replace(/^Date:.+$/m, "");
-    email = email.replace(/^Sent:.+$/m, "");
+    email = email.replace(/^Date:.+$/mg, "");
+    email = email.replace(/^Sent:.+$/mg, "");
+    email = email.replace(/^Saatmisaeg:.+$/mg, "");
     
     // from less specific to more specific
     
@@ -83,7 +85,7 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        res[1] = parseInt(res[1]);
+        res[1] = parseInt(res[1], 10);
         if (this.isValidDay(res[1]))
           guess.day = res[1];
       }
@@ -94,10 +96,11 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        res[1] = parseInt(res[1]);
-        if (this.isValidHour(res[1]))
+        res[1] = parseInt(res[1], 10);
+        if (this.isValidHour(res[1])) {
           guess.hour = res[1];
-        guess.minute = 0;
+          guess.minute = 0;
+        }
       }
     }
       
@@ -105,10 +108,11 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        res[1] = parseInt(res[1]);
-        if (this.isValidHour(res[1]))
+        res[1] = parseInt(res[1], 10);
+        if (this.isValidHour(res[1])) {
           guess.hour = res[1] + 12;
-        guess.minute = 0;
+          guess.minute = 0;
+        }
       }
     }
     
@@ -116,15 +120,13 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-          res[1] = parseInt(res[1]);
+          res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            if (res[1] < 8) {
-              guess.hour = res[1] + 12;
-            } else {
-              guess.hour = res[1];
-            }
+            guess.hour = res[1];
+            guess.minute = 0;
+            if (res[1] < 8)
+              guess.hour += 12;
           }
-          guess.minute = 0;
       }
     }
     
@@ -132,15 +134,13 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-          res[1] = parseInt(res[1]);
+          res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            if (res[1] < 8) {
-              guess.hour = res[1] + 12;
-            } else {
-              guess.hour = res[1];
-            }
+            guess.hour = res[1];
+            guess.minute = 0;
+            if (guess.hour < 8)
+              guess.hour += 12;
           }
-          guess.minute = 0;
       }
     }
     
@@ -148,17 +148,14 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-          res[1] = parseInt(res[1]);
-          if (this.isValidHour(res[1])) {
-            if (res[1] < 8) {
-              guess.hour = res[1] + 12;
-            } else {
-              guess.hour = res[1];
-            }
-          }
-          res[2] = parseInt(res[2]);
-          if (this.isValidMinute(res[2]))
-            guess.minute = parseInt(res[2]);
+        res[1] = parseInt(res[1], 10);
+        res[2] = parseInt(res[2], 10);
+        if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+          guess.hour = res[1];
+          guess.minute = res[2];
+          if (guess.hour < 8)
+            guess.hour += 12;
+        }
       }
     }
     
@@ -167,18 +164,15 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        res[1] = parseInt(res[1]);
+        res[1] = parseInt(res[1], 10);
+        res[2] = parseInt(res[2], 10);
         // unlikely meeting time, XXX should consider working hours
-        if (this.isValidHour(res[1])) {
-          if (res[1] < 8) {
-            guess.hour = res[1] + 12;
-          } else {
-            guess.hour = res[1];
-          }
-        }
-        res[2] = parseInt(res[2]);
-        if (this.isValidMinute(res[2]))
+        if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+          guess.hour = res[1];
           guess.minute = res[2];
+          if (res[1] < 8)
+            guess.hour += 12;
+        }          
       }
     }
 
@@ -186,12 +180,12 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        res[1] = parseInt(res[1]);
-        if (this.isValidHour(res[1]))
-          guess.hour = parseInt(res[1]);
-        res[2] = parseInt(res[2]);
-        if (this.isValidMinute(res[2]))
-        guess.minutes = res[2];
+        res[1] = parseInt(res[1], 10);
+        res[2] = parseInt(res[2], 10);
+        if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+          guess.hour = res[1];
+          guess.minutes = res[2];
+        }
       }
     }
     
@@ -199,13 +193,15 @@ var extractor = {
     for (var alt in alts) {
       res = new RegExp(alts[alt].pattern).exec(email);
       if (res) {
-        guess.hour = parseInt(res[1]);
-        if (this.isValidHour(res[1])) {
-          if (guess.hour < 12) guess.hour += 12;
+        res[1] = parseInt(res[1], 10);
+        res[2] = parseInt(res[2], 10);
+        if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+          guess.hour = res[1];
+          guess.minutes = res[2];
+          if (guess.hour < 12)
+            guess.hour += 12;
+ 
         }
-        res[2] = parseInt(res[2]);
-        if (this.isValidMinute(res[2]))
-          guess.minutes = parseInt(res[2]);
       }
     }
 
@@ -223,9 +219,8 @@ var extractor = {
       let positions = alts[alt].positions;
 
       res = new RegExp(re, "i").exec(email);
-      
       if (res) {
-        res[positions[2]] = parseInt(res[positions[2]]);
+        res[positions[2]] = parseInt(res[positions[2]], 10);
         if (this.isValidDay(res[positions[2]]))
           guess.day = res[positions[2]];
         for (let i = 0; i < 12; i++) {
@@ -237,7 +232,32 @@ var extractor = {
     }
     
     // date with year
-    alts = this.getRepAlternatives(bundle, "day.month.year",
+    alts = this.getRepAlternatives(bundle, "day.numericmonth.year",
+                              ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
+    for (var alt in alts) {
+      let re = alts[alt].pattern;
+      let positions = alts[alt].positions;
+
+      res = new RegExp(re, "i").exec(email);
+      
+      if (res) {
+        res[positions[1]] = parseInt(res[positions[1]], 10);
+        res[positions[2]] = parseInt(res[positions[2]], 10);
+        if (res[positions[3]].length == 2)
+          res[positions[3]] = "20" + res[positions[3]];
+        res[positions[3]] = parseInt(res[positions[3]], 10);
+        if (this.isValidDay(res[positions[1]]) && 
+          this.isValidMonth(res[positions[2]]) && 
+          this.isValidYear(res[positions[3]])) {
+          
+          guess.day = res[positions[1]];
+          guess.month = res[positions[2]];
+          guess.year = res[positions[3]];
+        }
+      }
+    }
+    
+    alts = this.getRepAlternatives(bundle, "day.monthname.year",
                               ["(\\d{1,2})", "(" + allMonths + ")", "(\\d{2,4})" ]);
     for (var alt in alts) {
       let re = alts[alt].pattern.replace(marker, "|", "g");
@@ -246,7 +266,7 @@ var extractor = {
       res = new RegExp(re, "i").exec(email);
       
       if (res) {
-        res[positions[1]] = parseInt(res[positions[1]]);
+        res[positions[1]] = parseInt(res[positions[1]], 10);
         if (this.isValidDay(res[positions[1]]))
           guess.day = res[positions[1]];
         for (let i = 0; i < 12; i++) {
@@ -256,7 +276,7 @@ var extractor = {
         }
         if (res[positions[3]].length == 2)
           res[positions[3]] = "20" + res[positions[3]];
-        guess.year = parseInt(res[positions[3]]);
+        guess.year = parseInt(res[positions[3]], 10);
       }
     }
     
@@ -299,10 +319,20 @@ var extractor = {
       match = re.exec(s);
       if (!match)
         break;
-      positions[parseInt(match[1])] = i;
+      positions[parseInt(match[1], 10)] = i;
     }
     
     return positions;
+  },
+  
+  isValidYear: function isValidYear(year) {
+    if (year >= 2000  && year <= 2050) return true;
+    else return false;
+  },
+  
+  isValidMonth: function isValidMonth(month) {
+    if (month >= 1 && month <= 12) return true;
+    else return false;
   },
   
   isValidDay: function isValidDay(day) {
