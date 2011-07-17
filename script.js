@@ -1,5 +1,5 @@
 /* Experiment on how far you can get with simple regular expressions
-   94/120 test set
+   95/120 test set
    177/205 train/bunch-1 set
  */
 
