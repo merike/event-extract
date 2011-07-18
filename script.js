@@ -1,11 +1,14 @@
 /* Experiment on how far you can get with simple regular expressions
-   112/120 93% test set
-   187/205 91% train/bunch-1 set
-   104/150 69% private et set
+   correct bits  %    correct events  %   set
+   111/120      93%   16/24           67% test set
+   186/205      91%   26/41           63% train/bunch-1 set
+   111/150      74%   12/30           40% private et set
  */
 
 var corSum = 0;
 var wrSum = 0;
+var corEvents = 0;
+var wrEvents = 0;
 
 var file = Components.classes["@mozilla.org/file/local;1"]
    .createInstance(Components.interfaces.nsILocalFile);
@@ -39,6 +42,7 @@ while (mails.hasMoreElements()) {
 }
 
 dump("total: " + corSum + "/" + (corSum + wrSum) + "\n");
+dump("total events: " + corEvents + "/" + (corEvents + wrEvents) + "\n");
 
 function readFile(nsiFile) {
   var info = {};
@@ -64,6 +68,8 @@ function readFile(nsiFile) {
 }
 
 function compare(correct, guessed) {
+  let r = wrSum;
+  
   if (correct.year === guessed.year) {
 //     dump("correct year\n");
     corSum++;
@@ -102,5 +108,11 @@ function compare(correct, guessed) {
   } else {
     dump(correct.minute + " " + guessed.minute + " minute\n");
     wrSum++;
+  }
+  
+  if (r === wrSum) {
+    corEvents++;
+  } else {
+    wrEvents++;
   }
 }

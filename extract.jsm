@@ -76,14 +76,14 @@ var extractor = {
     
     // from less specific to more specific
     
-    if (new RegExp(this.getAlternatives(bundle, "tomorrow")).exec(email)) {
+    if (new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig").exec(email)) {
       guess.day++;
     }
     
     // day only
     var alts = this.getRepAlternatives(bundle, "ordinal.date", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -96,9 +96,26 @@ var extractor = {
     }
     
     // time only
+    alts = this.getRepAlternatives(bundle, "hour.only", ["(\\d{1,2})"]);
+    for (var alt in alts) {
+      let re = new RegExp(alts[alt].pattern, "ig");
+      while ((res = re.exec(email)) != null) {
+        if (res) {
+          res[1] = parseInt(res[1], 10);
+          if (this.isValidHour(res[1])) {
+            guess.hour = res[1];
+            if (guess.hour < 8)
+              guess.hour += 12;
+            guess.minute = 0;
+            break;
+          }
+        }
+      }
+    }
+    
     alts = this.getRepAlternatives(bundle, "am.hour.only", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -113,7 +130,7 @@ var extractor = {
       
     alts = this.getRepAlternatives(bundle, "pm.hour.only", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -128,14 +145,14 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "duration.full.hours", ["(\\d{1,2})","(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             guess.hour = res[1];
             guess.minute = 0;
-            if (res[1] < 8)
+            if (guess.hour < 8)
               guess.hour += 12;
             break;
           }
@@ -145,7 +162,7 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "duration.full.hour.to.minutes", ["(\\d{1,2})","(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
             res[1] = parseInt(res[1], 10);
@@ -162,7 +179,7 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "duration.minutes.to.minutes", ["(\\d{1,2})", "(\\d{2})","(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -181,7 +198,7 @@ var extractor = {
     // hour:minutes
     alts = this.getRepAlternatives(bundle, "hour.minutes", ["(\\d{1,2})","(\\d{2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -200,7 +217,7 @@ var extractor = {
 
     alts = this.getRepAlternatives(bundle, "hour.minutes.am", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -216,7 +233,7 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "hour.minutes.pm", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "g");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -298,7 +315,7 @@ var extractor = {
       let pattern = alts[alt].pattern.replace(marker, "|", "g");
       let positions = alts[alt].positions;
 
-      let re = new RegExp(pattern, "i");
+      let re = new RegExp(pattern, "ig");
       
       while ((res = re.exec(email)) != null) {
         if (res) {
