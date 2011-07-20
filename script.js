@@ -1,14 +1,16 @@
 /* Experiment on how far you can get with simple regular expressions
    correct bits  %    correct events  %   set
-   111/120      93%   16/24           67% test set
-   186/205      91%   26/41           63% train/bunch-1 set
-   111/150      74%   12/30           40% private et set
+   110/120      92%   16/24           67% test set
+   184/205      90%   26/41           63% train/bunch-1 set
+   110/150      73%   11/30           37% private et set
  */
 
 var corSum = 0;
 var wrSum = 0;
 var corEvents = 0;
 var wrEvents = 0;
+
+var locale = "en-US";
 
 var file = Components.classes["@mozilla.org/file/local;1"]
    .createInstance(Components.interfaces.nsILocalFile);
@@ -23,7 +25,11 @@ file.initWithPath(arguments[0]);
 fileCor.initWithPath(arguments[0] + "../" + file.leafName + "_cor");
 
 if (arguments[1])
-  extractor.setLocale(arguments[1]);
+  locale = arguments[1];
+let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
+   .getService(Components.interfaces.nsIStringBundleService);
+let url = "file:/media/Meedia/tty/lt/event-extract/extract_" + locale + ".properties";
+let bundle = service.createBundle(url);
 
 var mails = file.directoryEntries;
 var ans = fileCor.directoryEntries;
@@ -36,7 +42,7 @@ while (mails.hasMoreElements()) {
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
   var now = extractor.findNow(info.contents);
-  var guess = extractor.extract(info.contents, now);
+  var guess = extractor.extract(info.contents, now, bundle);
   compare(expected, guess);
   dump("\n---------------------------------------------------------\n");
 }

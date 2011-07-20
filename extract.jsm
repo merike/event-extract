@@ -2,12 +2,6 @@ var EXPORTED_SYMBOLS = ["extractor"];
 var marker = "--MARK--";
 
 var extractor = {
-  locale: "en-US",
-
-  setLocale: function setLocale(locale) {
-    this.locale = locale;
-  },
-
   findNow: function findNow(email) {
     var now = {};
     
@@ -63,12 +57,14 @@ var extractor = {
     return now;
   },
 
-  extract: function extract(email, now) {
-    var service = Components.classes["@mozilla.org/intl/stringbundle;1"]
-      .getService(Components.interfaces.nsIStringBundleService);
-    var bundle = service.createBundle("file:///media/Meedia/tty/lt/event-extract/extract_" + this.locale + ".properties");
+  extract: function extract(email, now, bundle) {
+    let guess = {};
+    guess.year = now.year;
+    guess.month = now.month;
+    guess.day = now.day;
+    guess.hour = now.hour;
+    guess.minute = now.minute;
     
-    guess = now;
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
     email = email.replace(/^Sent:.+$/mg, "");
@@ -92,6 +88,27 @@ var extractor = {
             break;
           }
         }
+      }
+    }
+    
+    // weekday
+    let days = [];
+    for (let i = 0; i < 7; i++) {
+      days[i] = this.getAlternatives(bundle, "weekday." + i);
+      let re = new RegExp(days[i], "ig");
+      res = re.exec(email);
+      if (res) {
+        let date = new Date();
+        date.setDate(now.day);
+        date.setMonth(now.month - 1);
+        date.setYear(now.year);
+
+        let diff = (i - date.getDay() + 7) % 7;
+        date.setDate(date.getDate() + diff);
+        
+        guess.year = date.getFullYear();
+        guess.month = date.getMonth() + 1;
+        guess.day = date.getDate();
       }
     }
     
@@ -224,7 +241,7 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             guess.hour = res[1];
-            guess.minutes = res[2];
+            guess.minute = res[2];
             break;
           }
         }
@@ -240,7 +257,7 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             guess.hour = res[1];
-            guess.minutes = res[2];
+            guess.minute = res[2];
             if (guess.hour < 12)
               guess.hour += 12;
             break;
