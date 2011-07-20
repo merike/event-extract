@@ -1,0 +1,3 @@
+resource event-extract .
+content event-extract chrome/content/
+overlay chrome://lightning/content/messenger-overlay-toolbar.xul chrome://event-extract/content/context-menu-overlay.xul
