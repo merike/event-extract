@@ -121,7 +121,6 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
             guess.day = res[1];
-            break;
           }
         }
       }
@@ -160,7 +159,6 @@ var extractor = {
             if (guess.hour < 8)
               guess.hour += 12;
             guess.minute = 0;
-            break;
           }
         }
       }
@@ -175,7 +173,6 @@ var extractor = {
           if (this.isValidHour(res[1])) {
             guess.hour = res[1];
             guess.minute = 0;
-            break;
           }
         }
       }
@@ -190,7 +187,6 @@ var extractor = {
           if (this.isValidHour(res[1])) {
             guess.hour = res[1] + 12;
             guess.minute = 0;
-            break;
           }
         }
       }
@@ -207,7 +203,6 @@ var extractor = {
             guess.minute = 0;
             if (guess.hour < 8)
               guess.hour += 12;
-            break;
           }
         }
       }
@@ -224,7 +219,6 @@ var extractor = {
               guess.minute = 0;
               if (guess.hour < 8)
                 guess.hour += 12;
-              break;
             }
         }
       }
@@ -242,7 +236,6 @@ var extractor = {
             guess.minute = res[2];
             if (guess.hour < 8)
               guess.hour += 12;
-            break;
           }
         }
       }
@@ -254,6 +247,7 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          dump(res + "\n");
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           // unlikely meeting time, XXX should consider working hours
@@ -262,7 +256,6 @@ var extractor = {
             guess.minute = res[2];
             if (res[1] < 8)
               guess.hour += 12;
-            break;
           }          
         }
       }
@@ -278,7 +271,6 @@ var extractor = {
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             guess.hour = res[1];
             guess.minute = res[2];
-            break;
           }
         }
       }
@@ -296,7 +288,6 @@ var extractor = {
             guess.minute = res[2];
             if (guess.hour < 12)
               guess.hour += 12;
-            break;
           }
         }
       }
@@ -328,7 +319,6 @@ var extractor = {
                 break;
               }
             }
-            break;
           }
         }
       }
@@ -356,7 +346,6 @@ var extractor = {
             guess.day = res[positions[1]];
             guess.month = res[positions[2]];
             guess.year = res[positions[3]];
-            break;
           }
         }
       }
@@ -385,7 +374,6 @@ var extractor = {
               }
             }
             guess.year = res[positions[3]];
-            break;
           }
         }
       }
