@@ -39,67 +39,65 @@ var marker = "--MARK--";
 
 var extractor = {
   findNow: function findNow(email) {
-    var now = {};
+    var now = new Date();
     
     // use date header
     var re = /^Date:\s\w{3},\s+(\d{1,2})\s(\w{3})\s(\d{4})\s(\d{2}):(\d{1,2})/m;
     var res = re.exec(email);
 
-    now.day = parseInt(res[1], 10);
+    now.setDate(parseInt(res[1], 10));
     switch (res[2]) {
       case "Jan":
-        now.month = 1;
+        now.setMonth(0);
         break;
       case "Feb":
-        now.month = 2;
+        now.setMonth(1);
         break;
       case "Mar":
-        now.month = 3;
+        now.setMonth(2);
         break;
       case "Apr":
-        now.month = 4;
+        now.setMonth(3);
         break;
       case "May":
-        now.month = 5;
+        now.setMonth(4);
         break;
       case "Jun":
-        now.month = 6;
+        now.setMonth(5);
         break;
       case "Jul":
-        now.month = 7;
+        now.setMonth(6);
         break;
       case "Aug":
-        now.month = 8;
+        now.setMonth(7);
         break;
       case "Sep":
-        now.month = 9;
+        now.setMonth(8);
         break;
       case "Oct":
-        now.month = 10;
+        now.setMonth(9);
         break;
       case "Now":
-        now.month = 11;
+        now.setMonth(10);
         break;
       case "Dec":
-        now.month = 12;
+        now.setMonth(11);
         break;
     }
-    now.year = parseInt(res[3], 10);
-  //   also not likely correct
-  //   now.hour = parseInt(res[4], 10);
-  //   hardly correct unless sent exactly at meeting start
-  //   now.minute = parseInt(res[5], 10);
+    now.setFullYear(parseInt(res[3], 10));
+    now.setHours(parseInt(res[4], 10));
+    now.setMinutes(parseInt(res[5], 10));
     
     return now;
   },
 
   extract: function extract(email, now, bundle) {
     let guess = {};
-    guess.year = now.year;
-    guess.month = now.month;
-    guess.day = now.day;
-    guess.hour = now.hour;
-    guess.minute = now.minute;
+    guess.year = now.getFullYear();
+    guess.month = now.getMonth() + 1;
+    guess.day = now.getDate();
+    guess.hour = now.getHours();
+    guess.minute = now.getMinutes();
     
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
@@ -134,9 +132,9 @@ var extractor = {
       res = re.exec(email);
       if (res) {
         let date = new Date();
-        date.setDate(now.day);
-        date.setMonth(now.month - 1);
-        date.setYear(now.year);
+        date.setDate(now.getDate());
+        date.setMonth(now.getMonth);
+        date.setYear(now.getFullYear());
 
         let diff = (i - date.getDay() + 7) % 7;
         date.setDate(date.getDate() + diff);
@@ -247,7 +245,6 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
-          dump(res + "\n");
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           // unlikely meeting time, XXX should consider working hours
