@@ -92,12 +92,19 @@ var extractor = {
   },
 
   extract: function extract(email, now, bundle) {
-    let guess = {};
-    guess.year = now.getFullYear();
-    guess.month = now.getMonth() + 1;
-    guess.day = now.getDate();
-    guess.hour = now.getHours();
-    guess.minute = now.getMinutes();
+    let initial = {};
+    initial.year = now.getFullYear();
+    initial.month = now.getMonth() + 1;
+    initial.day = now.getDate();
+    initial.hour = now.getHours();
+    initial.minute = now.getMinutes();
+    let collected = new Array();
+    
+    collected.push({year: initial.year});
+    collected.push({month: initial.month});
+    collected.push({day: initial.day});
+    collected.push({hour: initial.hour});
+    collected.push({minute: initial.minute});
     
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
@@ -105,9 +112,8 @@ var extractor = {
     email = email.replace(/^Saatmisaeg:.+$/mg, "");
     
     // from less specific to more specific
-    
     if (new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig").exec(email)) {
-      guess.day++;
+        collected.push({day: initial.day++});
     }
     
     // day only
@@ -118,7 +124,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
-            guess.day = res[1];
+            collected.push({day: res[1]});
           }
         }
       }
@@ -139,9 +145,9 @@ var extractor = {
         let diff = (i - date.getDay() + 7) % 7;
         date.setDate(date.getDate() + diff);
         
-        guess.year = date.getFullYear();
-        guess.month = date.getMonth() + 1;
-        guess.day = date.getDate();
+        collected.push({day: date.getDate(),
+                        month: date.getMonth() + 1,
+                        year: date.getFullYear()});
       }
     }
     
@@ -153,10 +159,10 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            guess.hour = res[1];
-            if (guess.hour < 8)
-              guess.hour += 12;
-            guess.minute = 0;
+            if (res[1] < 8)
+              collected.push({hour: res[1] + 12, minute: 0});
+            else
+              collected.push({hour: res[1], minute: 0});
           }
         }
       }
@@ -169,8 +175,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            guess.hour = res[1];
-            guess.minute = 0;
+            collected.push({hour: res[1], minute: 0});
           }
         }
       }
@@ -183,8 +188,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            guess.hour = res[1] + 12;
-            guess.minute = 0;
+            collected.push({hour: res[1] + 12, minute: 0});
           }
         }
       }
@@ -197,10 +201,10 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            guess.hour = res[1];
-            guess.minute = 0;
-            if (guess.hour < 8)
-              guess.hour += 12;
+            if (res[1] < 8)
+              collected.push({hour: res[1] + 12, minute: 0});
+            else
+              collected.push({hour: res[1], minute: 0});
           }
         }
       }
@@ -213,10 +217,10 @@ var extractor = {
         if (res) {
             res[1] = parseInt(res[1], 10);
             if (this.isValidHour(res[1])) {
-              guess.hour = res[1];
-              guess.minute = 0;
-              if (guess.hour < 8)
-                guess.hour += 12;
+              if (res[1] < 8)
+                collected.push({hour: res[1] + 12, minute: 0});
+              else
+                collected.push({hour: res[1], minute: 0});
             }
         }
       }
@@ -230,10 +234,10 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            guess.hour = res[1];
-            guess.minute = res[2];
-            if (guess.hour < 8)
-              guess.hour += 12;
+            if (res[1] < 8)
+              collected.push({hour: res[1] + 12, minute: 0});
+            else
+              collected.push({hour: res[1], minute: 0});
           }
         }
       }
@@ -249,10 +253,10 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            guess.hour = res[1];
-            guess.minute = res[2];
             if (res[1] < 8)
-              guess.hour += 12;
+              collected.push({hour: res[1] + 12, minute: 0});
+            else
+              collected.push({hour: res[1], minute: 0});
           }          
         }
       }
@@ -266,8 +270,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            guess.hour = res[1];
-            guess.minute = res[2];
+            collected.push({hour: res[1] + 12, minute: res[2]});
           }
         }
       }
@@ -281,10 +284,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            guess.hour = res[1];
-            guess.minute = res[2];
-            if (guess.hour < 12)
-              guess.hour += 12;
+            collected.push({hour: res[1] + 12, minute: res[2]});
           }
         }
       }
@@ -308,11 +308,10 @@ var extractor = {
         if (res) {
           res[positions[2]] = parseInt(res[positions[2]], 10);
           if (this.isValidDay(res[positions[2]])) {
-            guess.day = res[positions[2]];
             for (let i = 0; i < 12; i++) {
               let ms = months[i].unescape().split("|");
               if (ms.indexOf(res[positions[1]].toLowerCase()) != -1) {
-                guess.month = i + 1;
+                collected.push({month: i + 1, day: res[positions[2]]});
                 break;
               }
             }
@@ -340,9 +339,9 @@ var extractor = {
             this.isValidMonth(res[positions[2]]) && 
             this.isValidYear(res[positions[3]])) {
             
-            guess.day = res[positions[1]];
-            guess.month = res[positions[2]];
-            guess.year = res[positions[3]];
+            collected.push({year: res[positions[3]],
+                            month: res[positions[2]],
+                            day: res[positions[1]]});
           }
         }
       }
@@ -363,20 +362,39 @@ var extractor = {
               res[positions[3]] = "20" + res[positions[3]];
           res[positions[3]] = parseInt(res[positions[3]], 10);
           if (this.isValidDay(res[positions[1]])) {
-            guess.day = res[positions[1]];
             for (let i = 0; i < 12; i++) {
               if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
-                guess.month = i + 1;
+                collected.push({year: res[positions[3]],
+                                month: i + 1,
+                                day: res[positions[1]]});
                 break;
               }
             }
-            guess.year = res[positions[3]];
           }
         }
       }
     }
     
-    return guess;
+    return collected;
+  },
+  
+  guessStart: function guessStart(collected) {
+    if (collected.length == 0)
+      return {};
+    else
+      var guess = {};
+      let withYear = collected.filter(function(val) {return (val.year != undefined);});
+      let withMonth = collected.filter(function(val) {return (val.month != undefined);});
+      let withDay = collected.filter(function(val) {return (val.day != undefined);});
+      let withHour = collected.filter(function(val) {return (val.hour != undefined);});
+      let withMinute = collected.filter(function(val) {return (val.minute != undefined);});
+      guess.year = withYear[withYear.length - 1].year;
+      guess.month = withMonth[withMonth.length - 1].month;
+      guess.day = withDay[withDay.length - 1].day;
+      guess.hour = withHour[withHour.length - 1].hour;
+      guess.minute = withMinute[withMinute.length - 1].minute;
+      
+      return guess;
   },
 
   getAlternatives: function getAlternatives(bundle, name) {

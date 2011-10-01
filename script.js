@@ -42,7 +42,8 @@ while (mails.hasMoreElements()) {
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
   var now = extractor.findNow(info.contents);
-  var guess = extractor.extract(info.contents, now, bundle);
+  var collected = extractor.extract(info.contents, now, bundle);
+  var guess = extractor.guessStart(collected);
   compare(expected, guess);
   dump("\n---------------------------------------------------------\n");
 }
