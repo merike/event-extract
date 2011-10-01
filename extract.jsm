@@ -235,9 +235,9 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0});
+              collected.push({hour: res[1] + 12, minute: res[2]});
             else
-              collected.push({hour: res[1], minute: 0});
+              collected.push({hour: res[1], minute: res[2]});
           }
         }
       }
@@ -254,9 +254,9 @@ var extractor = {
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0});
+              collected.push({hour: res[1] + 12, minute: res[2]});
             else
-              collected.push({hour: res[1], minute: 0});
+              collected.push({hour: res[1], minute: res[2]});
           }          
         }
       }
