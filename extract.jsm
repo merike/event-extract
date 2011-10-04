@@ -139,7 +139,7 @@ var extractor = {
       if (res) {
         let date = new Date();
         date.setDate(now.getDate());
-        date.setMonth(now.getMonth);
+        date.setMonth(now.getMonth());
         date.setYear(now.getFullYear());
 
         let diff = (i - date.getDay() + 7) % 7;
@@ -393,6 +393,10 @@ var extractor = {
       guess.day = withDay[withDay.length - 1].day;
       guess.hour = withHour[withHour.length - 1].hour;
       guess.minute = withMinute[withMinute.length - 1].minute;
+      
+      /*for (val in collected) {
+        dump(JSON.stringify(collected[val]) + "\n");
+      }*/
       
       return guess;
   },
