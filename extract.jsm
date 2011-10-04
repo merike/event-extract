@@ -270,7 +270,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            collected.push({hour: res[1] + 12, minute: res[2]});
+            collected.push({hour: res[1], minute: res[2]});
           }
         }
       }
