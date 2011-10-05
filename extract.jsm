@@ -112,8 +112,11 @@ var extractor = {
     email = email.replace(/^Saatmisaeg:.+$/mg, "");
     
     // from less specific to more specific
-    if (new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig").exec(email)) {
-        collected.push({day: initial.day++});
+    let re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
+    if ((res = re.exec(email)) != null) {
+        collected.push({day: initial.day++,
+                        start: res.index, end: res.index + res[0].length
+        });
     }
     
     // day only
@@ -124,7 +127,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
-            collected.push({day: res[1]});
+            collected.push({day: res[1], start: res.index, end: res.index + res[0].length});
           }
         }
       }
@@ -147,7 +150,9 @@ var extractor = {
         
         collected.push({day: date.getDate(),
                         month: date.getMonth() + 1,
-                        year: date.getFullYear()});
+                        year: date.getFullYear(),
+                        start: res.index, end: res.index + res[0].length
+        });
       }
     }
     
@@ -160,9 +165,13 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0});
+              collected.push({hour: res[1] + 12, minute: 0,
+                              start: res.index, end: res.index + res[0].length
+              });
             else
-              collected.push({hour: res[1], minute: 0});
+              collected.push({hour: res[1], minute: 0,
+                              start: res.index, end: res.index + res[0].length
+              });
           }
         }
       }
@@ -175,7 +184,9 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            collected.push({hour: res[1], minute: 0});
+            collected.push({hour: res[1], minute: 0,
+                            start: res.index, end: res.index + res[0].length
+            });
           }
         }
       }
@@ -188,7 +199,9 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            collected.push({hour: res[1] + 12, minute: 0});
+            collected.push({hour: res[1] + 12, minute: 0,
+                            start: res.index, end: res.index + res[0].length
+            });
           }
         }
       }
@@ -202,9 +215,13 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0});
+              collected.push({hour: res[1] + 12, minute: 0,
+                              start: res.index, end: res.index + res[0].length
+              });
             else
-              collected.push({hour: res[1], minute: 0});
+              collected.push({hour: res[1], minute: 0,
+                              start: res.index, end: res.index + res[0].length
+              });
           }
         }
       }
@@ -218,9 +235,13 @@ var extractor = {
             res[1] = parseInt(res[1], 10);
             if (this.isValidHour(res[1])) {
               if (res[1] < 8)
-                collected.push({hour: res[1] + 12, minute: 0});
+                collected.push({hour: res[1] + 12, minute: 0,
+                                start: res.index, end: res.index + res[0].length
+                });
               else
-                collected.push({hour: res[1], minute: 0});
+                collected.push({hour: res[1], minute: 0,
+                                start: res.index, end: res.index + res[0].length
+                });
             }
         }
       }
@@ -235,9 +256,13 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: res[2]});
+              collected.push({hour: res[1] + 12, minute: res[2],
+                              start: res.index, end: res.index + res[0].length
+              });
             else
-              collected.push({hour: res[1], minute: res[2]});
+              collected.push({hour: res[1], minute: res[2],
+                              start: res.index, end: res.index + res[0].length
+              });
           }
         }
       }
@@ -254,9 +279,13 @@ var extractor = {
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: res[2]});
+              collected.push({hour: res[1] + 12, minute: res[2],
+                              start: res.index, end: res.index + res[0].length
+              });
             else
-              collected.push({hour: res[1], minute: res[2]});
+              collected.push({hour: res[1], minute: res[2],
+                              start: res.index, end: res.index + res[0].length
+              });
           }          
         }
       }
@@ -270,7 +299,9 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            collected.push({hour: res[1], minute: res[2]});
+            collected.push({hour: res[1], minute: res[2],
+                            start: res.index, end: res.index + res[0].length
+            });
           }
         }
       }
@@ -284,7 +315,9 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            collected.push({hour: res[1] + 12, minute: res[2]});
+            collected.push({hour: res[1] + 12, minute: res[2],
+                            start: res.index, end: res.index + res[0].length
+            });
           }
         }
       }
@@ -311,7 +344,9 @@ var extractor = {
             for (let i = 0; i < 12; i++) {
               let ms = months[i].unescape().split("|");
               if (ms.indexOf(res[positions[1]].toLowerCase()) != -1) {
-                collected.push({month: i + 1, day: res[positions[2]]});
+                collected.push({month: i + 1, day: res[positions[2]],
+                                start: res.index, end: res.index + res[0].length
+                });
                 break;
               }
             }
@@ -341,7 +376,9 @@ var extractor = {
             
             collected.push({year: res[positions[3]],
                             month: res[positions[2]],
-                            day: res[positions[1]]});
+                            day: res[positions[1]],
+                            start: res.index, end: res.index + res[0].length
+            });
           }
         }
       }
@@ -366,7 +403,9 @@ var extractor = {
               if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
                 collected.push({year: res[positions[3]],
                                 month: i + 1,
-                                day: res[positions[1]]});
+                                day: res[positions[1]],
+                                start: res.index, end: res.index + res[0].length
+                });
                 break;
               }
             }
