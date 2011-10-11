@@ -38,6 +38,8 @@ var EXPORTED_SYMBOLS = ["extractor"];
 var marker = "--MARK--";
 
 var extractor = {
+  collected: [],
+  
   findNow: function findNow(email) {
     var now = new Date();
     
@@ -98,13 +100,13 @@ var extractor = {
     initial.day = now.getDate();
     initial.hour = now.getHours();
     initial.minute = now.getMinutes();
-    let collected = new Array();
+    this.collected = [];
     
-    collected.push({year: initial.year});
-    collected.push({month: initial.month});
-    collected.push({day: initial.day});
-    collected.push({hour: initial.hour});
-    collected.push({minute: initial.minute});
+    this.collected.push({year: initial.year});
+    this.collected.push({month: initial.month});
+    this.collected.push({day: initial.day});
+    this.collected.push({hour: initial.hour});
+    this.collected.push({minute: initial.minute});
     
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
@@ -114,7 +116,7 @@ var extractor = {
     // from less specific to more specific
     let re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
     if ((res = re.exec(email)) != null) {
-        collected.push({day: initial.day++,
+        this.collected.push({day: initial.day++,
                         start: res.index, end: res.index + res[0].length
         });
     }
@@ -127,7 +129,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
-            collected.push({day: res[1], start: res.index, end: res.index + res[0].length});
+            this.collected.push({day: res[1], start: res.index, end: res.index + res[0].length});
           }
         }
       }
@@ -148,7 +150,7 @@ var extractor = {
         let diff = (i - date.getDay() + 7) % 7;
         date.setDate(date.getDate() + diff);
         
-        collected.push({day: date.getDate(),
+        this.collected.push({day: date.getDate(),
                         month: date.getMonth() + 1,
                         year: date.getFullYear(),
                         start: res.index, end: res.index + res[0].length
@@ -165,11 +167,11 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0,
+              this.collected.push({hour: res[1] + 12, minute: 0,
                               start: res.index, end: res.index + res[0].length
               });
             else
-              collected.push({hour: res[1], minute: 0,
+              this.collected.push({hour: res[1], minute: 0,
                               start: res.index, end: res.index + res[0].length
               });
           }
@@ -184,7 +186,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            collected.push({hour: res[1], minute: 0,
+            this.collected.push({hour: res[1], minute: 0,
                             start: res.index, end: res.index + res[0].length
             });
           }
@@ -199,7 +201,7 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            collected.push({hour: res[1] + 12, minute: 0,
+            this.collected.push({hour: res[1] + 12, minute: 0,
                             start: res.index, end: res.index + res[0].length
             });
           }
@@ -215,11 +217,11 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: 0,
+              this.collected.push({hour: res[1] + 12, minute: 0,
                               start: res.index, end: res.index + res[0].length
               });
             else
-              collected.push({hour: res[1], minute: 0,
+              this.collected.push({hour: res[1], minute: 0,
                               start: res.index, end: res.index + res[0].length
               });
           }
@@ -235,11 +237,11 @@ var extractor = {
             res[1] = parseInt(res[1], 10);
             if (this.isValidHour(res[1])) {
               if (res[1] < 8)
-                collected.push({hour: res[1] + 12, minute: 0,
+                this.collected.push({hour: res[1] + 12, minute: 0,
                                 start: res.index, end: res.index + res[0].length
                 });
               else
-                collected.push({hour: res[1], minute: 0,
+                this.collected.push({hour: res[1], minute: 0,
                                 start: res.index, end: res.index + res[0].length
                 });
             }
@@ -256,11 +258,11 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: res[2],
+              this.collected.push({hour: res[1] + 12, minute: res[2],
                               start: res.index, end: res.index + res[0].length
               });
             else
-              collected.push({hour: res[1], minute: res[2],
+              this.collected.push({hour: res[1], minute: res[2],
                               start: res.index, end: res.index + res[0].length
               });
           }
@@ -279,11 +281,11 @@ var extractor = {
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              collected.push({hour: res[1] + 12, minute: res[2],
+              this.collected.push({hour: res[1] + 12, minute: res[2],
                               start: res.index, end: res.index + res[0].length
               });
             else
-              collected.push({hour: res[1], minute: res[2],
+              this.collected.push({hour: res[1], minute: res[2],
                               start: res.index, end: res.index + res[0].length
               });
           }          
@@ -299,7 +301,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            collected.push({hour: res[1], minute: res[2],
+            this.collected.push({hour: res[1], minute: res[2],
                             start: res.index, end: res.index + res[0].length
             });
           }
@@ -315,7 +317,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            collected.push({hour: res[1] + 12, minute: res[2],
+            this.collected.push({hour: res[1] + 12, minute: res[2],
                             start: res.index, end: res.index + res[0].length
             });
           }
@@ -344,7 +346,7 @@ var extractor = {
             for (let i = 0; i < 12; i++) {
               let ms = months[i].unescape().split("|");
               if (ms.indexOf(res[positions[1]].toLowerCase()) != -1) {
-                collected.push({month: i + 1, day: res[positions[2]],
+                this.collected.push({month: i + 1, day: res[positions[2]],
                                 start: res.index, end: res.index + res[0].length
                 });
                 break;
@@ -374,7 +376,7 @@ var extractor = {
             this.isValidMonth(res[positions[2]]) && 
             this.isValidYear(res[positions[3]])) {
             
-            collected.push({year: res[positions[3]],
+            this.collected.push({year: res[positions[3]],
                             month: res[positions[2]],
                             day: res[positions[1]],
                             start: res.index, end: res.index + res[0].length
@@ -401,7 +403,7 @@ var extractor = {
           if (this.isValidDay(res[positions[1]])) {
             for (let i = 0; i < 12; i++) {
               if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
-                collected.push({year: res[positions[3]],
+                this.collected.push({year: res[positions[3]],
                                 month: i + 1,
                                 day: res[positions[1]],
                                 start: res.index, end: res.index + res[0].length
@@ -414,7 +416,22 @@ var extractor = {
       }
     }
     
-    return collected;
+    this.markContained();
+//     return this.collected;
+  },
+  
+  markContained: function markContained() {
+    for (let first = 0; first < this.collected.length; first++) {
+      for (let second = 0; second < this.collected.length; second++) {
+        if (first != second && 
+            this.collected[first].start && this.collected[first].end &&
+            this.collected[second].start && this.collected[second].end &&
+            this.collected[second].start >= this.collected[first].start &&
+            this.collected[second].end <= this.collected[first].end) {
+            this.collected[second].use = false;
+        }
+      }
+    }
   },
   
   guessStart: function guessStart(collected) {
@@ -422,11 +439,16 @@ var extractor = {
       return {};
     else
       var guess = {};
-      let withYear = collected.filter(function(val) {return (val.year != undefined);});
-      let withMonth = collected.filter(function(val) {return (val.month != undefined);});
-      let withDay = collected.filter(function(val) {return (val.day != undefined);});
-      let withHour = collected.filter(function(val) {return (val.hour != undefined);});
-      let withMinute = collected.filter(function(val) {return (val.minute != undefined);});
+      let withYear = collected.filter(function(val) {
+        return (val.year != undefined && val.use != false);});
+      let withMonth = collected.filter(function(val) {
+        return (val.month != undefined && val.use != false);});
+      let withDay = collected.filter(function(val) {
+        return (val.day != undefined && val.use != false);});
+      let withHour = collected.filter(function(val) {
+        return (val.hour != undefined && val.use != false);});
+      let withMinute = collected.filter(function(val) {
+        return (val.minute != undefined && val.use != false);});
       guess.year = withYear[withYear.length - 1].year;
       guess.month = withMonth[withMonth.length - 1].month;
       guess.day = withDay[withDay.length - 1].day;
