@@ -102,11 +102,11 @@ var extractor = {
     initial.minute = now.getMinutes();
     this.collected = [];
     
-    this.collected.push({year: initial.year});
-    this.collected.push({month: initial.month});
-    this.collected.push({day: initial.day});
-    this.collected.push({hour: initial.hour});
-    this.collected.push({minute: initial.minute});
+    this.collected.push({year: initial.year,
+                         month: initial.month,
+                         day: initial.day});
+    this.collected.push({hour: initial.hour,
+                         minute: initial.minute});
     
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
@@ -116,8 +116,11 @@ var extractor = {
     // from less specific to more specific
     let re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
     if ((res = re.exec(email)) != null) {
-        this.collected.push({day: initial.day++,
-                        start: res.index, end: res.index + res[0].length
+        let item = new Date(now.getTime() + 60 * 60 * 24 * 1000);
+        this.collected.push({year: item.getFullYear(),
+                             month: item.getMonth() + 1,
+                             day: item.getDate(),
+                             start: res.index, end: res.index + res[0].length
         });
     }
     
@@ -129,7 +132,20 @@ var extractor = {
         if (res) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
-            this.collected.push({day: res[1], start: res.index, end: res.index + res[0].length});
+            let item = new Date(now.getTime());
+            if (now.getDate() > res[1]) {
+              // find next nth date
+              while (true) {
+                item.setDate(item.getDate() + 1);
+                if (item.getMonth() != now.getMonth() &&
+                  item.getDate() == res[1])
+                  break;
+              }
+            }
+            this.collected.push({year: item.getFullYear(),
+                                 month: item.getMonth() + 1,
+                                 day: res[1],
+                                 start: res.index, end: res.index + res[0].length});
           }
         }
       }
@@ -151,9 +167,9 @@ var extractor = {
         date.setDate(date.getDate() + diff);
         
         this.collected.push({day: date.getDate(),
-                        month: date.getMonth() + 1,
-                        year: date.getFullYear(),
-                        start: res.index, end: res.index + res[0].length
+                             month: date.getMonth() + 1,
+                             year: date.getFullYear(),
+                             start: res.index, end: res.index + res[0].length
         });
       }
     }
@@ -346,8 +362,13 @@ var extractor = {
             for (let i = 0; i < 12; i++) {
               let ms = months[i].unescape().split("|");
               if (ms.indexOf(res[positions[1]].toLowerCase()) != -1) {
-                this.collected.push({month: i + 1, day: res[positions[2]],
-                                start: res.index, end: res.index + res[0].length
+                let year = now.getFullYear();
+                if (now > new Date(year, i, res[positions[2]]))
+                  year++;
+                this.collected.push({year: year,
+                                     month: i + 1,
+                                     day: res[positions[2]],
+                                     start: res.index, end: res.index + res[0].length
                 });
                 break;
               }
@@ -417,7 +438,7 @@ var extractor = {
     }
     
     this.markContained();
-//     return this.collected;
+    return this.collected;
   },
   
   markContained: function markContained() {
