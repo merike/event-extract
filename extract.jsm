@@ -166,9 +166,9 @@ var extractor = {
         let diff = (i - date.getDay() + 7) % 7;
         date.setDate(date.getDate() + diff);
         
-        this.collected.push({day: date.getDate(),
+        this.collected.push({year: date.getFullYear(),
                              month: date.getMonth() + 1,
-                             year: date.getFullYear(),
+                             day: date.getDate(),
                              start: res.index, end: res.index + res[0].length
         });
       }
@@ -458,29 +458,76 @@ var extractor = {
   guessStart: function guessStart(collected) {
     if (collected.length == 0)
       return {};
-    else
-      var guess = {};
-      let withYear = collected.filter(function(val) {
-        return (val.year != undefined && val.use != false);});
-      let withMonth = collected.filter(function(val) {
-        return (val.month != undefined && val.use != false);});
-      let withDay = collected.filter(function(val) {
-        return (val.day != undefined && val.use != false);});
-      let withHour = collected.filter(function(val) {
-        return (val.hour != undefined && val.use != false);});
-      let withMinute = collected.filter(function(val) {
-        return (val.minute != undefined && val.use != false);});
-      guess.year = withYear[withYear.length - 1].year;
-      guess.month = withMonth[withMonth.length - 1].month;
-      guess.day = withDay[withDay.length - 1].day;
-      guess.hour = withHour[withHour.length - 1].hour;
-      guess.minute = withMinute[withMinute.length - 1].minute;
+    else {
+      let sort = function(one, two) {
+        if (one.year != undefined && two.year == undefined) {
+          return -1;
+        } else if (one.year == undefined && two.year != undefined) {
+          return 1;
+        } else if (one.year != undefined && two.year != undefined) {
+          if (one.year < two.year) {
+            return -1;
+          } else if (one.year > two.year) {
+            return 1;
+          } else {
+            if (one.month < two.month) {
+              return -1;
+            } else if (one.month > two.month) {
+              return 1;
+            } else {
+              if (one.day < two.day) {
+                return -1;
+              } else if (one.day > two.day) {
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+          }
+        } else {
+          if (one.hour < two.hour) {
+            return -1;
+          } else if (one.hour > two.hour) {
+            return 1;
+          } else {
+            if (one.minute < two.minute) {
+              return -1;
+            } else if (one.minute > two.minute) {
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+        }
+      }
+      
+      collected.sort(sort);
       
       /*for (val in collected) {
-        dump(JSON.stringify(collected[val]) + "\n");
+        if (collected[val].use != false)
+          dump(JSON.stringify(collected[val]) + "\n");
       }*/
       
+      var guess = {};
+      /*let withYear = collected.filter(function(val) {
+        return (val.year != undefined && val.use != false);});
+      let withMonth = collected.filter(function(val) {
+        return (val.month != undefined && val.use != false);});*/
+      let withDay = collected.filter(function(val) {
+        return (val.day != undefined && val.use != false);});
+      /*let withHour = collected.filter(function(val) {
+        return (val.hour != undefined && val.use != false);});*/
+      let withMinute = collected.filter(function(val) {
+        return (val.minute != undefined && val.use != false);});
+      
+      guess.year = withDay[0].year;
+      guess.month = withDay[0].month;
+      guess.day = withDay[0].day;
+      guess.hour = withMinute[0].hour;
+      guess.minute = withMinute[0].minute;
+      
       return guess;
+    }
   },
 
   getAlternatives: function getAlternatives(bundle, name) {
