@@ -460,7 +460,15 @@ var extractor = {
       return {};
     else {
       let sort = function(one, two) {
-        if (one.year != undefined && two.year == undefined) {
+        // sort the guess from email date as the last one
+        if (one.start == undefined && two.start != undefined) {
+          return 1;
+        } else if (one.start != undefined && two.start == undefined) {
+          return -1;
+        } else if (one.start == undefined && two.start == undefined) {
+          return 0;
+          // sort dates before times
+        } else if (one.year != undefined && two.year == undefined) {
           return -1;
         } else if (one.year == undefined && two.year != undefined) {
           return 1;
