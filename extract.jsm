@@ -201,6 +201,8 @@ var extractor = {
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
+          if (res[1] == 12)
+            res[1] = res[1] - 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
                             start: res.index, end: res.index + res[0].length
@@ -216,8 +218,10 @@ var extractor = {
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
+          if (res[1] != 12)
+            res[1] = res[1] + 12;
           if (this.isValidHour(res[1])) {
-            this.collected.push({hour: res[1] + 12, minute: 0,
+            this.collected.push({hour: res[1], minute: 0,
                             start: res.index, end: res.index + res[0].length
             });
           }
@@ -314,6 +318,8 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          if (res[1] == 12)
+            res[1] = res[1] - 12;
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
@@ -330,10 +336,12 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          if (res[1] != 12)
+            res[1] = res[1] + 12;
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: res[1] + 12, minute: res[2],
+            this.collected.push({hour: res[1], minute: res[2],
                             start: res.index, end: res.index + res[0].length
             });
           }
