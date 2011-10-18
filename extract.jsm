@@ -102,11 +102,11 @@ var extractor = {
     initial.minute = now.getMinutes();
     this.collected = [];
     
-    this.collected.push({year: initial.year,
+    /*this.collected.push({year: initial.year,
                          month: initial.month,
                          day: initial.day});
     this.collected.push({hour: initial.hour,
-                         minute: initial.minute});
+                         minute: initial.minute});*/
     
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/mg, "");
@@ -145,7 +145,9 @@ var extractor = {
             this.collected.push({year: item.getFullYear(),
                                  month: item.getMonth() + 1,
                                  day: res[1],
-                                 start: res.index, end: res.index + res[0].length});
+                                 start: res.index, end: res.index + res[0].length,
+                                 ambiguous: true
+            });
           }
         }
       }
@@ -169,7 +171,8 @@ var extractor = {
         this.collected.push({year: date.getFullYear(),
                              month: date.getMonth() + 1,
                              day: date.getDate(),
-                             start: res.index, end: res.index + res[0].length
+                             start: res.index, end: res.index + res[0].length,
+                             ambiguous: true
         });
       }
     }
@@ -525,22 +528,32 @@ var extractor = {
       }*/
       
       var guess = {};
-      /*let withYear = collected.filter(function(val) {
-        return (val.year != undefined && val.use != false);});
-      let withMonth = collected.filter(function(val) {
-        return (val.month != undefined && val.use != false);});*/
       let withDay = collected.filter(function(val) {
         return (val.day != undefined && val.use != false);});
-      /*let withHour = collected.filter(function(val) {
-        return (val.hour != undefined && val.use != false);});*/
+      let withDayNA = withDay.filter(function(val) {
+        return (val.ambiguous == undefined);});
       let withMinute = collected.filter(function(val) {
         return (val.minute != undefined && val.use != false);});
+      let withMinuteNA = withMinute.filter(function(val) {
+        return (val.ambiguous == undefined);});
       
-      guess.year = withDay[0].year;
-      guess.month = withDay[0].month;
-      guess.day = withDay[0].day;
-      guess.hour = withMinute[0].hour;
-      guess.minute = withMinute[0].minute;
+      if (withDayNA.length != 0) {
+        guess.year = withDayNA[0].year;
+        guess.month = withDayNA[0].month;
+        guess.day = withDayNA[0].day;
+      } else if (withDay.length != 0) {
+        guess.year = withDay[0].year;
+        guess.month = withDay[0].month;
+        guess.day = withDay[0].day;
+      }
+      
+      if (withMinuteNA.length != 0) {
+        guess.hour = withMinuteNA[0].hour;
+        guess.minute = withMinuteNA[0].minute;
+      } else if (withMinute.length != 0) {
+        guess.hour = withMinute[0].hour;
+        guess.minute = withMinute[0].minute;
+      }
       
       return guess;
     }
