@@ -187,11 +187,13 @@ var extractor = {
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length,
+                              ambiguous: true
               });
             else
               this.collected.push({hour: res[1], minute: 0,
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length,
+                              ambiguous: true
               });
           }
         }
@@ -208,7 +210,8 @@ var extractor = {
             res[1] = res[1] - 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length
+                            start: res.index, end: res.index + res[0].length,
+                            ambiguous: true
             });
           }
         }
@@ -225,7 +228,8 @@ var extractor = {
             res[1] = res[1] + 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length
+                            start: res.index, end: res.index + res[0].length,
+                            ambiguous: true
             });
           }
         }
@@ -241,11 +245,13 @@ var extractor = {
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length,
+                              ambiguous: true
               });
             else
               this.collected.push({hour: res[1], minute: 0,
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length,
+                              ambiguous: true
               });
           }
         }
@@ -261,11 +267,13 @@ var extractor = {
             if (this.isValidHour(res[1])) {
               if (res[1] < 8)
                 this.collected.push({hour: res[1] + 12, minute: 0,
-                                start: res.index, end: res.index + res[0].length
+                                start: res.index, end: res.index + res[0].length,
+                                ambiguous: true
                 });
               else
                 this.collected.push({hour: res[1], minute: 0,
-                                start: res.index, end: res.index + res[0].length
+                                start: res.index, end: res.index + res[0].length,
+                                ambiguous: true
                 });
             }
         }
