@@ -188,6 +188,14 @@ var extractor = {
     }
     
     // time only
+    re = new RegExp(this.getAlternatives(bundle, "noon"), "ig");
+    if ((res = re.exec(email)) != null) {
+        this.collected.push({hour: 12,
+                             minute: 0,
+                             start: res.index, end: res.index + res[0].length
+        });
+    }
+    
     alts = this.getRepAlternatives(bundle, "hour.only", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
