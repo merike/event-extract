@@ -114,7 +114,17 @@ var extractor = {
     email = email.replace(/^Saatmisaeg:.+$/mg, "");
     
     // from less specific to more specific
-    let re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
+    let re = new RegExp(this.getAlternatives(bundle, "today"), "ig");
+    if ((res = re.exec(email)) != null) {
+        let item = new Date(now.getTime());
+        this.collected.push({year: item.getFullYear(),
+                             month: item.getMonth() + 1,
+                             day: item.getDate(),
+                             start: res.index, end: res.index + res[0].length
+        });
+    }
+    
+    re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime() + 60 * 60 * 24 * 1000);
         this.collected.push({year: item.getFullYear(),
