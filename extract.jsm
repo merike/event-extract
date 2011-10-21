@@ -102,16 +102,16 @@ var extractor = {
     initial.minute = now.getMinutes();
     this.collected = [];
     
-    /*this.collected.push({year: initial.year,
+    this.collected.push({year: initial.year,
                          month: initial.month,
-                         day: initial.day});
+                         day: initial.day});/*
     this.collected.push({hour: initial.hour,
                          minute: initial.minute});*/
     
     // remove Date: and Sent: lines
-    email = email.replace(/^Date:.+$/mg, "");
-    email = email.replace(/^Sent:.+$/mg, "");
-    email = email.replace(/^Saatmisaeg:.+$/mg, "");
+    email = email.replace(/^Date:.+$/m, "");
+    email = email.replace(/^Sent:.+$/m, "");
+    email = email.replace(/^Saatmisaeg:.+$/m, "");
     
     // from less specific to more specific
     let re = new RegExp(this.getAlternatives(bundle, "today"), "ig");
