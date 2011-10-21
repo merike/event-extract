@@ -555,22 +555,33 @@ var extractor = {
       
       var guess = {};
       let withDay = collected.filter(function(val) {
-        return (val.day != undefined && val.use != false);});
+        return (val.day != undefined && val.use != false && val.start != undefined);});
       let withDayNA = withDay.filter(function(val) {
         return (val.ambiguous == undefined);});
+      let withDayInit = collected.filter(function(val) {
+        return (val.day != undefined && val.start == undefined);});
       let withMinute = collected.filter(function(val) {
-        return (val.minute != undefined && val.use != false);});
+        return (val.minute != undefined && val.use != false && val.start != undefined);});
       let withMinuteNA = withMinute.filter(function(val) {
         return (val.ambiguous == undefined);});
+      let withMinuteInit = collected.filter(function(val) {
+        return (val.minute != undefined && val.start == undefined);});
       
+      // first use unambiguous guesses
       if (withDayNA.length != 0) {
         guess.year = withDayNA[0].year;
         guess.month = withDayNA[0].month;
         guess.day = withDayNA[0].day;
+      // then also ambiguous ones
       } else if (withDay.length != 0) {
         guess.year = withDay[0].year;
         guess.month = withDay[0].month;
         guess.day = withDay[0].day;
+      // and finally when nothing was found then use initial guess from send time
+      } else {
+        guess.year = withDayInit[0].year;
+        guess.month = withDayInit[0].month;
+        guess.day = withDayInit[0].day;
       }
       
       if (withMinuteNA.length != 0) {

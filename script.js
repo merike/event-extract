@@ -1,8 +1,9 @@
 /* Experiment on how far you can get with simple regular expressions
+ * all times best
    correct bits  %    correct events  %   set
-    97/120      81%    7/24           29% test set
-   167/205      81%   15/41           37% train/bunch-1 set
-   101/150      67%    9/30           30% private et set
+   111/120     93%    16/24         67%   test set
+   188/205     92%    28/41         68%   train/bunch-1 set
+   111/150     74%    16/30         53%   private et set
  */
 
 var corSum = 0;
