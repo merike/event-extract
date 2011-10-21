@@ -113,7 +113,6 @@ var extractor = {
     email = email.replace(/^Sent:.+$/m, "");
     email = email.replace(/^Saatmisaeg:.+$/m, "");
     
-    // from less specific to more specific
     let re = new RegExp(this.getAlternatives(bundle, "today"), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime());
@@ -256,7 +255,7 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "duration.full.hours", ["(\\d{1,2})","(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "ig");
+      let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -673,4 +672,9 @@ String.prototype.sanitize = function() {
 String.prototype.unescape = function() {
   let res = this.replace(/\\([\.])/g, "$1");
   return res;
+}
+
+String.prototype.restrictNumbers = function() {
+    let naN = "[^0-9]";
+    return naN + this.replace("|", naN + "|" + naN) + naN;
 }
