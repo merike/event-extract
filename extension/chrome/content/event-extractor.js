@@ -111,6 +111,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
     if (guessed.minute != undefined)
       dueDate.setMinutes(guessed.minute);
     
+    setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
     setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
   }
   
