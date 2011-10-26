@@ -34,15 +34,16 @@
    - the terms of any one of the MPL, the GPL or the LGPL.
    -
    - ***** END LICENSE BLOCK ***** -->
+
 <overlay id="context-menu-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/javascript" src="chrome://event-extract/content/event-extractor.js"/>
   
   <window id="messengerWindow">
     <menupopup id="mailContext">
-      <menu id="mailContext-calendar-convert-menu"
+      <menu id="mailContext-calendar-add-menu"
           insertafter="mailContext-moveToFolderAgain"
-          label="Convert to"
-          accesskey="n">
+          label="Add as"
+          accesskey="d">
         <menupopup id="mailContext-calendar-convert-menupopup">
           <menuitem id="mailContext-calendar-convert-event-menuitem"
                     label="Event..."

@@ -48,8 +48,8 @@
       <Description>
       <!-- Thunderbird -->
       <em:id>{3550f703-e582-4d05-9a08-453d09bdfdc6}</em:id>
-      <em:minVersion>5.0</em:minVersion>
-      <em:maxVersion>8.0.a1</em:maxVersion>
+      <em:minVersion>7.0</em:minVersion>
+      <em:maxVersion>8.0</em:maxVersion>
       </Description>
     </em:targetApplication>
     
@@ -57,8 +57,8 @@
       <Description>
         <!-- Lightning -->
         <em:id>{e2fda1a4-762b-4020-b5ad-a41df1933103}</em:id>
-        <em:minVersion>1.0b4</em:minVersion>
-        <em:maxVersion>1.1a1pre</em:maxVersion>
+        <em:minVersion>1.0b7</em:minVersion>
+        <em:maxVersion>1.0</em:maxVersion>
       </Description>
     </em:requires>
   

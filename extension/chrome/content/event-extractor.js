@@ -54,10 +54,6 @@ var extractFromEmail = function extractFromEmail(isEvent) {
                                             true,
                                             { });
   let date = new Date(message.date/1000);
-  let now = {};
-  now.year = date.getFullYear();
-  now.month = date.getMonth() + 1;
-  now.day = date.getDate();
   
   let locale = getPrefSafe("general.useragent.locale", "en-US");
   let defUrl = "chrome://event-extract/content/locale/extract_en-US.properties";
@@ -67,7 +63,8 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let bundle;
   if ((bundle = service.createBundle(url)) == null)
     service.createBundle(defUrl);
-  let guessed = extractor.extract(content, now, bundle);
+  let collected = extractor.extract(content, date, bundle);
+  let guessed = extractor.guessStart(collected);
   
   var item;
   if (isEvent) {
