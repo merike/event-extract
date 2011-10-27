@@ -3,5 +3,6 @@
 "month":5,
 "year":2001,
 "hour":16,
-"minute":0
+"minute":0,
+"location":"NE3003"
 }

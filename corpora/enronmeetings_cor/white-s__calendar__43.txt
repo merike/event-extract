@@ -3,5 +3,6 @@
 "month":10,
 "year":2001,
 "hour":11,
-"minute":10
+"minute":10,
+"location":"room 2557"
 }

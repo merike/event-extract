@@ -3,5 +3,6 @@
 "day":30,
 "year":2001,
 "hour":15,
-"minute":0
+"minute":0,
+"location":"EB3143B"
 }

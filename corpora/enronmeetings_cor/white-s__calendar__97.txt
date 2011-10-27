@@ -3,5 +3,6 @@
 "month":7,
 "year":2001,
 "hour":11,
-"minute":30
+"minute":30,
+"location":"lobby"
 }

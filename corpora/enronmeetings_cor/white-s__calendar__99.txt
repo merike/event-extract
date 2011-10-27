@@ -3,5 +3,6 @@
 "day":3,
 "year":2001,
 "hour":11,
-"minute":30
+"minute":30,
+"location":"EB32c2"
 }

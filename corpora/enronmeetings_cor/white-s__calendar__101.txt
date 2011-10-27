@@ -3,5 +3,6 @@
 "day":28,
 "year":2001,
 "hour":14,
-"minute":0
+"minute":0,
+"location":"EB2601"
 }

@@ -3,5 +3,6 @@
 "day":24,
 "year":2001,
 "hour":10,
-"minute":30
+"minute":30,
+"location":"2378 (Georganne's Office)"
 }

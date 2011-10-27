@@ -3,5 +3,6 @@
 "month":8,
 "year":2001,
 "hour":17,
-"minute":0
+"minute":0,
+"location":"Highway 6"
 }

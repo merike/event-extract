@@ -3,6 +3,7 @@
 "day":7,
 "year":2001,
 "hour":13,
-"minute":0
+"minute":0,
+"location":"EB 2854"
 }
 
