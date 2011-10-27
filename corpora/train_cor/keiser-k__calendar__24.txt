@@ -3,5 +3,6 @@
 "month":9,
 "day":20,
 "hour":15,
-"minute":0
+"minute":0,
+"location":"EB2869"
 }

@@ -3,5 +3,6 @@
 "month":12,
 "day":17,
 "hour":9,
-"minute":0
+"minute":0,
+"location":"ECN 30-C-1"
 }

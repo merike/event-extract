@@ -3,5 +3,6 @@
 "month":9,
 "day":14,
 "hour":10,
-"minute":0
+"minute":0,
+"location":"EB50M"
 }

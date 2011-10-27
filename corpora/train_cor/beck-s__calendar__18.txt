@@ -3,5 +3,6 @@
 "month":11,
 "day":1,
 "hour":8,
-"minute":30
+"minute":30,
+"location":"Enron Center South 03980 Conference Room"
 }

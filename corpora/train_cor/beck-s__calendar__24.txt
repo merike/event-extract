@@ -3,5 +3,6 @@
 "month":10,
 "year":2001,
 "hour":12,
-"minute":30
+"minute":30,
+"location":"3AC - 18th floor"
 }

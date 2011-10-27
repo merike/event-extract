@@ -3,5 +3,6 @@
 "month":12,
 "day":5,
 "hour":13,
-"minute":0
+"minute":0,
+"location":"ECS04-104"
 }

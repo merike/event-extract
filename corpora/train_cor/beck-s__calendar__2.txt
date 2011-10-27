@@ -3,5 +3,6 @@
 "month":1,
 "year":2002,
 "hour":11,
-"minute":30
+"minute":30,
+"location":"The Houston Club; Travis Room - 10th flr - 811 Rusk (Ctr for Houston's Future"
 }

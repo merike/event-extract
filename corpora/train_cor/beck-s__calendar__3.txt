@@ -3,5 +3,6 @@
 "month":1,
 "day":7,
 "hour":9,
-"minute":0
+"minute":0,
+"location":"ECN 8C1"
 }

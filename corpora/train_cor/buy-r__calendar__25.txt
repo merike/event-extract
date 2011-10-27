@@ -3,5 +3,6 @@
 "month":3,
 "day":20,
 "hour":16,
-"minute":0
+"minute":0,
+"location":"NE4005"
 }

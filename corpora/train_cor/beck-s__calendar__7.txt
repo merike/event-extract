@@ -3,5 +3,6 @@
 "month":12,
 "day":10,
 "hour":15,
-"minute":30
+"minute":30,
+"location":"ECS 06980"
 }

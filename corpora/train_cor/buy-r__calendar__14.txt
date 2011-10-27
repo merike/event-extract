@@ -3,5 +3,6 @@
 "month":6,
 "day":4,
 "hour":15,
-"minute":0
+"minute":0,
+"location":"SE5017"
 }

@@ -3,5 +3,6 @@
 "month":8,
 "year":2001,
 "hour":8,
-"minute":30
+"minute":30,
+"location":"EB3663"
 }

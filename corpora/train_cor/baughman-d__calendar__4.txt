@@ -3,5 +3,6 @@
 "month":9,
 "day":19,
 "hour":15,
-"minute":0
+"minute":0,
+"location":"3125b"
 }

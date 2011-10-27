@@ -3,5 +3,6 @@
 "month":8,
 "year":2001,
 "hour":8,
-"minute":35
+"minute":35,
+"location":"Enron Kids' Center"
 }
