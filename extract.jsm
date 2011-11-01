@@ -113,7 +113,7 @@ var extractor = {
     email = email.replace(/^Sent:.+$/m, "");
     email = email.replace(/^Saatmisaeg:.+$/m, "");
     
-    let re = new RegExp(this.getAlternatives(bundle, "today"), "ig");
+    let re = new RegExp(this.getAlternatives(bundle, "today").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime());
         this.collected.push({year: item.getFullYear(),
@@ -123,7 +123,7 @@ var extractor = {
         });
     }
     
-    re = new RegExp(this.getAlternatives(bundle, "tomorrow"), "ig");
+    re = new RegExp(this.getAlternatives(bundle, "tomorrow").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime() + 60 * 60 * 24 * 1000);
         this.collected.push({year: item.getFullYear(),
@@ -166,7 +166,7 @@ var extractor = {
     let days = [];
     for (let i = 0; i < 7; i++) {
       days[i] = this.getAlternatives(bundle, "weekday." + i);
-      let re = new RegExp(days[i], "ig");
+      let re = new RegExp(days[i].restrictFollowChars(), "ig");
       res = re.exec(email);
       if (res) {
         let date = new Date();
@@ -187,7 +187,7 @@ var extractor = {
     }
     
     // time only
-    re = new RegExp(this.getAlternatives(bundle, "noon"), "ig");
+    re = new RegExp(this.getAlternatives(bundle, "noon").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         this.collected.push({hour: 12,
                              minute: 0,
@@ -677,4 +677,9 @@ String.prototype.unescape = function() {
 String.prototype.restrictNumbers = function() {
     let naN = "[^0-9]";
     return naN + this.replace("|", naN + "|" + naN) + naN;
+}
+
+String.prototype.restrictFollowChars = function() {
+    let sep = "\\W";
+    return this.replace("|", sep + "|") + sep;
 }

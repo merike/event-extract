@@ -2,8 +2,8 @@
  * all times best
    correct bits  %    correct events  %   set
    111/120     93%    16/24         67%   test set
-   188/205     92%    28/41         68%   train/bunch-1 set
-   113/150     75%    17/30         57%   private et set
+   189/205     92%    28/41         68%   train/bunch-1 set
+   115/150     77%    18/30         60%   private et set
  */
 
 var corSum = 0;
@@ -46,7 +46,7 @@ while (mails.hasMoreElements()) {
   var collected = extractor.extract(info.contents, now, bundle);
   var guess = extractor.guessStart(collected);
   compare(expected, guess);
-  dump("\n---------------------------------------------------------\n");
+  dump("---------------------------------------------------------\n");
 }
 
 dump("total: " + corSum + "/" + (corSum + wrSum) + "\n");
