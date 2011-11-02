@@ -113,6 +113,23 @@ var extractor = {
     email = email.replace(/^Sent:.+$/m, "");
     email = email.replace(/^Saatmisaeg:.+$/m, "");
     
+    // XXX remove earlier correspondence, for now
+    let lenBefore = email.length;
+    let correspondence = false;
+    
+    email = email.replace(/^>+.*$/gm, "");
+    if (email.length != lenBefore) 
+      correspondence = true;
+    // remove empty lines
+    email = email.replace(/^\s[ \t]*$/gm, "");
+    // remove last line of content, assumed to contain: X wrote on Y or similar
+    if (correspondence)
+      email = email.replace(/\r?\n.+\r?\n?$/, "");
+    
+    let aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
+                        getService(Components.interfaces.nsIConsoleService);
+    aConsoleService.logStringMessage("After removing correspondence: \n" + email);
+    
     let re = new RegExp(this.getAlternatives(bundle, "today").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime());

@@ -37,6 +37,9 @@
 Components.utils.import("resource://event-extract/modules/extract.jsm");
 
 var extractFromEmail = function extractFromEmail(isEvent) {
+  let aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
+                        getService(Components.interfaces.nsIConsoleService);
+  
   let message = gFolderDisplay.selectedMessage;
   let messenger = Components.classes["@mozilla.org/messenger;1"]
                             .createInstance(Components.interfaces.nsIMessenger);
@@ -53,6 +56,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
                                             false,
                                             true,
                                             { });
+  aConsoleService.logStringMessage("Original content: \n" + content);
   let date = new Date(message.date/1000);
   
   let locale = getPrefSafe("general.useragent.locale", "en-US");
