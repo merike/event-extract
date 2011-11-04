@@ -4,5 +4,11 @@
 "day":29,
 "hour":14,
 "minute":0,
+
+"year2":2002,
+"month2":1,
+"day2":29,
+"hour2":15,
+"minute2":0,
 "location":"ECS 5th floor - Room TBA"
 }

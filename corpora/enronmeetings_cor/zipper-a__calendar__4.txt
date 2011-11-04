@@ -4,5 +4,11 @@
 "year":2001,
 "hour":9,
 "minute":0,
+
+"day2":5,
+"month2":6,
+"year2":2001,
+"hour2":11,
+"minute2":0,
 "location":"RM SE5005"
 }

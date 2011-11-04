@@ -4,5 +4,11 @@
 "day":7,
 "hour":13,
 "minute":0,
+
+"year2":2002,
+"month2":1,
+"day2":7,
+"hour2":17,
+"minute2":0,
 "location":"ECN 21C2"
 }

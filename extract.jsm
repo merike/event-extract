@@ -123,6 +123,7 @@ var extractor = {
     // remove empty lines
     email = email.replace(/^\s[ \t]*$/gm, "");
     // remove last line of content, assumed to contain: X wrote on Y or similar
+    // XXX adapt to not ruin bottom-posted emails
     if (correspondence)
       email = email.replace(/\r?\n.+\r?\n?$/, "");
     

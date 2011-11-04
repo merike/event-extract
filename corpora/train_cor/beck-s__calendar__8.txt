@@ -4,5 +4,11 @@
 "day":5,
 "hour":13,
 "minute":0,
+
+"year2":2001,
+"month2":12,
+"day2":5,
+"hour2":13,
+"minute2":30,
 "location":"ECS04-104"
 }

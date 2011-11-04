@@ -4,5 +4,11 @@
 "year":2001,
 "hour":8,
 "minute":30,
+
+"day2":1,
+"month2":8,
+"year2":2001,
+"hour2":11,
+"minute2":0,
 "location":"EB3663"
 }

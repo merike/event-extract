@@ -4,6 +4,12 @@
 "year":2001,
 "hour":13,
 "minute":0,
+
+"month2":8,
+"day2":7,
+"year2":2001,
+"hour2":14,
+"minute2":0,
 "location":"EB 2854"
 }
 

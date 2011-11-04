@@ -4,5 +4,11 @@
 "day":24,
 "hour":9,
 "minute":0,
+
+"year2":2001,
+"month2":10,
+"day2":24,
+"hour2":10,
+"minute2":30,
 "location":"conference room EB38c1"
 }
