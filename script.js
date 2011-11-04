@@ -44,8 +44,9 @@ while (mails.hasMoreElements()) {
   var expected = JSON.parse(answer.contents);
   var now = extractor.findNow(info.contents);
   var collected = extractor.extract(info.contents, now, bundle);
-  var guess = extractor.guessStart(collected);
-  compare(expected, guess);
+  var startGuess = extractor.guessStart(collected);
+  var endGuess = extractor.guessEnd(collected, startGuess);
+  compare(expected, startGuess, endGuess);
   dump("---------------------------------------------------------\n");
 }
 
@@ -75,14 +76,14 @@ function readFile(nsiFile) {
   return info;
 }
 
-function compare(correct, guessed) {
+function compare(correct, guessed, guessedEnd) {
   let r = wrSum;
   
   if (correct.year === guessed.year) {
 //     dump("correct year\n");
     corSum++;
   } else {
-    dump(correct.year + " " + guessed.year + " year\n");
+    dump(correct.year + " S " + guessed.year + " year\n");
     wrSum++;
   }
   
@@ -90,7 +91,7 @@ function compare(correct, guessed) {
 //     dump("correct month\n");
     corSum++;
   } else {
-    dump(correct.month + " " + guessed.month + " month\n");
+    dump(correct.month + " S " + guessed.month + " month\n");
     wrSum++;
   }
   
@@ -98,7 +99,7 @@ function compare(correct, guessed) {
 //     dump("correct day\n");
     corSum++;
   } else {
-    dump(correct.day + " " + guessed.day + " day\n");
+    dump(correct.day + " S " + guessed.day + " day\n");
     wrSum++;
   }
   
@@ -106,7 +107,7 @@ function compare(correct, guessed) {
 //     dump("correct hour\n");
     corSum++;
   } else {
-    dump(correct.hour + " " + guessed.hour + " hour\n");
+    dump(correct.hour + " S " + guessed.hour + " hour\n");
     wrSum++;
   }
   
@@ -114,7 +115,47 @@ function compare(correct, guessed) {
 //     dump("correct minute\n");
     corSum++;
   } else {
-    dump(correct.minute + " " + guessed.minute + " minute\n");
+    dump(correct.minute + " S " + guessed.minute + " minute\n");
+    wrSum++;
+  }
+  
+  if (correct.year2 === guessedEnd.year) {
+//     dump("correct year\n");
+    corSum++;
+  } else {
+    dump(correct.year2 + " E " + guessedEnd.year + " year\n");
+    wrSum++;
+  }
+  
+  if (correct.month2 === guessedEnd.month) {
+//     dump("correct month\n");
+    corSum++;
+  } else {
+    dump(correct.month2 + " E " + guessedEnd.month + " month\n");
+    wrSum++;
+  }
+  
+  if (correct.day2 === guessedEnd.day) {
+//     dump("correct day\n");
+    corSum++;
+  } else {
+    dump(correct.day2 + " E " + guessedEnd.day + " day\n");
+    wrSum++;
+  }
+  
+  if (correct.hour2 === guessedEnd.hour) {
+//     dump("correct hour\n");
+    corSum++;
+  } else {
+    dump(correct.hour2 + " E " + guessedEnd.hour + " hour\n");
+    wrSum++;
+  }
+  
+  if (correct.minute2 === guessedEnd.minute) {
+//     dump("correct minute\n");
+    corSum++;
+  } else {
+    dump(correct.minute2 + " E " + guessedEnd.minute + " minute\n");
     wrSum++;
   }
   

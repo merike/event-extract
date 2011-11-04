@@ -612,6 +612,10 @@ var extractor = {
       return guess;
     }
   },
+  
+  guessEnd: function guessEnd(collected, start) {
+    return {};
+  },
 
   getAlternatives: function getAlternatives(bundle, name) {
     let value = bundle.GetStringFromName(name);
