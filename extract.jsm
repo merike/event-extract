@@ -127,6 +127,9 @@ var extractor = {
     if (correspondence)
       email = email.replace(/\r?\n.+\r?\n?$/, "");
     
+    // XXX remove timezone info, for now
+    email = email.replace(/gmt[+-]\d{2}:\d{2}/gi, "");
+    
     let aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
                         getService(Components.interfaces.nsIConsoleService);
     aConsoleService.logStringMessage("After removing correspondence: \n" + email);
