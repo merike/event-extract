@@ -50,7 +50,9 @@ while (mails.hasMoreElements()) {
   var expected = JSON.parse(answer.contents);
   var now = extractor.findNow(info.contents);
   var collected = extractor.extract(info.contents, now, bundle);
-  var startGuess = extractor.guessStart(collected);
+  var startGuess = {};
+  if (expected.to != "task")
+    startGuess = extractor.guessStart(collected);
   var endGuess = extractor.guessEnd(collected, startGuess);
   compare(expected, startGuess, endGuess);
   dump("---------------------------------------------------------\n");

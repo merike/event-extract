@@ -451,6 +451,37 @@ var extractor = {
       }
     }
     
+    alts = this.getRepAlternatives(bundle, "due.day.numericmonth.year",
+                              ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
+    for (var alt in alts) {
+      let pattern = alts[alt].pattern;
+      let positions = alts[alt].positions;
+
+      let re = new RegExp(pattern, "ig");
+      while ((res = re.exec(email)) != null) {
+        if (res) {
+          res[positions[1]] = parseInt(res[positions[1]], 10);
+          res[positions[2]] = parseInt(res[positions[2]], 10);
+          if (res[positions[3]].length == 2)
+            res[positions[3]] = "20" + res[positions[3]];
+          res[positions[3]] = parseInt(res[positions[3]], 10);
+          if (this.isValidDay(res[positions[1]]) && 
+            this.isValidMonth(res[positions[2]]) && 
+            this.isValidYear(res[positions[3]])) {
+            
+            let guess = {};
+            guess.year2 = res[positions[3]];
+            guess.month2 = res[positions[2]];
+            guess.day2 = res[positions[1]];
+            guess.start = res.index;
+            guess.end = res.index + res[0].length;
+            
+            if (!this.isPastDate(guess, now))
+              this.collected.push(guess);
+          }
+        }
+      }
+    }
     alts = this.getRepAlternatives(bundle, "day.monthname.year",
                               ["(\\d{1,2})", "(" + allMonths + ")", "(\\d{2,4})" ]);
     for (var alt in alts) {
