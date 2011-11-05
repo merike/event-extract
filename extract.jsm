@@ -727,12 +727,14 @@ var extractor = {
   getAlternatives: function getAlternatives(bundle, name) {
     let value = bundle.GetStringFromName(name);
     value = value.replace(" |", "|", "g").replace("| ", "|", "g");
+    value = value.replace(/ +/g, "\\s");
     return value.sanitize();
   },
 
   getRepAlternatives: function getRepAlternatives(bundle, name, replaceables) {
     let value = bundle.formatStringFromName(name, replaceables, replaceables.length);
     value = value.replace(" |", "|", "g").replace("| ", "|", "g");
+    value = value.replace(/ +/g, "\\s");
     value = value.sanitize();
     let patterns = value.split("|");
     
