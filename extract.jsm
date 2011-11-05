@@ -271,29 +271,19 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "duration.full.hours", ["(\\d{1,2})","(\\d{1,2})"]);
+    alts = this.getRepAlternatives(bundle, "until.hour", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           let guess = {};
-          
           res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
           
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              guess.hour = res[1] + 12;
+              guess.hour2 = res[1] + 12;
             else
-              guess.hour = res[1];
-            guess.minute = 0;
-          }
-          
-          if (this.isValidHour(res[2])) {
-            if (res[2] < 8)
-              guess.hour2 = res[2] + 12;
-            else
-              guess.hour2 = res[2];
+              guess.hour2 = res[1];
             guess.minute2 = 0;
           }
           
@@ -306,7 +296,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "duration.full.hour.to.minutes", ["(\\d{1,2})","(\\d{1,2})", "(\\d{2})"]);
+    alts = this.getRepAlternatives(bundle, "until.hour.minutes", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -314,22 +304,13 @@ var extractor = {
           let guess = {};
             res[1] = parseInt(res[1], 10);
             res[2] = parseInt(res[2], 10);
-            res[3] = parseInt(res[3], 10);
             
-            if (this.isValidHour(res[1])) {
+            if (this.isValidHour(res[1]) && this.isValidMinute(res[1])) {
               if (res[1] < 8)
-                guess.hour =  res[1] + 12;
+                guess.hour2 = res[1] + 12;
               else
-                guess.hour = res[1];
-              guess.minute = 0;
-            }
-            
-            if (this.isValidHour(res[2]) && this.isValidMinute(res[3])) {
-              if (res[2] < 8)
-                guess.hour2 = res[2] + 12;
-              else
-                guess.hour2 = res[2];
-              guess.minute2 = res[3];
+                guess.hour2 = res[1];
+              guess.minute2 = res[2];
             }
             
             guess.start = res.index;
@@ -337,42 +318,6 @@ var extractor = {
             guess.ambiguous = true;
             
             this.collected.push(guess);
-        }
-      }
-    }
-    
-    alts = this.getRepAlternatives(bundle, "duration.minutes.to.minutes", ["(\\d{1,2})", "(\\d{2})","(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(email)) != null) {
-        if (res) {
-          let guess = {};
-          
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          res[3] = parseInt(res[3], 10);
-          res[4] = parseInt(res[4], 10);
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            if (res[1] < 8)
-              guess.hour = res[1] + 12;
-            else
-              guess.hour = res[1];
-            guess.minute = res[2];
-          }
-          
-          if (this.isValidHour(res[3]) && this.isValidMinute(res[4])) {
-            if (res[3] < 8)
-              guess.hour2 = res[3] + 12;
-            else
-              guess.hour2 = res[3];
-            guess.minute2 = res[4];
-          }
-          
-          guess.start = res.index;
-          guess.end = res.index + res[0].length;
-          
-          this.collected.push(guess);
         }
       }
     }
