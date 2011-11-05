@@ -1,9 +1,15 @@
 /* Experiment on how far you can get with simple regular expressions
- * all times best
+ * all times best when guessing one date and time per event
    correct bits  %    correct events  %   set
    111/120     93%    16/24         67%   test set
    189/205     92%    28/41         68%   train/bunch-1 set
    115/150     77%    18/30         60%   private et set
+   
+ * all times best when guessing one or two (where appropriate) dates and times per event
+   correct bits  %    correct events  %   set
+   177/240     74%     9/24         38%   test set
+   332/410     81%    18/41         44%   train/bunch-1 set
+   239/300     80%    13/30         43%   private et set
  */
 
 var corSum = 0;

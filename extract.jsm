@@ -276,19 +276,32 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          let guess = {};
+          
           res[1] = parseInt(res[1], 10);
+          res[2] = parseInt(res[2], 10);
+          
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
-              this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index, end: res.index + res[0].length,
-                              ambiguous: true
-              });
+              guess.hour = res[1] + 12;
             else
-              this.collected.push({hour: res[1], minute: 0,
-                              start: res.index, end: res.index + res[0].length,
-                              ambiguous: true
-              });
+              guess.hour = res[1];
+            guess.minute = 0;
           }
+          
+          if (this.isValidHour(res[2])) {
+            if (res[2] < 8)
+              guess.hour2 = res[2] + 12;
+            else
+              guess.hour2 = res[2];
+            guess.minute2 = 0;
+          }
+          
+          guess.start = res.index;
+          guess.end = res.index + res[0].length;
+          guess.ambiguous = true;
+          
+          this.collected.push(guess);
         }
       }
     }
@@ -298,19 +311,32 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          let guess = {};
             res[1] = parseInt(res[1], 10);
+            res[2] = parseInt(res[2], 10);
+            res[3] = parseInt(res[3], 10);
+            
             if (this.isValidHour(res[1])) {
               if (res[1] < 8)
-                this.collected.push({hour: res[1] + 12, minute: 0,
-                                start: res.index, end: res.index + res[0].length,
-                                ambiguous: true
-                });
+                guess.hour =  res[1] + 12;
               else
-                this.collected.push({hour: res[1], minute: 0,
-                                start: res.index, end: res.index + res[0].length,
-                                ambiguous: true
-                });
+                guess.hour = res[1];
+              guess.minute = 0;
             }
+            
+            if (this.isValidHour(res[2]) && this.isValidMinute(res[3])) {
+              if (res[2] < 8)
+                guess.hour2 = res[2] + 12;
+              else
+                guess.hour2 = res[2];
+              guess.minute2 = res[3];
+            }
+            
+            guess.start = res.index;
+            guess.end = res.index + res[0].length;
+            guess.ambiguous = true;
+            
+            this.collected.push(guess);
         }
       }
     }
@@ -320,18 +346,33 @@ var extractor = {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
+          let guess = {};
+          
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
+          res[3] = parseInt(res[3], 10);
+          res[4] = parseInt(res[4], 10);
+          
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
-              this.collected.push({hour: res[1] + 12, minute: res[2],
-                              start: res.index, end: res.index + res[0].length
-              });
+              guess.hour = res[1] + 12;
             else
-              this.collected.push({hour: res[1], minute: res[2],
-                              start: res.index, end: res.index + res[0].length
-              });
+              guess.hour = res[1];
+            guess.minute = res[2];
           }
+          
+          if (this.isValidHour(res[3]) && this.isValidMinute(res[4])) {
+            if (res[3] < 8)
+              guess.hour2 = res[3] + 12;
+            else
+              guess.hour2 = res[3];
+            guess.minute2 = res[4];
+          }
+          
+          guess.start = res.index;
+          guess.end = res.index + res[0].length;
+          
+          this.collected.push(guess);
         }
       }
     }
@@ -567,7 +608,7 @@ var extractor = {
       
       /*for (val in collected) {
         if (collected[val].use != false)
-          dump(JSON.stringify(collected[val]) + "\n");
+          dump("S: " + JSON.stringify(collected[val]) + "\n");
       }*/
       
       var guess = {};
@@ -614,7 +655,86 @@ var extractor = {
   },
   
   guessEnd: function guessEnd(collected, start) {
-    return {};
+    let endTimes = collected.filter(function(val) {
+        return (val.minute2 != undefined || val.day2 != undefined);});
+    if (endTimes.length == 0)
+      return {};
+    else {
+      let sort = function(one, two) {
+        // sort dates before times
+        if (one.year2 != undefined && two.year2 == undefined) {
+          return -1;
+        } else if (one.year2 == undefined && two.year2 != undefined) {
+          return 1;
+        } else if (one.year2 != undefined && two.year2 != undefined) {
+          if (one.year < two.year) {
+            return -1;
+          } else if (one.year > two.year) {
+            return 1;
+          } else {
+            if (one.month < two.month) {
+              return -1;
+            } else if (one.month > two.month) {
+              return 1;
+            } else {
+              if (one.day < two.day) {
+                return -1;
+              } else if (one.day > two.day) {
+                return 1;
+              } else {
+                return 0;
+              }
+            }
+          }
+        } else {
+          if (one.hour2 < two.hour2) {
+            return -1;
+          } else if (one.hour2 > two.hour2) {
+            return 1;
+          } else {
+            if (one.minute2 < two.minute2) {
+              return -1;
+            } else if (one.minute2 > two.minute2) {
+              return 1;
+            } else {
+              return 0;
+            }
+          }
+        }
+      }
+      
+      endTimes.sort(sort);
+      
+      /*for (val in endTimes) {
+        if (endTimes[val].use != false)
+          dump("E: " + JSON.stringify(endTimes[val]) + "\n");
+      }*/
+      
+      var guess = {};
+      let withDay = endTimes.filter(function(val) {
+        return (val.day2 != undefined && val.use != false);});
+      let withMinute = endTimes.filter(function(val) {
+        return (val.minute2 != undefined && val.use != false);});
+      
+      if (withDay.length != 0) {
+        guess.year = withDay[withDay.length - 1].year2;
+        guess.month = withDay[withDay.length - 1].month2;
+        guess.day = withDay[withDay.length - 1].day2;
+      }
+      
+      if (withMinute.length != 0) {
+        guess.hour = withMinute[withMinute.length - 1].hour2;
+        guess.minute = withMinute[withMinute.length - 1].minute2;
+      }
+      
+      if (guess.minute != undefined && guess.day == undefined) {
+        guess.year = start.year;
+        guess.month = start.month;
+        guess.day = start.day;
+      }
+      
+      return guess;
+    }
   },
 
   getAlternatives: function getAlternatives(bundle, name) {
