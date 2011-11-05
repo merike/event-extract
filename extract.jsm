@@ -437,11 +437,15 @@ var extractor = {
             this.isValidMonth(res[positions[2]]) && 
             this.isValidYear(res[positions[3]])) {
             
-            this.collected.push({year: res[positions[3]],
-                            month: res[positions[2]],
-                            day: res[positions[1]],
-                            start: res.index, end: res.index + res[0].length
-            });
+            let guess = {};
+            guess.year = res[positions[3]];
+            guess.month = res[positions[2]];
+            guess.day = res[positions[1]];
+            guess.start = res.index;
+            guess.end = res.index + res[0].length;
+            
+            if (!this.isPastDate(guess, now))
+              this.collected.push(guess);
           }
         }
       }
@@ -464,11 +468,15 @@ var extractor = {
           if (this.isValidDay(res[positions[1]])) {
             for (let i = 0; i < 12; i++) {
               if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
-                this.collected.push({year: res[positions[3]],
-                                month: i + 1,
-                                day: res[positions[1]],
-                                start: res.index, end: res.index + res[0].length
-                });
+                let guess = {};
+                guess.year = res[positions[3]];
+                guess.month = i + 1;
+                guess.day = res[positions[1]];
+                guess.start = res.index;
+                guess.end = res.index + res[0].length;
+                
+                if (!this.isPastDate(guess, now))
+                  this.collected.push(guess);
                 break;
               }
             }
@@ -742,6 +750,11 @@ var extractor = {
   isValidHour: function isValidHour(hour) {
     if (hour >= 0 && hour <= 23) return true;
     else return false;
+  },
+  
+  isPastDate: function isPastDate(date, refDate) {
+    let jsDate = new Date(date.year, date.month - 1, date.day);
+    return jsDate < refDate;
   },
   
   isValidMinute: function isValidMinute(minute) {
