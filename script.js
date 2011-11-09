@@ -7,9 +7,9 @@
    
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   184/240     77%    11/24         46%   test set
+   197/240     82%    11/24         46%   test set
    353/410     86%    20/41         49%   train/bunch-1 set
-   239/300     80%    13/30         43%   private et set
+   243/300     81%    14/30         47%   private et set
  */
 
 var corSum = 0;

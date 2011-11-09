@@ -157,7 +157,7 @@ var extractor = {
     // day only
     var alts = this.getRepAlternatives(bundle, "ordinal.date", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern, "ig");
+      let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           res[1] = parseInt(res[1], 10);
@@ -276,7 +276,7 @@ var extractor = {
     
     alts = this.getRepAlternatives(bundle, "until.hour", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
+      let re = new RegExp(alts[alt].pattern.restrictFollowNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
         if (res) {
           let guess = {};
@@ -413,6 +413,36 @@ var extractor = {
                                      day: res[positions[2]],
                                      start: res.index, end: res.index + res[0].length
                 });
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    alts = this.getRepAlternatives(bundle, "until.monthname.date",
+                              ["(\\d{1,2})", "(" + allMonths + ")"]);
+    for (var alt in alts) {
+      let pattern = alts[alt].pattern.replace(marker, "|", "g");
+      let positions = alts[alt].positions;
+
+      let re = new RegExp(pattern, "ig");
+      
+      while ((res = re.exec(email)) != null) {
+        if (res) {
+          res[positions[1]] = parseInt(res[positions[1]], 10);
+          if (this.isValidDay(res[positions[1]])) {
+            for (let i = 0; i < 12; i++) {
+              if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
+                let guess = {};
+                guess.year2 = now.getFullYear();
+                guess.month2 = i + 1;
+                guess.day2 = res[positions[1]];
+                guess.start = res.index;
+                guess.end = res.index + res[0].length;
+                
+                this.collected.push(guess);
                 break;
               }
             }
@@ -727,14 +757,14 @@ var extractor = {
   getAlternatives: function getAlternatives(bundle, name) {
     let value = bundle.GetStringFromName(name);
     value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-    value = value.replace(/ +/g, "\\s");
+    value = value.replace(/ +/g, "\\s*");
     return value.sanitize();
   },
 
   getRepAlternatives: function getRepAlternatives(bundle, name, replaceables) {
     let value = bundle.formatStringFromName(name, replaceables, replaceables.length);
     value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-    value = value.replace(/ +/g, "\\s");
+    value = value.replace(/ +/g, "\\s*");
     value = value.sanitize();
     let patterns = value.split("|");
     
@@ -813,6 +843,11 @@ String.prototype.unescape = function() {
 String.prototype.restrictNumbers = function() {
     let naN = "[^0-9]";
     return naN + this.replace("|", naN + "|" + naN) + naN;
+}
+
+String.prototype.restrictFollowNumbers = function() {
+    let naN = "[^0-9]";
+    return this.replace("|", naN + "|") + naN;
 }
 
 String.prototype.restrictFollowChars = function() {
