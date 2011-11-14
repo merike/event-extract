@@ -238,7 +238,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "am.hour.only", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(bundle, "hour.only.am", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -256,7 +256,7 @@ var extractor = {
       }
     }
       
-    alts = this.getRepAlternatives(bundle, "pm.hour.only", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(bundle, "hour.only.pm", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -392,7 +392,7 @@ var extractor = {
     // | is both used as pattern separator and within patterns
     // ignore those within patterns temporarily
     let allMonths = months.join(marker).replace("|", marker, "g");
-    alts = this.getRepAlternatives(bundle, "month.day", ["(" + allMonths + ")", "(\\d{1,2})"]);
+    alts = this.getRepAlternatives(bundle, "monthname.day", ["(" + allMonths + ")", "(\\d{1,2})"]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern.replace(marker, "|", "g");
       let positions = alts[alt].positions;
