@@ -48,12 +48,21 @@ while (mails.hasMoreElements()) {
   var answer = readFile(corFile);
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
-  var now = extractor.findNow(info.contents);
-  var collected = extractor.extract(info.contents, now, bundle);
+  var refDate = extractor.findNow(info.contents);
+  var collected = extractor.extract(info.contents, refDate, bundle);
   var startGuess = {};
-  if (expected.to != "task")
+  var endGuess = {};
+  if (expected.to != "task") {
     startGuess = extractor.guessStart(collected);
-  var endGuess = extractor.guessEnd(collected, startGuess);
+    endGuess = extractor.guessEnd(collected, startGuess);
+  } else {
+    startGuess.year = refDate.getFullYear();
+    startGuess.month = refDate.getMonth() + 1;
+    startGuess.day = refDate.getDate();
+    startGuess.hour = refDate.getHours();
+    startGuess.minute = refDate.getMinutes();
+    endGuess = extractor.guessEnd(collected, startGuess);
+  }
   compare(expected, startGuess, endGuess);
   dump("---------------------------------------------------------\n");
 }
