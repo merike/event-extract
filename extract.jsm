@@ -223,7 +223,7 @@ var extractor = {
         this.collected.push({year: item.getFullYear(),
                              month: item.getMonth() + 1,
                              day: item.getDate(),
-                             start: res.index, end: res.index + res[0].length
+                             start: res.index, end: res.index + res[0].length - 1
         });
     }
     
@@ -233,7 +233,7 @@ var extractor = {
         this.collected.push({year: item.getFullYear(),
                              month: item.getMonth() + 1,
                              day: item.getDate(),
-                             start: res.index, end: res.index + res[0].length
+                             start: res.index, end: res.index + res[0].length - 1
         });
     }
     
@@ -258,7 +258,7 @@ var extractor = {
             this.collected.push({year: item.getFullYear(),
                                  month: item.getMonth() + 1,
                                  day: res[1],
-                                 start: res.index, end: res.index + res[0].length,
+                                 start: res.index, end: res.index + res[0].length - 1,
                                  ambiguous: true
             });
           }
@@ -284,7 +284,7 @@ var extractor = {
         this.collected.push({year: date.getFullYear(),
                              month: date.getMonth() + 1,
                              day: date.getDate(),
-                             start: res.index, end: res.index + res[0].length,
+                             start: res.index, end: res.index + res[0].length - 1,
                              ambiguous: true
         });
       }
@@ -295,7 +295,7 @@ var extractor = {
     if ((res = re.exec(email)) != null) {
         this.collected.push({hour: 12,
                              minute: 0,
-                             start: res.index, end: res.index + res[0].length
+                             start: res.index, end: res.index + res[0].length - 1
         });
     }
     
@@ -308,12 +308,12 @@ var extractor = {
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index, end: res.index + res[0].length,
+                              start: res.index, end: res.index + res[0].length - 1,
                               ambiguous: true
               });
             else
               this.collected.push({hour: res[1], minute: 0,
-                              start: res.index, end: res.index + res[0].length,
+                              start: res.index, end: res.index + res[0].length - 1,
                               ambiguous: true
               });
           }
@@ -331,7 +331,7 @@ var extractor = {
             res[1] = res[1] - 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length,
+                            start: res.index, end: res.index + res[0].length - 1,
                             ambiguous: true
             });
           }
@@ -349,7 +349,7 @@ var extractor = {
             res[1] = res[1] + 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length,
+                            start: res.index, end: res.index + res[0].length - 1,
                             ambiguous: true
             });
           }
@@ -374,7 +374,7 @@ var extractor = {
           }
           
           guess.start = res.index;
-          guess.end = res.index + res[0].length;
+          guess.end = res.index + res[0].length - 1;
           guess.ambiguous = true;
           
           this.collected.push(guess);
@@ -400,7 +400,7 @@ var extractor = {
             }
             
             guess.start = res.index;
-            guess.end = res.index + res[0].length;
+            guess.end = res.index + res[0].length - 1;
             guess.ambiguous = true;
             
             this.collected.push(guess);
@@ -420,11 +420,11 @@ var extractor = {
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: res[2],
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length - 1
               });
             else
               this.collected.push({hour: res[1], minute: res[2],
-                              start: res.index, end: res.index + res[0].length
+                              start: res.index, end: res.index + res[0].length - 1
               });
           }          
         }
@@ -442,7 +442,7 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index, end: res.index + res[0].length
+                            start: res.index, end: res.index + res[0].length - 1
             });
           }
         }
@@ -460,7 +460,7 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index, end: res.index + res[0].length
+                            start: res.index, end: res.index + res[0].length - 1
             });
           }
         }
@@ -494,7 +494,7 @@ var extractor = {
                 this.collected.push({year: year,
                                      month: i + 1,
                                      day: res[positions[2]],
-                                     start: res.index, end: res.index + res[0].length
+                                     start: res.index, end: res.index + res[0].length - 1
                 });
                 break;
               }
@@ -523,7 +523,7 @@ var extractor = {
                 guess.month2 = i + 1;
                 guess.day2 = res[positions[1]];
                 guess.start = res.index;
-                guess.end = res.index + res[0].length;
+                guess.end = res.index + res[0].length - 1;
                 
                 this.collected.push(guess);
                 break;
@@ -558,7 +558,7 @@ var extractor = {
             guess.month = res[positions[2]];
             guess.day = res[positions[1]];
             guess.start = res.index;
-            guess.end = res.index + res[0].length;
+            guess.end = res.index + res[0].length - 1;
             
             if (!this.isPastDate(guess, now))
               this.collected.push(guess);
@@ -590,7 +590,7 @@ var extractor = {
             guess.month2 = res[positions[2]];
             guess.day2 = res[positions[1]];
             guess.start = res.index;
-            guess.end = res.index + res[0].length;
+            guess.end = res.index + res[0].length - 1;
             
             if (!this.isPastDate(guess, now))
               this.collected.push(guess);
@@ -620,7 +620,7 @@ var extractor = {
                 guess.month = i + 1;
                 guess.day = res[positions[1]];
                 guess.start = res.index;
-                guess.end = res.index + res[0].length;
+                guess.end = res.index + res[0].length - 1;
                 
                 if (!this.isPastDate(guess, now))
                   this.collected.push(guess);
@@ -824,6 +824,7 @@ var extractor = {
       
       if (withMinute.length != 0) {
         // end has to occur later
+        // XXX consider date as well
         if (withMinute[withMinute.length - 1].hour2 > start.hour ||
           (withMinute[withMinute.length - 1].hour2 == start.hour &&
           withMinute[withMinute.length - 1].minute2 > start.minute)
