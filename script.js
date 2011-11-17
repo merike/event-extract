@@ -9,7 +9,7 @@
    correct bits  %    correct events  %   set
    197/240     82%    11/24         46%   test set
    353/410     86%    20/41         49%   train/bunch-1 set
-   243/300     81%    14/30         47%   private et set
+   250/300     83%    14/30         47%   private et set
  */
 
 var corSum = 0;

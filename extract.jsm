@@ -112,7 +112,9 @@ var extractor = {
     if (email.length != lenBefore) 
       correspondence = true;
     // remove empty lines
+    email = email.replace(/<br ?\/?>/gm, "");
     email = email.replace(/^\s[ \t]*$/gm, "");
+    
     // remove last line of content, assumed to contain: X wrote on Y or similar
     // XXX adapt to not ruin bottom-posted emails
     if (correspondence)
@@ -821,8 +823,14 @@ var extractor = {
       }
       
       if (withMinute.length != 0) {
-        guess.hour = withMinute[withMinute.length - 1].hour2;
-        guess.minute = withMinute[withMinute.length - 1].minute2;
+        // end has to occur later
+        if (withMinute[withMinute.length - 1].hour2 > start.hour ||
+          (withMinute[withMinute.length - 1].hour2 == start.hour &&
+          withMinute[withMinute.length - 1].minute2 > start.minute)
+        ) {
+          guess.hour = withMinute[withMinute.length - 1].hour2;
+          guess.minute = withMinute[withMinute.length - 1].minute2;
+        }
       }
       
       if (guess.minute != undefined && guess.day == undefined) {
