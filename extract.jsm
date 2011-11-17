@@ -489,7 +489,8 @@ var extractor = {
               let ms = months[i].unescape().split("|");
               if (ms.indexOf(res[positions[1]].toLowerCase()) != -1) {
                 let year = now.getFullYear();
-                if (now > new Date(year, i, res[positions[2]]))
+                let ref = new Date(now.getTime() - 60 * 60 * 24 * 1000);
+                if (ref > new Date(year, i, res[positions[2]]))
                   year++;
                 this.collected.push({year: year,
                                      month: i + 1,

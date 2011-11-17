@@ -8,7 +8,7 @@
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
    197/240     82%    11/24         46%   test set
-   353/410     86%    20/41         49%   train/bunch-1 set
+   364/410     89%    25/41         60%   train/bunch-1 set
    257/300     86%    15/30         50%   private et set
  */
 
