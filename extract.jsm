@@ -39,6 +39,11 @@ var marker = "--MARK--";
 
 var extractor = {
   collected: [],
+  bundleDir: "",
+  bundle: "",
+  fallbackLocale: "",
+  aConsoleService: Components.classes["@mozilla.org/consoleservice;1"]
+                  .getService(Components.interfaces.nsIConsoleService),
   
   findNow: function findNow(email) {
     var now = new Date();
@@ -92,22 +97,8 @@ var extractor = {
     
     return now;
   },
-
-  extract: function extract(email, now, bundle) {
-    let initial = {};
-    initial.year = now.getFullYear();
-    initial.month = now.getMonth() + 1;
-    initial.day = now.getDate();
-    initial.hour = now.getHours();
-    initial.minute = now.getMinutes();
-    this.collected = [];
-    
-    this.collected.push({year: initial.year,
-                         month: initial.month,
-                         day: initial.day});/*
-    this.collected.push({hour: initial.hour,
-                         minute: initial.minute});*/
-    
+  
+  cleanup: function cleanup(email) {
     // remove Date: and Sent: lines
     email = email.replace(/^Date:.+$/m, "");
     email = email.replace(/^Sent:.+$/m, "");
@@ -129,12 +120,102 @@ var extractor = {
     
     // XXX remove timezone info, for now
     email = email.replace(/gmt[+-]\d{2}:\d{2}/gi, "");
+    return email;
+  },
+  
+  setBundle: function setBundle(dir, fallbackLocale) {
+    this.bundleDir = dir;
+    this.fallbackLocale = fallbackLocale;
+  },
+  
+  checkBundle: function checkBundle(locale) {
+    let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
+                 .getService(Components.interfaces.nsIStringBundleService);
+    let bundle = service.createBundle(this.bundleDir + "extract_" + locale + ".properties");
     
-    let aConsoleService = Components.classes["@mozilla.org/consoleservice;1"].
-                        getService(Components.interfaces.nsIConsoleService);
-    aConsoleService.logStringMessage("After removing correspondence: \n" + email);
+    try {
+      bundle.formatStringFromName("today", [], 0);
+      return true;
+    } catch (ex) {
+      return false;
+    }
+  },
+  
+  guessLanguage: function guessLanguage(email) {
+    let spellclass = "@mozilla.org/spellchecker/engine;1";
+    let gSpellCheckEngine = Components.classes[spellclass]
+                       .createInstance(Components.interfaces.mozISpellCheckingEngine);
+    let arr = {};
+    let cnt = {};
+    let words = email.split(/\W+/);
+    let matching = [];
+    let most = 0;
+    let mostLocale;
     
-    let re = new RegExp(this.getAlternatives(bundle, "today").restrictFollowChars(), "ig");
+    gSpellCheckEngine.getDictionaryList(arr, cnt);
+    let dicts = arr["value"]
+    
+    for (dict in dicts) {
+      if (!this.checkBundle(dicts[dict])) {
+        dump("Dictionary present, rules missing: " + dicts[dict]);
+        this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
+        continue;
+      }
+      
+      gSpellCheckEngine.dictionary = dicts[dict];
+      
+      let correct = 0;
+      for (word in words) {
+        if (gSpellCheckEngine.check(words[word]))
+          correct++;
+      }
+      
+      let percentage = correct/words.length;
+      dump(dicts[dict] + " " + percentage + "\n");
+      this.aConsoleService.logStringMessage(dicts[dict] + " " + percentage);
+      
+      if (percentage > 0.5 && percentage > most) {
+        mostLocale = dicts[dict];
+        most = percentage;
+      }
+    }
+    
+    let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
+                 .getService(Components.interfaces.nsIStringBundleService);
+    
+    if (most > 0) {
+      dump("Chose " + mostLocale + "\n");
+      this.aConsoleService.logStringMessage("Chose " + mostLocale);
+      this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
+    } else {
+      dump("Falling back to " + this.fallbackLocale + "\n");
+      this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
+      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+    }
+  },
+
+  extract: function extract(email, now) {
+    let initial = {};
+    initial.year = now.getFullYear();
+    initial.month = now.getMonth() + 1;
+    initial.day = now.getDate();
+    initial.hour = now.getHours();
+    initial.minute = now.getMinutes();
+    this.collected = [];
+    
+    this.collected.push({year: initial.year,
+                         month: initial.month,
+                         day: initial.day});/*
+    this.collected.push({hour: initial.hour,
+                         minute: initial.minute});*/
+    
+    email = this.cleanup(email);
+    
+    this.aConsoleService.logStringMessage("After removing correspondence: \n" + email);
+    
+    this.guessLanguage(email);
+    
+    let re = new RegExp(this.getAlternatives(this.bundle, "today").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime());
         this.collected.push({year: item.getFullYear(),
@@ -144,7 +225,7 @@ var extractor = {
         });
     }
     
-    re = new RegExp(this.getAlternatives(bundle, "tomorrow").restrictFollowChars(), "ig");
+    re = new RegExp(this.getAlternatives(this.bundle, "tomorrow").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         let item = new Date(now.getTime() + 60 * 60 * 24 * 1000);
         this.collected.push({year: item.getFullYear(),
@@ -155,7 +236,7 @@ var extractor = {
     }
     
     // day only
-    var alts = this.getRepAlternatives(bundle, "ordinal.date", ["(\\d{1,2})"]);
+    var alts = this.getRepAlternatives(this.bundle, "ordinal.date", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
@@ -186,7 +267,7 @@ var extractor = {
     // weekday
     let days = [];
     for (let i = 0; i < 7; i++) {
-      days[i] = this.getAlternatives(bundle, "weekday." + i);
+      days[i] = this.getAlternatives(this.bundle, "weekday." + i);
       let re = new RegExp(days[i].restrictFollowChars(), "ig");
       res = re.exec(email);
       if (res) {
@@ -208,7 +289,7 @@ var extractor = {
     }
     
     // time only
-    re = new RegExp(this.getAlternatives(bundle, "noon").restrictFollowChars(), "ig");
+    re = new RegExp(this.getAlternatives(this.bundle, "noon").restrictFollowChars(), "ig");
     if ((res = re.exec(email)) != null) {
         this.collected.push({hour: 12,
                              minute: 0,
@@ -216,7 +297,7 @@ var extractor = {
         });
     }
     
-    alts = this.getRepAlternatives(bundle, "hour.only", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.only", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -238,7 +319,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "hour.only.am", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.only.am", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -256,7 +337,7 @@ var extractor = {
       }
     }
       
-    alts = this.getRepAlternatives(bundle, "hour.only.pm", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.only.pm", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -274,7 +355,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "until.hour", ["(\\d{1,2})"]);
+    alts = this.getRepAlternatives(this.bundle, "until.hour", ["(\\d{1,2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern.restrictFollowNumbers(), "ig");
       while ((res = re.exec(email)) != null) {
@@ -299,7 +380,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "until.hour.minutes", ["(\\d{1,2})", "(\\d{2})"]);
+    alts = this.getRepAlternatives(this.bundle, "until.hour.minutes", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -326,7 +407,7 @@ var extractor = {
     }
     
     // hour:minutes
-    alts = this.getRepAlternatives(bundle, "hour.minutes", ["(\\d{1,2})","(\\d{2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.minutes", ["(\\d{1,2})","(\\d{2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -348,7 +429,7 @@ var extractor = {
       }
     }
 
-    alts = this.getRepAlternatives(bundle, "hour.minutes.am", ["(\\d{1,2})", "(\\d{2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.minutes.am", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -366,7 +447,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "hour.minutes.pm", ["(\\d{1,2})", "(\\d{2})"]);
+    alts = this.getRepAlternatives(this.bundle, "hour.minutes.pm", ["(\\d{1,2})", "(\\d{2})"]);
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
@@ -387,12 +468,12 @@ var extractor = {
     // month with day
     let months = [];
     for (let i = 0; i < 12; i++) {
-      months[i] = this.getAlternatives(bundle, "month." + (i + 1));
+      months[i] = this.getAlternatives(this.bundle, "month." + (i + 1));
     }
     // | is both used as pattern separator and within patterns
     // ignore those within patterns temporarily
     let allMonths = months.join(marker).replace("|", marker, "g");
-    alts = this.getRepAlternatives(bundle, "monthname.day", ["(" + allMonths + ")", "(\\d{1,2})"]);
+    alts = this.getRepAlternatives(this.bundle, "monthname.day", ["(" + allMonths + ")", "(\\d{1,2})"]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern.replace(marker, "|", "g");
       let positions = alts[alt].positions;
@@ -421,7 +502,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "until.monthname.date",
+    alts = this.getRepAlternatives(this.bundle, "until.monthname.date",
                               ["(\\d{1,2})", "(" + allMonths + ")"]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern.replace(marker, "|", "g");
@@ -452,7 +533,7 @@ var extractor = {
     }
     
     // date with year
-    alts = this.getRepAlternatives(bundle, "day.numericmonth.year",
+    alts = this.getRepAlternatives(this.bundle, "day.numericmonth.year",
                               ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern;
@@ -484,7 +565,7 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(bundle, "due.day.numericmonth.year",
+    alts = this.getRepAlternatives(this.bundle, "due.day.numericmonth.year",
                               ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern;
@@ -515,7 +596,7 @@ var extractor = {
         }
       }
     }
-    alts = this.getRepAlternatives(bundle, "day.monthname.year",
+    alts = this.getRepAlternatives(this.bundle, "day.monthname.year",
                               ["(\\d{1,2})", "(" + allMonths + ")", "(\\d{2,4})" ]);
     for (var alt in alts) {
       let pattern = alts[alt].pattern.replace(marker, "|", "g");

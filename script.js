@@ -33,10 +33,7 @@ fileCor.initWithPath(arguments[0] + "../" + file.leafName + "_cor");
 
 if (arguments[1])
   locale = arguments[1];
-let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
-   .getService(Components.interfaces.nsIStringBundleService);
-let url = "file:/media/Meedia/tty/lt/event-extract/extract_" + locale + ".properties";
-let bundle = service.createBundle(url);
+let baseUrl = "file:/media/Meedia/tty/lt/event-extract/";
 
 var mails = file.directoryEntries;
 var ans = fileCor.directoryEntries;
@@ -48,8 +45,9 @@ while (mails.hasMoreElements()) {
   var answer = readFile(corFile);
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
+  extractor.setBundle(baseUrl, locale);
   var refDate = extractor.findNow(info.contents);
-  var collected = extractor.extract(info.contents, refDate, bundle);
+  var collected = extractor.extract(info.contents, refDate);
   var startGuess = {};
   var endGuess = {};
   if (expected.to != "task") {

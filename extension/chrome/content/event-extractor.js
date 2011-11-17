@@ -60,15 +60,11 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let date = new Date(message.date/1000);
   
   let locale = getPrefSafe("general.useragent.locale", "en-US");
-  let defUrl = "chrome://event-extract/content/locale/extract_en-US.properties";
-  let url = "chrome://event-extract/content/locale/extract_" + locale + ".properties";
-  let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
-     .getService(Components.interfaces.nsIStringBundleService);
-  let bundle;
-  if ((bundle = service.createBundle(url)) == null)
-    service.createBundle(defUrl);
-  let collected = extractor.extract(content, date, bundle);
+  let baseUrl = "chrome://event-extract/content/locale/";
+  extractor.setBundle(baseUrl, locale);
+  let collected = extractor.extract(content, date);
   let guessed = extractor.guessStart(collected);
+  let endGuess = extractor.guessEnd(collected, guessed);
   
   var item;
   if (isEvent) {
@@ -96,6 +92,17 @@ var extractFromEmail = function extractFromEmail(isEvent) {
     
     item.endDate = item.startDate.clone();
     item.endDate.minute += cal.getPrefSafe("calendar.event.defaultlength", 60);
+    
+    if (endGuess.year)
+      item.endDate.year = endGuess.year;
+    if (endGuess.month)
+      item.endDate.month = endGuess.month - 1;
+    if (endGuess.day)
+      item.endDate.day = endGuess.day;
+    if (endGuess.hour)
+      item.endDate.hour = endGuess.hour;
+    if (endGuess.minute)
+      item.endDate.minute = endGuess.minute;
   } else {
     let dtz = cal.calendarDefaultTimezone();
     let dueDate = new Date();
@@ -105,15 +112,15 @@ var extractFromEmail = function extractFromEmail(isEvent) {
     dueDate.setSeconds(0);
     
     if (guessed.year != undefined)
-      dueDate.setYear(guessed.year);
+      dueDate.setYear(endGuess.year);
     if (guessed.month  != undefined)
-      dueDate.setMonth(guessed.month - 1);
+      dueDate.setMonth(endGuess.month - 1);
     if (guessed.day != undefined)
-      dueDate.setDate(guessed.day);
+      dueDate.setDate(endGuess.day);
     if (guessed.hour != undefined)
-      dueDate.setHours(guessed.hour);
+      dueDate.setHours(endGuess.hour);
     if (guessed.minute != undefined)
-      dueDate.setMinutes(guessed.minute);
+      dueDate.setMinutes(endGuess.minute);
     
     setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
     setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
