@@ -9,6 +9,8 @@
    correct bits  %    correct events  %   set
    197/240     82%    11/24         46%   test set
    364/410     89%    25/41         60%   train/bunch-1 set
+   338/420     80%    21/42         50%   mozilla.dev.planning sept set
+   
    257/300     86%    15/30         50%   private et set
  */
 
