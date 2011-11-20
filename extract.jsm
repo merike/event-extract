@@ -173,7 +173,7 @@ var extractor = {
       }
       
       let percentage = correct/words.length;
-      dump(dicts[dict] + " " + percentage + "\n");
+      //dump(dicts[dict] + " " + percentage + "\n");
       this.aConsoleService.logStringMessage(dicts[dict] + " " + percentage);
       
       if (percentage > 0.5 && percentage > most) {
@@ -186,11 +186,11 @@ var extractor = {
                  .getService(Components.interfaces.nsIStringBundleService);
     
     if (most > 0) {
-      dump("Chose " + mostLocale + "\n");
+      //dump("Chose " + mostLocale + "\n");
       this.aConsoleService.logStringMessage("Chose " + mostLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     } else {
-      dump("Falling back to " + this.fallbackLocale + "\n");
+      //dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
     }
@@ -223,7 +223,9 @@ var extractor = {
         this.collected.push({year: item.getFullYear(),
                              month: item.getMonth() + 1,
                              day: item.getDate(),
-                             start: res.index, end: res.index + res[0].length - 1
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             str: res[0]
         });
     }
     
@@ -233,16 +235,18 @@ var extractor = {
         this.collected.push({year: item.getFullYear(),
                              month: item.getMonth() + 1,
                              day: item.getDate(),
-                             start: res.index, end: res.index + res[0].length - 1
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             str: res[0]
         });
     }
     
     // day only
     var alts = this.getRepAlternatives(this.bundle, "ordinal.date", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern.restrictNumbers(), "ig");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidDay(res[1])) {
             let item = new Date(now.getTime());
@@ -258,8 +262,10 @@ var extractor = {
             this.collected.push({year: item.getFullYear(),
                                  month: item.getMonth() + 1,
                                  day: res[1],
-                                 start: res.index, end: res.index + res[0].length - 1,
-                                 ambiguous: true
+                                 start: res.index,
+                                 end: res.index + res[0].length - 1,
+                                 ambiguous: true,
+                                 str: res[0]
             });
           }
         }
@@ -284,8 +290,10 @@ var extractor = {
         this.collected.push({year: date.getFullYear(),
                              month: date.getMonth() + 1,
                              day: date.getDate(),
-                             start: res.index, end: res.index + res[0].length - 1,
-                             ambiguous: true
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             ambiguous: true,
+                             str: res[0]
         });
       }
     }
@@ -295,7 +303,9 @@ var extractor = {
     if ((res = re.exec(email)) != null) {
         this.collected.push({hour: 12,
                              minute: 0,
-                             start: res.index, end: res.index + res[0].length - 1
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             str: res[0]
         });
     }
     
@@ -303,18 +313,22 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index, end: res.index + res[0].length - 1,
-                              ambiguous: true
+                              start: res.index,
+                              end: res.index + res[0].length - 1,
+                              ambiguous: true,
+                              str: res[0]
               });
             else
               this.collected.push({hour: res[1], minute: 0,
-                              start: res.index, end: res.index + res[0].length - 1,
-                              ambiguous: true
+                              start: res.index,
+                              end: res.index + res[0].length - 1,
+                              ambiguous: true,
+                              str: res[0]
               });
           }
         }
@@ -325,14 +339,16 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           if (res[1] == 12)
             res[1] = res[1] - 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length - 1,
-                            ambiguous: true
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            ambiguous: true,
+                            str: res[0]
             });
           }
         }
@@ -343,14 +359,16 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           if (res[1] != 12)
             res[1] = res[1] + 12;
           if (this.isValidHour(res[1])) {
             this.collected.push({hour: res[1], minute: 0,
-                            start: res.index, end: res.index + res[0].length - 1,
-                            ambiguous: true
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            ambiguous: true,
+                            str: res[0]
             });
           }
         }
@@ -359,9 +377,9 @@ var extractor = {
     
     alts = this.getRepAlternatives(this.bundle, "until.hour", ["(\\d{1,2})"]);
     for (var alt in alts) {
-      let re = new RegExp(alts[alt].pattern.restrictFollowNumbers(), "ig");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           let guess = {};
           res[1] = parseInt(res[1], 10);
           
@@ -376,6 +394,7 @@ var extractor = {
           guess.start = res.index;
           guess.end = res.index + res[0].length - 1;
           guess.ambiguous = true;
+          guess.str = res[0];
           
           this.collected.push(guess);
         }
@@ -386,7 +405,7 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           let guess = {};
             res[1] = parseInt(res[1], 10);
             res[2] = parseInt(res[2], 10);
@@ -402,6 +421,7 @@ var extractor = {
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
             guess.ambiguous = true;
+            guess.str = res[0];
             
             this.collected.push(guess);
         }
@@ -412,14 +432,18 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
-          if (res[1] == 12)
-            res[1] = res[1] - 12;
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
+          
+          if (res[1] == 12)
+            res[1] = res[1] - 12;
+          
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour2: res[1], minute2: res[2],
-                            start: res.index, end: res.index + res[0].length - 1
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            str: res[0]
             });
           }
         }
@@ -430,14 +454,18 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
-          if (res[1] != 12)
-            res[1] = res[1] + 12;
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
+          
+          if (res[1] != 12)
+            res[1] = res[1] + 12;
+          
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour2: res[1], minute2: res[2],
-                            start: res.index, end: res.index + res[0].length - 1
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            str: res[0]
             });
           }
         }
@@ -449,18 +477,22 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             if (res[1] < 8)
               this.collected.push({hour: res[1] + 12, minute: res[2],
-                              start: res.index, end: res.index + res[0].length - 1
+                              start: res.index,
+                              end: res.index + res[0].length - 1,
+                              str: res[0]
               });
             else
               this.collected.push({hour: res[1], minute: res[2],
-                              start: res.index, end: res.index + res[0].length - 1
+                              start: res.index,
+                              end: res.index + res[0].length - 1,
+                              str: res[0]
               });
           }          
         }
@@ -471,14 +503,18 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
-          if (res[1] == 12)
-            res[1] = res[1] - 12;
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
+          
+          if (res[1] == 12)
+            res[1] = res[1] - 12;
+          
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index, end: res.index + res[0].length - 1
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            str: res[0]
             });
           }
         }
@@ -489,14 +525,18 @@ var extractor = {
     for (var alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
-          if (res[1] != 12)
-            res[1] = res[1] + 12;
+        if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           res[2] = parseInt(res[2], 10);
+          
+          if (res[1] != 12)
+            res[1] = res[1] + 12;
+          
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
             this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index, end: res.index + res[0].length - 1
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            str: res[0]
             });
           }
         }
@@ -518,7 +558,7 @@ var extractor = {
 
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[positions[2]] = parseInt(res[positions[2]], 10);
           if (this.isValidDay(res[positions[2]])) {
             for (let i = 0; i < 12; i++) {
@@ -531,7 +571,9 @@ var extractor = {
                 this.collected.push({year: year,
                                      month: i + 1,
                                      day: res[positions[2]],
-                                     start: res.index, end: res.index + res[0].length - 1
+                                     start: res.index,
+                                     end: res.index + res[0].length - 1,
+                                     str: res[0]
                 });
                 break;
               }
@@ -550,7 +592,7 @@ var extractor = {
       let re = new RegExp(pattern, "ig");
       
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           if (this.isValidDay(res[positions[1]])) {
             for (let i = 0; i < 12; i++) {
@@ -561,6 +603,7 @@ var extractor = {
                 guess.day2 = res[positions[1]];
                 guess.start = res.index;
                 guess.end = res.index + res[0].length - 1;
+                guess.str = res[0];
                 
                 this.collected.push(guess);
                 break;
@@ -580,7 +623,7 @@ var extractor = {
 
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           res[positions[2]] = parseInt(res[positions[2]], 10);
           if (res[positions[3]].length == 2)
@@ -596,9 +639,12 @@ var extractor = {
             guess.day = res[positions[1]];
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
+            guess.str = res[0];
             
-            if (!this.isPastDate(guess, now))
-              this.collected.push(guess);
+            if (this.isPastDate(guess, now))
+              guess.use = false;
+
+            this.collected.push(guess);
           }
         }
       }
@@ -612,7 +658,7 @@ var extractor = {
 
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           res[positions[2]] = parseInt(res[positions[2]], 10);
           if (res[positions[3]].length == 2)
@@ -628,6 +674,7 @@ var extractor = {
             guess.day2 = res[positions[1]];
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
+            guess.str = res[0];
             
             if (!this.isPastDate(guess, now))
               this.collected.push(guess);
@@ -644,7 +691,7 @@ var extractor = {
       let re = new RegExp(pattern, "ig");
       
       while ((res = re.exec(email)) != null) {
-        if (res) {
+        if (res && !this.restrictNumbers(res, email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           if (res[positions[3]].length == 2)
               res[positions[3]] = "20" + res[positions[3]];
@@ -658,6 +705,7 @@ var extractor = {
                 guess.day = res[positions[1]];
                 guess.start = res.index;
                 guess.end = res.index + res[0].length - 1;
+                guess.str = res[0];
                 
                 if (!this.isPastDate(guess, now))
                   this.collected.push(guess);
@@ -743,10 +791,10 @@ var extractor = {
       
       collected.sort(sort);
       
-      /*for (val in collected) {
-        if (collected[val].use != false)
+      for (val in collected) {
+//         if (collected[val].use != false)
           dump("S: " + JSON.stringify(collected[val]) + "\n");
-      }*/
+      }
       
       var guess = {};
       let withDay = collected.filter(function(val) {
@@ -842,10 +890,10 @@ var extractor = {
       
       endTimes.sort(sort);
       
-      /*for (val in endTimes) {
-        if (endTimes[val].use != false)
+      for (val in endTimes) {
+//         if (endTimes[val].use != false)
           dump("E: " + JSON.stringify(endTimes[val]) + "\n");
-      }*/
+      }
       
       var guess = {};
       let withDay = endTimes.filter(function(val) {
@@ -946,6 +994,12 @@ var extractor = {
   },
   
   isPastDate: function isPastDate(date, refDate) {
+    // avoid changing original refDate
+    let refDate = new Date(refDate.getTime());
+    refDate.setHours(0);
+    refDate.setMinutes(0);
+    refDate.setSeconds(0);
+    refDate.setMilliseconds(0);
     let jsDate = new Date(date.year, date.month - 1, date.day);
     return jsDate < refDate;
   },
@@ -953,6 +1007,15 @@ var extractor = {
   isValidMinute: function isValidMinute(minute) {
     if (minute >= 0 && minute <= 59) return true;
     else return false;
+  },
+  
+  restrictNumbers: function restrictNumbers(res, email) {
+    let pattern = email.substring(res.index, res.index + res[0].length);
+    let before = email.charAt(res.index - 1);
+    let after = email.charAt(res.index + res[0].length);
+    let result = (/\d/.exec(before) && /\d/.exec(pattern.charAt(0))) ||
+              (/\d/.exec(pattern.charAt(pattern.length - 1)) && /\d/.exec(after));
+    return result != null;
   }
 }
 
@@ -965,16 +1028,6 @@ String.prototype.sanitize = function() {
 String.prototype.unescape = function() {
   let res = this.replace(/\\([\.])/g, "$1");
   return res;
-}
-
-String.prototype.restrictNumbers = function() {
-    let naN = "[^0-9]";
-    return naN + this.replace("|", naN + "|" + naN) + naN;
-}
-
-String.prototype.restrictFollowNumbers = function() {
-    let naN = "[^0-9]";
-    return this.replace("|", naN + "|") + naN;
 }
 
 String.prototype.restrictFollowChars = function() {

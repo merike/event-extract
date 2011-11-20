@@ -9,9 +9,9 @@
    correct bits  %    correct events  %   set
    197/240     82%    11/24         46%   test set
    364/410     89%    25/41         60%   train/bunch-1 set
-   363/420     86%    25/42         60%   mozilla.dev.planning sept set
+   370/420     88%    25/42         60%   mozilla.dev.planning sept set
    
-   257/300     86%    15/30         50%   private et set
+   258/300     86%    16/30         53%   private et set
  */
 
 var corSum = 0;
