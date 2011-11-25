@@ -7,8 +7,7 @@
    
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   197/240     82%    11/24         46%   test set
-   364/410     89%    25/41         60%   train/bunch-1 set
+   561/650     86%    36/65         55%   enronmeetings
    370/420     88%    25/42         60%   mozilla.dev.planning sept set
    
    262/300     87%    16/30         53%   private et set
