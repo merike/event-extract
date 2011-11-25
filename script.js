@@ -11,7 +11,7 @@
    364/410     89%    25/41         60%   train/bunch-1 set
    370/420     88%    25/42         60%   mozilla.dev.planning sept set
    
-   258/300     86%    16/30         53%   private et set
+   262/300     87%    16/30         53%   private et set
  */
 
 var corSum = 0;

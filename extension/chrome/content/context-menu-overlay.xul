@@ -41,9 +41,9 @@
   <window id="messengerWindow">
     <menupopup id="mailContext">
       <menu id="mailContext-calendar-add-menu"
-          insertafter="mailContext-moveToFolderAgain"
-          label="Add as"
-          accesskey="d">
+            insertafter="mailContext-moveToFolderAgain"
+            label="Add as"
+            accesskey="d">
         <menupopup id="mailContext-calendar-convert-menupopup">
           <menuitem id="mailContext-calendar-convert-event-menuitem"
                     label="Event..."

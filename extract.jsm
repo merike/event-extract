@@ -605,6 +605,8 @@ var extractor = {
                 guess.end = res.index + res[0].length - 1;
                 guess.str = res[0];
                 
+                if (this.isPastDate(guess, now))
+                  guess.year2++;
                 this.collected.push(guess);
                 break;
               }
@@ -1000,7 +1002,11 @@ var extractor = {
     refDate.setMinutes(0);
     refDate.setSeconds(0);
     refDate.setMilliseconds(0);
-    let jsDate = new Date(date.year, date.month - 1, date.day);
+    let jsDate;
+    if (date.day != undefined)
+      jsDate = new Date(date.year, date.month - 1, date.day);
+    else
+      jsDate = new Date(date.year2, date.month2 - 1, date.day2);
     return jsDate < refDate;
   },
   
