@@ -65,6 +65,8 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let collected = extractor.extract(content, date);
   let guessed = extractor.guessStart(collected);
   let endGuess = extractor.guessEnd(collected, guessed);
+  let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
+               isEvent;
   
   var item;
   if (isEvent) {
@@ -97,8 +99,11 @@ var extractFromEmail = function extractFromEmail(isEvent) {
       item.endDate.year = endGuess.year;
     if (endGuess.month)
       item.endDate.month = endGuess.month - 1;
-    if (endGuess.day)
+    if (endGuess.day) {
       item.endDate.day = endGuess.day;
+      if (allDay)
+        item.endDate.day++;
+    }
     if (endGuess.hour)
       item.endDate.hour = endGuess.hour;
     if (endGuess.minute)
@@ -127,7 +132,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   }
   
   // if time not guessed set allday for events
-  if ((guessed.hour == undefined || guessed.minute == undefined) && isEvent)
+  if (allDay)
     createEventWithDialog(null, null, null, null, item, true);
   else
     createEventWithDialog(null, null, null, null, item);
