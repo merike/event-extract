@@ -932,14 +932,32 @@ var extractor = {
   },
 
   getAlternatives: function getAlternatives(bundle, name) {
-    let value = bundle.GetStringFromName(name);
-    value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-    value = value.replace(/ +/g, "\\s*");
-    return value.sanitize();
+    let value;
+    try {
+      value = bundle.GetStringFromName(name);
+      value = value.replace(" |", "|", "g").replace("| ", "|", "g");
+      value = value.replace(/ +/g, "\\s*");
+      return value.sanitize();
+    } catch (ex) {
+      this.aConsoleService.logStringMessage("Pattern not found: " + name);
+      dump("Pattern not found: " + name + "\n");
+      
+      // fake a value to not error out
+      return "abc %1$S def %2$S ghi %3$S";
+    }
   },
 
   getRepAlternatives: function getRepAlternatives(bundle, name, replaceables) {
-    let value = bundle.formatStringFromName(name, replaceables, replaceables.length);
+    let value;
+    try {
+      value = bundle.formatStringFromName(name, replaceables, replaceables.length);
+    } catch (ex) {
+      this.aConsoleService.logStringMessage("Pattern not found: " + name);
+      dump("Pattern not found: " + name + "\n");
+      
+      // fake a value to not error out
+      value = "abc def ghi";
+    }
     value = value.replace(" |", "|", "g").replace("| ", "|", "g");
     value = value.replace(/ +/g, "\\s*");
     value = value.sanitize();
