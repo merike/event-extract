@@ -173,7 +173,7 @@ var extractor = {
       }
       
       let percentage = correct/words.length;
-      //dump(dicts[dict] + " " + percentage + "\n");
+      dump(dicts[dict] + " " + percentage + "\n");
       this.aConsoleService.logStringMessage(dicts[dict] + " " + percentage);
       
       if (percentage > 0.5 && percentage > most) {
