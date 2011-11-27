@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd extension
+rm -f event-extract.xpi
 mkdir modules
 cp ../extract.jsm modules
 mkdir chrome/content/locale
