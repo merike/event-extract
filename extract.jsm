@@ -793,10 +793,10 @@ var extractor = {
       
       collected.sort(sort);
       
-      for (val in collected) {
-//         if (collected[val].use != false)
+      /*for (val in collected) {
+         if (collected[val].use != false)
           dump("S: " + JSON.stringify(collected[val]) + "\n");
-      }
+      }*/
       
       var guess = {};
       let withDay = collected.filter(function(val) {
@@ -892,10 +892,10 @@ var extractor = {
       
       endTimes.sort(sort);
       
-      for (val in endTimes) {
-//         if (endTimes[val].use != false)
+      /*for (val in endTimes) {
+         if (endTimes[val].use != false)
           dump("E: " + JSON.stringify(endTimes[val]) + "\n");
-      }
+      }*/
       
       var guess = {};
       let withDay = endTimes.filter(function(val) {

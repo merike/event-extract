@@ -10,7 +10,7 @@
    561/650     86%    36/65         55%   enronmeetings
    370/420     88%    25/42         60%   mozilla.dev.planning sept set
    
-   262/300     87%    16/30         53%   private et set
+   342/400     86%    20/40         50%   private et set
  */
 
 var corSum = 0;
