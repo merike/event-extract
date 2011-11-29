@@ -190,7 +190,7 @@ var extractor = {
       this.aConsoleService.logStringMessage("Chose " + mostLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     } else {
-      //dump("Falling back to " + this.fallbackLocale + "\n");
+      dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
     }
@@ -726,11 +726,15 @@ var extractor = {
   markContained: function markContained() {
     for (let first = 0; first < this.collected.length; first++) {
       for (let second = 0; second < this.collected.length; second++) {
+        // included but not exactly the same
         if (first != second && 
             this.collected[first].start && this.collected[first].end &&
             this.collected[second].start && this.collected[second].end &&
             this.collected[second].start >= this.collected[first].start &&
-            this.collected[second].end <= this.collected[first].end) {
+            this.collected[second].end <= this.collected[first].end &&
+           !(this.collected[second].start == this.collected[first].start &&
+            this.collected[second].end == this.collected[first].end)) {
+          
             this.collected[second].use = false;
         }
       }
