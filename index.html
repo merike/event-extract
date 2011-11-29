@@ -53,20 +53,29 @@
       <p>You can download a recent version of the extension <a href="https://github.com/merike/event-extract/downloads">here</a></p>
       
       <h3>Localizing</h3>
-      <p>The stress is on localizing not translating. You shouldn't follow en-US punctuation unless it makes sense in your language.</p>
+      <p>The stress is on localizing not translating. You shouldn't follow en-US punctuation unless 
+      it makes sense in your language.</p>
       <p>Also, patterns can be omitted (or commented out) if some make no sense in your language.</p>
       <p>If for some pattern you can think of endless possibilities try to include most common ones.</p>
+      <p>Patterns are space-insensitive, "at %1$S pm" will match both "at 3 pm" and "at 3pm".</p>
       
       <h3>Expected behaviour</h3>
       <p>For events extract both start and end date and time from email.</p>
-      <p>For tasks extract both date and time of due date from email and use email Date header as start time.</p>
+      <p>For tasks extract both date and time of due date from email and use email Date header as 
+      start time.</p>
       <p>Language chosen depends on dictionaries installed. 
       A dictionary that matched the highest amount of email content determines the language. 
-      If no dictionary gives a match of > 50% or no dictionaries are installed then application locale determines language used.</p>
+      If no dictionary gives a match of > 50% or no dictionaries are installed then application locale 
+      determines language used.</p>
       
       <h3>Testing</h3>
-      <p>You don't need to have invitations to test. You can write a draft invitation yourself in any language you wish. 
+      <p>You don't need to have invitations to test. You can write a draft invitation yourself in 
+      any language you wish. 
       To add as an event or task right-click the email/draft and choose "Add as".</p>
+      <p>You can change application locale temporarily if using a language pack in about:config by 
+      changing general.useragent.locale</p>
+      <p>You can change patterns included in the extension by unzipping .xpi file, making 
+      appropriate changes in a patterns file and zipping it together again.</p>
       <p>The extension will log some data to error console while converting which you might find useful.</p>
       <p>Post your results to <a href="https://etherpad.mozilla.org/event-extract">etherpad</a> or email them.</p>
     <h2>Download</h2>
