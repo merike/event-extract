@@ -84,7 +84,7 @@ var extractor = {
       case "Oct":
         now.setMonth(9);
         break;
-      case "Now":
+      case "Nov":
         now.setMonth(10);
         break;
       case "Dec":
