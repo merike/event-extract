@@ -953,29 +953,30 @@ var extractor = {
 
   getRepAlternatives: function getRepAlternatives(bundle, name, replaceables) {
     let value;
+    let alts = new Array();
+    
     try {
       value = bundle.formatStringFromName(name, replaceables, replaceables.length);
+      value = value.replace(" |", "|", "g").replace("| ", "|", "g");
+      value = value.replace(/ +/g, "\\s*");
+      value = value.sanitize();
+      
+      let patterns = value.split("|");
+      let rawValues = this.getAlternatives(bundle, name).split("|");
+      
+      let i = 0;
+      for (var pattern in patterns) {
+        // XXX only add information when more than 1 replaceables, not needed otherwise
+        let positions = this.getPositionsFor(rawValues[i]);
+        alts[i] = {pattern: patterns[i], positions: positions};
+        i++;
+      }
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);
       dump("Pattern not found: " + name + "\n");
       
       // fake a value to not error out
       value = "abc def ghi";
-    }
-    value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-    value = value.replace(/ +/g, "\\s*");
-    value = value.sanitize();
-    let patterns = value.split("|");
-    
-    let rawValues = this.getAlternatives(bundle, name).split("|");
-    
-    let alts = new Array();
-    let i = 0;
-    for (var pattern in patterns) {
-      // XXX only add information when more than 1 replaceables, not needed otherwise
-      let positions = this.getPositionsFor(rawValues[i]);
-      alts[i] = {pattern: patterns[i], positions: positions};
-      i++;
     }
     
     return alts;
