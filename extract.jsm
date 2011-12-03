@@ -149,7 +149,7 @@ var extractor = {
                        .createInstance(Components.interfaces.mozISpellCheckingEngine);
     let arr = {};
     let cnt = {};
-    let words = email.split(/\W+/);
+    let words = email.split(/\s+/);
     let matching = [];
     let most = 0;
     let mostLocale;
