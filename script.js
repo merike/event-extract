@@ -10,7 +10,7 @@
    561/650     86%    36/65         55%   enronmeetings
    546/600     91%    34/60         57%   mozilla.dev.planning sept set
    
-   342/400     86%    20/40         50%   private et set
+   500/600     83%    27/60         45%   private et set
  */
 
 var corSum = 0;
@@ -61,6 +61,10 @@ while (mails.hasMoreElements()) {
     startGuess.hour = refDate.getHours();
     startGuess.minute = refDate.getMinutes();
     endGuess = extractor.guessEnd(collected, startGuess);
+    if (endGuess.hour == undefined) {
+      endGuess.hour = 0;
+      endGuess.minute = 0;
+    }
   }
   compare(expected, startGuess, endGuess);
   dump("---------------------------------------------------------\n");

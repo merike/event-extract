@@ -583,6 +583,42 @@ var extractor = {
       }
     }
     
+    alts = this.getRepAlternatives(this.bundle, "month.day", ["(\\d{1,2})", "(\\d{1,2})"]);
+    for (var alt in alts) {
+      let re = new RegExp(alts[alt].pattern, "ig");
+      while ((res = re.exec(email)) != null) {
+        if (res && !this.restrictNumbers(res, email)) {
+          res[1] = parseInt(res[1], 10);
+          res[2] = parseInt(res[2], 10);
+          
+          if (this.isValidMonth(res[2]) && this.isValidDay(res[1])) {
+            let guess = {};
+            guess.year = now.getFullYear();
+            guess.month = res[2];
+            guess.day = res[1];
+            guess.start = res.index;
+            guess.end = res.index + res[0].length - 1;
+//             guess.ambiguous = true;
+            guess.str = res[0];
+            
+            if (this.isPastDate(guess, now)) {
+              // find next such date
+              let item = new Date(now.getTime());
+              while (true) {
+                item.setDate(item.getDate() + 1);
+                if (item.getMonth() == res[2] - 1  &&
+                  item.getDate() == res[1]) {
+                    guess.year = item.getFullYear();
+                    break;
+                  }
+              }
+            }
+            this.collected.push(guess);
+          }
+        }
+      }
+    }
+    
     alts = this.getRepAlternatives(this.bundle, "until.monthname.date",
                               ["(\\d{1,2})", "(" + allMonths + ")"]);
     for (var alt in alts) {
@@ -611,6 +647,42 @@ var extractor = {
                 break;
               }
             }
+          }
+        }
+      }
+    }
+    
+    alts = this.getRepAlternatives(this.bundle, "until.month.date", ["(\\d{1,2})", "(\\d{1,2})"]);
+    for (var alt in alts) {
+      let re = new RegExp(alts[alt].pattern, "ig");
+      while ((res = re.exec(email)) != null) {
+        if (res && !this.restrictNumbers(res, email)) {
+          res[1] = parseInt(res[1], 10);
+          res[2] = parseInt(res[2], 10);
+          
+          if (this.isValidMonth(res[2]) && this.isValidDay(res[1])) {
+            let guess = {};
+            guess.year2 = now.getFullYear();
+            guess.month2 = res[2];
+            guess.day2 = res[1];
+            guess.start = res.index;
+            guess.end = res.index + res[0].length - 1;
+//             guess.ambiguous = true;
+            guess.str = res[0];
+            
+            if (this.isPastDate(guess, now)) {
+              // find next such date
+              let item = new Date(now.getTime());
+              while (true) {
+                item.setDate(item.getDate() + 1);
+                if (item.getMonth() == res[2] - 1  &&
+                  item.getDate() == res[1]) {
+                    guess.year2 = item.getFullYear();
+                    break;
+                  }
+              }
+            }
+            this.collected.push(guess);
           }
         }
       }
@@ -798,7 +870,7 @@ var extractor = {
       collected.sort(sort);
       
       /*for (val in collected) {
-         if (collected[val].use != false)
+        if (collected[val].use != false)
           dump("S: " + JSON.stringify(collected[val]) + "\n");
       }*/
       
