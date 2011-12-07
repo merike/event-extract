@@ -160,7 +160,7 @@ var extractor = {
     gSpellCheckEngine.getDictionaryList(arr, cnt);
     let dicts = arr["value"]
     
-    for (dict in dicts) {
+    for (let dict in dicts) {
       if (!this.checkBundle(dicts[dict])) {
         dump("Dictionary present, rules missing: " + dicts[dict]);
         this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
@@ -170,7 +170,7 @@ var extractor = {
       gSpellCheckEngine.dictionary = dicts[dict];
       
       let correct = 0;
-      for (word in words) {
+      for (let word in words) {
         if (gSpellCheckEngine.check(words[word]))
           correct++;
       }
@@ -201,6 +201,7 @@ var extractor = {
 
   extract: function extract(email, now) {
     let initial = {};
+    let res;
     initial.year = now.getFullYear();
     initial.month = now.getMonth() + 1;
     initial.day = now.getDate();
