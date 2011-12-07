@@ -7,7 +7,7 @@
    
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   561/650     86%    36/65         55%   enronmeetings
+   564/650     87%    38/65         58%   enronmeetings
    546/600     91%    34/60         57%   mozilla.dev.planning sept set
    
    500/600     83%    27/60         45%   private et set
@@ -34,11 +34,15 @@ fileCor.initWithPath(arguments[0] + "../" + file.leafName + "_cor");
 
 if (arguments[1])
   locale = arguments[1];
-let baseUrl = "file:/media/Meedia/tty/lt/event-extract/";
+let baseUrl = "file:/media/Meedia/tty/lt/event-extract/patterns/";
 
 var mails = file.directoryEntries;
 var ans = fileCor.directoryEntries;
 var array = [];
+
+var minTime = 99999;
+var maxTime = 0;
+var total = 0;
 while (mails.hasMoreElements()) {
   var file = mails.getNext();
   var corFile = ans.getNext();
@@ -47,6 +51,7 @@ while (mails.hasMoreElements()) {
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
   extractor.setBundle(baseUrl, locale);
+  var time1 = (new Date()).getTime();
   var refDate = extractor.findNow(info.contents);
   var collected = extractor.extract(info.contents, refDate);
   var startGuess = {};
@@ -66,12 +71,23 @@ while (mails.hasMoreElements()) {
       endGuess.minute = 0;
     }
   }
+  var time2 = (new Date()).getTime();
+  var time = time2 - time1;
+  total += time;
+  
+  if (time < minTime)
+    minTime = time;
+  if (time > maxTime)
+    maxTime = time;
+  
   compare(expected, startGuess, endGuess);
   dump("---------------------------------------------------------\n");
 }
 
 dump("total: " + corSum + "/" + (corSum + wrSum) + "\n");
 dump("total events: " + corEvents + "/" + (corEvents + wrEvents) + "\n");
+var avg = total * 1.0 / (corEvents + wrEvents);
+dump("total: " + total + " minTime: " + minTime + " maxTime: " + maxTime + " avg: " + avg + "\n");
 
 function readFile(nsiFile) {
   var info = {};

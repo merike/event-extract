@@ -979,18 +979,34 @@ var extractor = {
       var guess = {};
       let withDay = endTimes.filter(function(val) {
         return (val.day2 != undefined && val.use != false);});
+      let withDayNA = withDay.filter(function(val) {
+        return (val.ambiguous == undefined);});
       let withMinute = endTimes.filter(function(val) {
         return (val.minute2 != undefined && val.use != false);});
+      let withMinuteNA = withMinute.filter(function(val) {
+        return (val.ambiguous == undefined);});
       
-      if (withDay.length != 0) {
+      if (withDayNA.length != 0) {
+        guess.year = withDayNA[withDayNA.length - 1].year2;
+        guess.month = withDayNA[withDayNA.length - 1].month2;
+        guess.day = withDayNA[withDayNA.length - 1].day2;
+      } else if (withDay.length != 0) {
         guess.year = withDay[withDay.length - 1].year2;
         guess.month = withDay[withDay.length - 1].month2;
         guess.day = withDay[withDay.length - 1].day2;
       }
       
-      if (withMinute.length != 0) {
+      if (withMinuteNA.length != 0) {
         // end has to occur later
         // XXX consider date as well
+        if (withMinuteNA[withMinuteNA.length - 1].hour2 > start.hour ||
+          (withMinuteNA[withMinuteNA.length - 1].hour2 == start.hour &&
+          withMinuteNA[withMinuteNA.length - 1].minute2 > start.minute)
+        ) {
+          guess.hour = withMinuteNA[withMinuteNA.length - 1].hour2;
+          guess.minute = withMinuteNA[withMinuteNA.length - 1].minute2;
+        }
+      } else if (withMinute.length != 0) {
         if (withMinute[withMinute.length - 1].hour2 > start.hour ||
           (withMinute[withMinute.length - 1].hour2 == start.hour &&
           withMinute[withMinute.length - 1].minute2 > start.minute)
