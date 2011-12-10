@@ -53,6 +53,15 @@
       </Description>
     </em:targetApplication>
     
+    <em:targetApplication>
+      <Description>
+      <!-- Seamonkey -->
+      <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+      <em:minVersion>2.4</em:minVersion>
+      <em:maxVersion>2.7</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
     <em:requires>
       <Description>
         <!-- Lightning -->
