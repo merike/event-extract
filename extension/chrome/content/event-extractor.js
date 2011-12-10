@@ -49,7 +49,8 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   messenger.messageServiceFromURI(uri)
           .streamMessage(uri, listener, null, null, false, "");
   let folder = message.folder;
-  let content = folder.getMsgTextFromStream(listener.inputStream,
+  let content = message.mime2DecodedSubject + "\r\n" +
+                folder.getMsgTextFromStream(listener.inputStream,
                                             message.Charset,
                                             65536,
                                             32768,
