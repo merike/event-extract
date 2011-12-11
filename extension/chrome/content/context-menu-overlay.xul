@@ -38,23 +38,21 @@
 <overlay id="context-menu-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/javascript" src="chrome://event-extract/content/event-extractor.js"/>
   
-  <window id="messengerWindow">
-    <menupopup id="mailContext">
-      <menu id="mailContext-calendar-add-menu"
-            insertafter="mailContext-moveToFolderAgain"
-            label="Add as"
-            accesskey="d">
-        <menupopup id="mailContext-calendar-convert-menupopup">
-          <menuitem id="mailContext-calendar-convert-event-menuitem"
-                    label="Event..."
-                    accesskey="E"
-                    oncommand="extractFromEmail(true)"/>
-          <menuitem id="mailContext-calendar-convert-task-menuitem"
-                    label="Task..."
-                    accesskey="T"
-                    oncommand="extractFromEmail(false)"/>
-        </menupopup>
-      </menu>
-    </menupopup>
-  </window>
+  <menupopup id="mailContext">
+    <menu id="mailContext-calendar-add-menu"
+          insertafter="mailContext-moveToFolderAgain"
+          label="Add as"
+          accesskey="d">
+      <menupopup id="mailContext-calendar-convert-menupopup">
+        <menuitem id="mailContext-calendar-convert-event-menuitem"
+                  label="Event..."
+                  accesskey="E"
+                  oncommand="extractFromEmail(true)"/>
+        <menuitem id="mailContext-calendar-convert-task-menuitem"
+                  label="Task..."
+                  accesskey="T"
+                  oncommand="extractFromEmail(false)"/>
+      </menupopup>
+    </menu>
+  </menupopup>
 </overlay>
