@@ -49,8 +49,8 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   messenger.messageServiceFromURI(uri)
           .streamMessage(uri, listener, null, null, false, "");
   let folder = message.folder;
-  let content = message.mime2DecodedSubject + "\r\n" +
-                folder.getMsgTextFromStream(listener.inputStream,
+  let title = message.mime2DecodedSubject;
+  let content = folder.getMsgTextFromStream(listener.inputStream,
                                             message.Charset,
                                             65536,
                                             32768,
@@ -63,7 +63,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let locale = getPrefSafe("general.useragent.locale", "en-US");
   let baseUrl = "chrome://event-extract/content/locale/";
   extractor.setBundle(baseUrl, locale);
-  let collected = extractor.extract(content, date);
+  let collected = extractor.extract(title + "\r\n" + content, date);
   let guessed = extractor.guessStart(collected);
   let endGuess = extractor.guessEnd(collected, guessed);
   let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
