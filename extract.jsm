@@ -153,7 +153,6 @@ var extractor = {
     let arr = {};
     let cnt = {};
     let words = email.split(/\s+/);
-    let matching = [];
     let most = 0;
     let mostLocale;
     
@@ -189,7 +188,6 @@ var extractor = {
                  .getService(Components.interfaces.nsIStringBundleService);
     
     if (most > 0) {
-      //dump("Chose " + mostLocale + "\n");
       this.aConsoleService.logStringMessage("Chose " + mostLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     } else {
@@ -320,20 +318,12 @@ var extractor = {
         if (res && !this.restrictNumbers(res, email)) {
           res[1] = parseInt(res[1], 10);
           if (this.isValidHour(res[1])) {
-            if (res[1] < 8)
-              this.collected.push({hour: res[1] + 12, minute: 0,
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              ambiguous: true,
-                              str: res[0]
-              });
-            else
-              this.collected.push({hour: res[1], minute: 0,
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              ambiguous: true,
-                              str: res[0]
-              });
+            this.collected.push({hour: this.normalizeHour(res[1]), minute: 0,
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            ambiguous: true,
+                            str: res[0]
+            });
           }
         }
       }
@@ -388,10 +378,7 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           
           if (this.isValidHour(res[1])) {
-            if (res[1] < 8)
-              guess.hour2 = res[1] + 12;
-            else
-              guess.hour2 = res[1];
+            guess.hour2 = this.normalizeHour(res[1]);
             guess.minute2 = 0;
           }
           
@@ -415,10 +402,7 @@ var extractor = {
             res[2] = parseInt(res[2], 10);
             
             if (this.isValidHour(res[1]) && this.isValidMinute(res[1])) {
-              if (res[1] < 8)
-                guess.hour2 = res[1] + 12;
-              else
-                guess.hour2 = res[1];
+              guess.hour2 = this.normalizeHour(res[1]);
               guess.minute2 = res[2];
             }
             
@@ -486,19 +470,12 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           // unlikely meeting time, XXX should consider working hours
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            if (res[1] < 8)
-              this.collected.push({hour: res[1] + 12, minute: res[2],
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              str: res[0]
-              });
-            else
-              this.collected.push({hour: res[1], minute: res[2],
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              str: res[0]
-              });
-          }          
+            this.collected.push({hour: this.normalizeHour(res[1]), minute: res[2],
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
+                            str: res[0]
+            });
+          }
         }
       }
     }
@@ -1128,6 +1105,14 @@ var extractor = {
   isValidMinute: function isValidMinute(minute) {
     if (minute >= 0 && minute <= 59) return true;
     else return false;
+  },
+  
+  // TODO consider default day start time
+  normalizeHour: function normalizeHour(hour) {
+    if (hour < 8)
+      return hour + 12;
+    else
+      return hour;
   },
   
   restrictNumbers: function restrictNumbers(res, email) {
