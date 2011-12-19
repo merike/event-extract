@@ -7,8 +7,8 @@
    
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   564/650     87%    38/65         58%   enronmeetings
-   546/600     91%    34/60         57%   mozilla.dev.planning sept set
+   568/650     87%    41/65         63%   enronmeetings
+   546/600     91%    35/60         58%   mozilla.dev.planning sept set
    
    500/600     83%    27/60         45%   private et set
  */
