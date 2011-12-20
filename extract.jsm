@@ -39,6 +39,7 @@ var marker = "--MARK--";
 
 var extractor = {
   collected: [],
+  dayStart: 6,
   bundleDir: "",
   bundle: "",
   fallbackLocale: "",
@@ -197,7 +198,7 @@ var extractor = {
     }
   },
 
-  extract: function extract(email, now) {
+  extract: function extract(email, now, dayStart) {
     let initial = {};
     let res;
     initial.year = now.getFullYear();
@@ -206,6 +207,8 @@ var extractor = {
     initial.hour = now.getHours();
     initial.minute = now.getMinutes();
     this.collected = [];
+    if (dayStart != undefined)
+      this.dayStart = dayStart;
     
     this.collected.push({year: initial.year,
                          month: initial.month,
@@ -1120,9 +1123,8 @@ var extractor = {
     else return false;
   },
   
-  // TODO consider default day start time
   normalizeHour: function normalizeHour(hour) {
-    if (hour < 6)
+    if (hour < this.dayStart && hour <= 11)
       return hour + 12;
     else
       return hour;

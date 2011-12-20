@@ -59,11 +59,13 @@ var extractFromEmail = function extractFromEmail(isEvent) {
                                             { });
   aConsoleService.logStringMessage("Original content: \n" + content);
   let date = new Date(message.date/1000);
+  let time = (new Date()).getTime();
   
   let locale = getPrefSafe("general.useragent.locale", "en-US");
   let baseUrl = "chrome://event-extract/content/locale/";
+  let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
   extractor.setBundle(baseUrl, locale);
-  let collected = extractor.extract(title + "\r\n" + content, date);
+  let collected = extractor.extract(title + "\r\n" + content, date, dayStart);
   let guessed = extractor.guessStart(collected);
   let endGuess = extractor.guessEnd(collected, guessed);
   let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
@@ -131,6 +133,9 @@ var extractFromEmail = function extractFromEmail(isEvent) {
     setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
     setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
   }
+  
+  let timeSpent = (new Date()).getTime() - time;
+  aConsoleService.logStringMessage("Time spent in conversion: " + timeSpent + "ms");
   
   // if time not guessed set allday for events
   if (allDay)
