@@ -117,7 +117,7 @@ var extractor = {
     email = email.replace(/^\s[ \t]*$/gm, "");
     
     // remove signature
-    email = email.replace(/\r?\n-- \r\n[\S\s]+$/, "");
+    email = email.replace(/\r?\n-- \r?\n[\S\s]+$/, "");
     
     // remove last line of content, assumed to contain: X wrote on Y or similar
     // XXX adapt to not ruin bottom-posted emails

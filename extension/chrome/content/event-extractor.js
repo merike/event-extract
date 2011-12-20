@@ -57,7 +57,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
                                             false,
                                             true,
                                             { });
-  aConsoleService.logStringMessage("Original content: \n" + content);
+  aConsoleService.logStringMessage("Original content: \n" + title + "\r\n" + content);
   let date = new Date(message.date/1000);
   let time = (new Date()).getTime();
   
@@ -82,6 +82,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   item.calendar = getSelectedCalendar();
   item.setProperty("DESCRIPTION", content);
   cal.setDefaultStartEndHour(item);
+  cal.alarms.setDefaultValues(item);
   
   if (isEvent) {
     if (guessed.year)
