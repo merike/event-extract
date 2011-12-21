@@ -156,18 +156,23 @@ var extractor = {
     let words = email.split(/\s+/);
     let most = 0;
     let mostLocale;
+    let patterns;
     
     gSpellCheckEngine.getDictionaryList(arr, cnt);
     let dicts = arr["value"]
     
     for (let dict in dicts) {
-      if (!this.checkBundle(dicts[dict])) {
+      if (this.checkBundle(dicts[dict])) {
+        gSpellCheckEngine.dictionary = dicts[dict];
+        patterns = dicts[dict];
+      } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
+        gSpellCheckEngine.dictionary = dicts[dict];
+        patterns = dicts[dict].substring(0, 2);
+      } else {
         dump("Dictionary present, rules missing: " + dicts[dict]);
         this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
         continue;
       }
-      
-      gSpellCheckEngine.dictionary = dicts[dict];
       
       let correct = 0;
       for (let word in words) {
@@ -180,7 +185,7 @@ var extractor = {
       this.aConsoleService.logStringMessage(dicts[dict] + " " + percentage);
       
       if (percentage > 0.5 && percentage > most) {
-        mostLocale = dicts[dict];
+        mostLocale = patterns;
         most = percentage;
       }
     }
@@ -189,7 +194,7 @@ var extractor = {
                  .getService(Components.interfaces.nsIStringBundleService);
     
     if (most > 0) {
-      this.aConsoleService.logStringMessage("Chose " + mostLocale);
+      this.aConsoleService.logStringMessage("Chose " + mostLocale + " patterns");
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     } else {
       dump("Falling back to " + this.fallbackLocale + "\n");
