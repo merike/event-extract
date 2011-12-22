@@ -106,23 +106,17 @@ var extractor = {
     email = email.replace(/^Saatmisaeg:.+$/m, "");
     
     // XXX remove earlier correspondence, for now
-    let lenBefore = email.length;
-    let correspondence = false;
-    
+    // remove line preceeding quoted message and first line of the quote
+    email = email.replace(/\r?\n[^>].*\r?\n>+.*$/m, "");
+    // remove the rest of quoted content
     email = email.replace(/^>+.*$/gm, "");
-    if (email.length != lenBefore) 
-      correspondence = true;
+    
     // remove empty lines
     email = email.replace(/<br ?\/?>/gm, "");
     email = email.replace(/^\s[ \t]*$/gm, "");
-    
-    // remove signature
+        
+    // remove standard signature
     email = email.replace(/\r?\n-- \r?\n[\S\s]+$/, "");
-    
-    // remove last line of content, assumed to contain: X wrote on Y or similar
-    // XXX adapt to not ruin bottom-posted emails
-    if (correspondence)
-      email = email.replace(/\r?\n.+\r?\n?$/, "");
     
     // XXX remove timezone info, for now
     email = email.replace(/gmt[+-]\d{2}:\d{2}/gi, "");
