@@ -141,6 +141,22 @@ var extractor = {
     }
   },
   
+  avgCharCode: function avgCharCode(email) {
+    let sum = 0;
+    let cnt = 0;
+    
+    for (let i = 0; i < email.length; i++) {
+      let ch = email.charAt(i);
+        if (/[^a-zA-Z0-9 .,;:'"()\[\]\r\n\t%?/\-]/.exec(ch)) {
+          sum += ch.charCodeAt();
+          cnt++;
+        }
+    }
+    this.aConsoleService.logStringMessage("Average charcode: " + sum/cnt);
+    dump("Average charcode: " + sum/cnt + "\n");
+    return sum/cnt;
+  },
+  
   guessLanguage: function guessLanguage(email) {
     let spellclass = "@mozilla.org/spellchecker/engine;1";
     let gSpellCheckEngine = Components.classes[spellclass]
@@ -186,9 +202,23 @@ var extractor = {
     
     let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
                  .getService(Components.interfaces.nsIStringBundleService);
-    
-    if (most > 0) {
-      this.aConsoleService.logStringMessage("Chose " + mostLocale + " patterns");
+    let avgCharCode = this.avgCharCode(email);
+                 
+    if (avgCharCode > 24000 && avgCharCode < 32000) {
+      dump("Using zh-TW patterns\n");
+      this.aConsoleService.logStringMessage("Using zh-TW patterns");
+      this.bundle = service.createBundle(this.bundleDir + "extract_zh-TW.properties");
+    } else if (avgCharCode > 14000 && avgCharCode < 24000) {
+      dump("Using ja patterns\n");
+      this.aConsoleService.logStringMessage("Using ja patterns");
+      this.bundle = service.createBundle(this.bundleDir + "extract_ja.properties");
+    } else if (avgCharCode > 1000 && avgCharCode < 1200) {
+      dump("Using ru patterns\n");
+      this.aConsoleService.logStringMessage("Using ru patterns");
+      this.bundle = service.createBundle(this.bundleDir + "extract_ru.properties");
+    } else if (most > 0) {
+      dump("Using " + mostLocale + " patterns based on dictionary\n");
+      this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns  based on dictionary");
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     } else {
       dump("Falling back to " + this.fallbackLocale + "\n");
