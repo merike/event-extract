@@ -220,10 +220,19 @@ var extractor = {
       dump("Using " + mostLocale + " patterns based on dictionary\n");
       this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns  based on dictionary");
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
-    } else {
+    } else if (this.checkBundle(this.fallbackLocale)) {
       dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+    } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
+      this.fallbackLocale = this.fallbackLocale.substring(0, 2);
+      dump("Falling back to " + this.fallbackLocale + "\n");
+      this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
+      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+    } else {
+      dump("Using en-US\n");
+      this.aConsoleService.logStringMessage("Using en-US");
+      this.bundle = service.createBundle(this.bundleDir + "extract_en-US.properties");
     }
   },
 
