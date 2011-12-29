@@ -7,10 +7,10 @@
    
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   568/650     87%    41/65         63%   enronmeetings
+   571/650     88%    42/65         65%   enronmeetings
    546/600     91%    35/60         58%   mozilla.dev.planning sept set
    
-   500/600     83%    27/60         45%   private et set
+   506/600     84%    28/60         47%   private et set
  */
 
 var corSum = 0;
@@ -65,7 +65,7 @@ while (mails.hasMoreElements()) {
     startGuess.day = refDate.getDate();
     startGuess.hour = refDate.getHours();
     startGuess.minute = refDate.getMinutes();
-    endGuess = extractor.guessEnd(collected, startGuess);
+    endGuess = extractor.guessEnd(collected, startGuess, true);
     if (endGuess.hour == undefined) {
       endGuess.hour = 0;
       endGuess.minute = 0;

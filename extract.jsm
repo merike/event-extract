@@ -250,9 +250,7 @@ var extractor = {
     
     this.collected.push({year: initial.year,
                          month: initial.month,
-                         day: initial.day});/*
-    this.collected.push({hour: initial.hour,
-                         minute: initial.minute});*/
+                         day: initial.day});
     
     email = this.cleanup(email);
     
@@ -427,14 +425,15 @@ var extractor = {
           res[1] = parseInt(res[1], 10);
           
           if (this.isValidHour(res[1])) {
-            guess.hour2 = this.normalizeHour(res[1]);
-            guess.minute2 = 0;
+            guess.hour = this.normalizeHour(res[1]);
+            guess.minute = 0;
           }
           
           guess.start = res.index;
           guess.end = res.index + res[0].length - 1;
           guess.ambiguous = true;
           guess.str = res[0];
+          guess.endtime = true;
           
           this.collected.push(guess);
         }
@@ -451,14 +450,15 @@ var extractor = {
             res[2] = parseInt(res[2], 10);
             
             if (this.isValidHour(res[1]) && this.isValidMinute(res[1])) {
-              guess.hour2 = this.normalizeHour(res[1]);
-              guess.minute2 = res[2];
+              guess.hour = this.normalizeHour(res[1]);
+              guess.minute = res[2];
             }
             
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
             guess.ambiguous = true;
             guess.str = res[0];
+            guess.endtime = true;
             
             this.collected.push(guess);
         }
@@ -477,10 +477,10 @@ var extractor = {
             res[1] = res[1] - 12;
           
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour2: res[1], minute2: res[2],
+            this.collected.push({hour: res[1], minute: res[2],
                             start: res.index,
                             end: res.index + res[0].length - 1,
-                            str: res[0]
+                            str: res[0], endtime: true
             });
           }
         }
@@ -499,10 +499,10 @@ var extractor = {
             res[1] = res[1] + 12;
           
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour2: res[1], minute2: res[2],
+            this.collected.push({hour: res[1], minute: res[2],
                             start: res.index,
                             end: res.index + res[0].length - 1,
-                            str: res[0]
+                            str: res[0], endtime: true
             });
           }
         }
@@ -628,7 +628,6 @@ var extractor = {
             guess.day = res[1];
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
-//             guess.ambiguous = true;
             guess.str = res[0];
             
             if (this.isPastDate(guess, now)) {
@@ -658,21 +657,22 @@ var extractor = {
       let re = new RegExp(pattern, "ig");
       
       while ((res = re.exec(email)) != null) {
-        if (res && !this.restrictNumbers(res, email) && !this.restrictChars(res, email)) {
+        if (res) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           if (this.isValidDay(res[positions[1]])) {
             for (let i = 0; i < 12; i++) {
               if (months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
                 let guess = {};
-                guess.year2 = now.getFullYear();
-                guess.month2 = i + 1;
-                guess.day2 = res[positions[1]];
+                guess.year = now.getFullYear();
+                guess.month = i + 1;
+                guess.day = res[positions[1]];
                 guess.start = res.index;
                 guess.end = res.index + res[0].length - 1;
                 guess.str = res[0];
+                guess.endtime = true;
                 
                 if (this.isPastDate(guess, now))
-                  guess.year2++;
+                  guess.year++;
                 this.collected.push(guess);
                 break;
               }
@@ -692,13 +692,13 @@ var extractor = {
           
           if (this.isValidMonth(res[2]) && this.isValidDay(res[1])) {
             let guess = {};
-            guess.year2 = now.getFullYear();
-            guess.month2 = res[2];
-            guess.day2 = res[1];
+            guess.year = now.getFullYear();
+            guess.month = res[2];
+            guess.day = res[1];
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
-//             guess.ambiguous = true;
             guess.str = res[0];
+            guess.endtime = true;
             
             if (this.isPastDate(guess, now)) {
               // find next such date
@@ -707,7 +707,7 @@ var extractor = {
                 item.setDate(item.getDate() + 1);
                 if (item.getMonth() == res[2] - 1  &&
                   item.getDate() == res[1]) {
-                    guess.year2 = item.getFullYear();
+                    guess.year = item.getFullYear();
                     break;
                   }
               }
@@ -762,7 +762,7 @@ var extractor = {
 
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(email)) != null) {
-        if (res && !this.restrictNumbers(res, email) && !this.restrictChars(res, email)) {
+        if (res) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           res[positions[2]] = parseInt(res[positions[2]], 10);
           if (res[positions[3]].length == 2)
@@ -773,12 +773,13 @@ var extractor = {
             this.isValidYear(res[positions[3]])) {
             
             let guess = {};
-            guess.year2 = res[positions[3]];
-            guess.month2 = res[positions[2]];
-            guess.day2 = res[positions[1]];
+            guess.year = res[positions[3]];
+            guess.month = res[positions[2]];
+            guess.day = res[positions[1]];
             guess.start = res.index;
             guess.end = res.index + res[0].length - 1;
             guess.str = res[0];
+            guess.endtime = true;
             
             if (!this.isPastDate(guess, now))
               this.collected.push(guess);
@@ -822,6 +823,7 @@ var extractor = {
     }
     
     this.markContained();
+    this.collected = this.collected.sort(this.sort);
     return this.collected;
   },
   
@@ -843,81 +845,81 @@ var extractor = {
     }
   },
   
-  guessStart: function guessStart(collected) {
-    if (collected.length == 0)
-      return {};
-    else {
-      let sort = function(one, two) {
-        // sort the guess from email date as the last one
-        if (one.start == undefined && two.start != undefined) {
-          return 1;
-        } else if (one.start != undefined && two.start == undefined) {
+  sort: function sort(one, two) {
+    // sort the guess from email date as the last one
+    if (one.start == undefined && two.start != undefined) {
+      return 1;
+    } else if (one.start != undefined && two.start == undefined) {
+      return -1;
+    } else if (one.start == undefined && two.start == undefined) {
+      return 0;
+      // sort dates before times
+    } else if (one.year != undefined && two.year == undefined) {
+      return -1;
+    } else if (one.year == undefined && two.year != undefined) {
+      return 1;
+    } else if (one.year != undefined && two.year != undefined) {
+      if (one.year < two.year) {
+        return -1;
+      } else if (one.year > two.year) {
+        return 1;
+      } else {
+        if (one.month < two.month) {
           return -1;
-        } else if (one.start == undefined && two.start == undefined) {
-          return 0;
-          // sort dates before times
-        } else if (one.year != undefined && two.year == undefined) {
-          return -1;
-        } else if (one.year == undefined && two.year != undefined) {
+        } else if (one.month > two.month) {
           return 1;
-        } else if (one.year != undefined && two.year != undefined) {
-          if (one.year < two.year) {
-            return -1;
-          } else if (one.year > two.year) {
-            return 1;
-          } else {
-            if (one.month < two.month) {
-              return -1;
-            } else if (one.month > two.month) {
-              return 1;
-            } else {
-              if (one.day < two.day) {
-                return -1;
-              } else if (one.day > two.day) {
-                return 1;
-              } else {
-                return 0;
-              }
-            }
-          }
         } else {
-          if (one.hour < two.hour) {
+          if (one.day < two.day) {
             return -1;
-          } else if (one.hour > two.hour) {
+          } else if (one.day > two.day) {
             return 1;
           } else {
-            if (one.minute < two.minute) {
-              return -1;
-            } else if (one.minute > two.minute) {
-              return 1;
-            } else {
-              return 0;
-            }
+            return 0;
           }
         }
       }
-      
-      collected.sort(sort);
-      
-      /*for (val in collected) {
-        if (collected[val].use != false) {
-          dump("S: " + JSON.stringify(collected[val]) + "\n");
-          this.aConsoleService.logStringMessage("S: " + JSON.stringify(collected[val]));
+    } else {
+      if (one.hour < two.hour) {
+        return -1;
+      } else if (one.hour > two.hour) {
+        return 1;
+      } else {
+        if (one.minute < two.minute) {
+          return -1;
+        } else if (one.minute > two.minute) {
+          return 1;
+        } else {
+          return 0;
+        }
+      }
+    }
+  },
+  
+  guessStart: function guessStart(collected) {
+    let startTimes = collected.filter(function(val) {
+        return (val.endtime == false || val.endtime == undefined);});
+    if (startTimes.length == 0)
+      return {};
+    else {
+      /*for (val in startTimes) {
+        if (startTimes[val].use != false) {
+          dump("S: " + JSON.stringify(startTimes[val]) + "\n");
+          this.aConsoleService.logStringMessage("S: " + JSON.stringify(startTimes[val]));
         }
       }*/
       
       var guess = {};
-      let withDay = collected.filter(function(val) {
+      let withDay = startTimes.filter(function(val) {
         return (val.day != undefined && val.use != false && val.start != undefined);});
       let withDayNA = withDay.filter(function(val) {
         return (val.ambiguous == undefined);});
-      let withDayInit = collected.filter(function(val) {
+      let withDayInit = startTimes.filter(function(val) {
         return (val.day != undefined && val.start == undefined);});
-      let withMinute = collected.filter(function(val) {
+      let withMinute = startTimes.filter(function(val) {
         return (val.minute != undefined && val.use != false && val.start != undefined);});
       let withMinuteNA = withMinute.filter(function(val) {
         return (val.ambiguous == undefined);});
-      let withMinuteInit = collected.filter(function(val) {
+      let withMinuteInit = startTimes.filter(function(val) {
         return (val.minute != undefined && val.start == undefined);});
       
       // first use unambiguous guesses
@@ -949,57 +951,12 @@ var extractor = {
     }
   },
   
-  guessEnd: function guessEnd(collected, start) {
+  guessEnd: function guessEnd(collected, start, isTask) {
     let endTimes = collected.filter(function(val) {
-        return (val.minute2 != undefined || val.day2 != undefined);});
+        return (val.endtime == true);});
     if (endTimes.length == 0)
       return {};
     else {
-      let sort = function(one, two) {
-        // sort dates before times
-        if (one.year2 != undefined && two.year2 == undefined) {
-          return -1;
-        } else if (one.year2 == undefined && two.year2 != undefined) {
-          return 1;
-        } else if (one.year2 != undefined && two.year2 != undefined) {
-          if (one.year < two.year) {
-            return -1;
-          } else if (one.year > two.year) {
-            return 1;
-          } else {
-            if (one.month < two.month) {
-              return -1;
-            } else if (one.month > two.month) {
-              return 1;
-            } else {
-              if (one.day < two.day) {
-                return -1;
-              } else if (one.day > two.day) {
-                return 1;
-              } else {
-                return 0;
-              }
-            }
-          }
-        } else {
-          if (one.hour2 < two.hour2) {
-            return -1;
-          } else if (one.hour2 > two.hour2) {
-            return 1;
-          } else {
-            if (one.minute2 < two.minute2) {
-              return -1;
-            } else if (one.minute2 > two.minute2) {
-              return 1;
-            } else {
-              return 0;
-            }
-          }
-        }
-      }
-      
-      endTimes.sort(sort);
-      
       /*for (val in endTimes) {
          if (endTimes[val].use != false)
           dump("E: " + JSON.stringify(endTimes[val]) + "\n");
@@ -1007,41 +964,45 @@ var extractor = {
       
       var guess = {};
       let withDay = endTimes.filter(function(val) {
-        return (val.day2 != undefined && val.use != false);});
+        return (val.day != undefined && val.use != false);});
       let withDayNA = withDay.filter(function(val) {
         return (val.ambiguous == undefined);});
       let withMinute = endTimes.filter(function(val) {
-        return (val.minute2 != undefined && val.use != false);});
+        return (val.minute != undefined && val.use != false);});
       let withMinuteNA = withMinute.filter(function(val) {
         return (val.ambiguous == undefined);});
       
+      let pos = isTask == true ? 0 : withDayNA.length - 1;
       if (withDayNA.length != 0) {
-        guess.year = withDayNA[withDayNA.length - 1].year2;
-        guess.month = withDayNA[withDayNA.length - 1].month2;
-        guess.day = withDayNA[withDayNA.length - 1].day2;
+        guess.year = withDayNA[pos].year;
+        guess.month = withDayNA[pos].month;
+        guess.day = withDayNA[pos].day;
       } else if (withDay.length != 0) {
-        guess.year = withDay[withDay.length - 1].year2;
-        guess.month = withDay[withDay.length - 1].month2;
-        guess.day = withDay[withDay.length - 1].day2;
+        pos = isTask == true ? 0 : withDay.length - 1;
+        guess.year = withDay[pos].year;
+        guess.month = withDay[pos].month;
+        guess.day = withDay[pos].day;
       }
       
       if (withMinuteNA.length != 0) {
         // end has to occur later
         // XXX consider date as well
-        if (withMinuteNA[withMinuteNA.length - 1].hour2 > start.hour ||
-          (withMinuteNA[withMinuteNA.length - 1].hour2 == start.hour &&
-          withMinuteNA[withMinuteNA.length - 1].minute2 > start.minute)
+        pos = isTask == true ? 0 : withMinuteNA.length - 1;
+        if (withMinuteNA[pos].hour > start.hour ||
+          (withMinuteNA[pos].hour == start.hour &&
+          withMinuteNA[pos].minute > start.minute)
         ) {
-          guess.hour = withMinuteNA[withMinuteNA.length - 1].hour2;
-          guess.minute = withMinuteNA[withMinuteNA.length - 1].minute2;
+          guess.hour = withMinuteNA[pos].hour;
+          guess.minute = withMinuteNA[pos].minute;
         }
       } else if (withMinute.length != 0) {
-        if (withMinute[withMinute.length - 1].hour2 > start.hour ||
-          (withMinute[withMinute.length - 1].hour2 == start.hour &&
-          withMinute[withMinute.length - 1].minute2 > start.minute)
+        pos = isTask == true ? 0 : withMinute.length - 1;
+        if (withMinute[pos].hour > start.hour ||
+          (withMinute[pos].hour == start.hour &&
+          withMinute[pos].minute > start.minute)
         ) {
-          guess.hour = withMinute[withMinute.length - 1].hour2;
-          guess.minute = withMinute[withMinute.length - 1].minute2;
+          guess.hour = withMinute[pos].hour;
+          guess.minute = withMinute[pos].minute;
         }
       }
       
@@ -1151,8 +1112,6 @@ var extractor = {
     let jsDate;
     if (date.day != undefined)
       jsDate = new Date(date.year, date.month - 1, date.day);
-    else
-      jsDate = new Date(date.year2, date.month2 - 1, date.day2);
     return jsDate < refDate;
   },
   
