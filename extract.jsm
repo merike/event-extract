@@ -985,24 +985,36 @@ var extractor = {
       }
       
       if (withMinuteNA.length != 0) {
-        // end has to occur later
-        // XXX consider date as well
         pos = isTask == true ? 0 : withMinuteNA.length - 1;
-        if (withMinuteNA[pos].hour > start.hour ||
-          (withMinuteNA[pos].hour == start.hour &&
-          withMinuteNA[pos].minute > start.minute)
-        ) {
-          guess.hour = withMinuteNA[pos].hour;
-          guess.minute = withMinuteNA[pos].minute;
+        guess.hour = withMinuteNA[pos].hour;
+        guess.minute = withMinuteNA[pos].minute;
+        if (guess.day == undefined || guess.day == start.day) {
+          if (withMinuteNA[pos].hour < start.hour ||
+              (withMinuteNA[pos].hour == start.hour &&
+              withMinuteNA[pos].minute < start.minute)
+          ) {
+            let nextDay = new Date(start.year, start.month - 1, start.day);
+            nextDay.setTime(nextDay.getTime() + 60 * 60 * 24 * 1000);
+            guess.year = nextDay.getFullYear();
+            guess.month = nextDay.getMonth() + 1;
+            guess.day = nextDay.getDate();
+          }
         }
       } else if (withMinute.length != 0) {
         pos = isTask == true ? 0 : withMinute.length - 1;
-        if (withMinute[pos].hour > start.hour ||
-          (withMinute[pos].hour == start.hour &&
-          withMinute[pos].minute > start.minute)
-        ) {
-          guess.hour = withMinute[pos].hour;
-          guess.minute = withMinute[pos].minute;
+        guess.hour = withMinute[pos].hour;
+        guess.minute = withMinute[pos].minute;
+        if (guess.day == undefined || guess.day == start.day) {
+          if (withMinute[pos].hour < start.hour ||
+              (withMinute[pos].hour == start.hour &&
+              withMinute[pos].minute < start.minute)
+          ) {
+            let nextDay = new Date(start.year, start.month - 1, start.day);
+            nextDay.setTime(nextDay.getTime() + 60 * 60 * 24 * 1000);
+            guess.year = nextDay.getFullYear();
+            guess.month = nextDay.getMonth() + 1;
+            guess.day = nextDay.getDate();
+          }
         }
       }
       
