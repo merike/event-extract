@@ -140,12 +140,17 @@ var extractor = {
       }
       
       let correct = 0;
+      let total = 0;
       for (let word in words) {
-        if (gSpellCheckEngine.check(words[word]))
-          correct++;
+        words[word] = words[word].replace(/[()\d,;:?!#\.]/g, "");
+        if (words[word].length >= 2) {
+          total++;
+          if (gSpellCheckEngine.check(words[word]))
+            correct++;
+        }
       }
       
-      let percentage = correct/words.length;
+      let percentage = correct/total;
       dump(dicts[dict] + " " + percentage + "\n");
       this.aConsoleService.logStringMessage(dicts[dict] + " " + percentage);
       
@@ -1103,7 +1108,7 @@ var extractor = {
     return result != null;
   },
   
-  restrictChars: function restrictFollowChars(res, email) {
+  restrictChars: function restrictChars(res, email) {
     let alphabet = this.getAlternatives(this.bundle, "alphabet");
     // for languages without regular alphabet ignore surrounding characters
     if (alphabet == "abc def ghi")
