@@ -52,7 +52,7 @@ while (mails.hasMoreElements()) {
   var expected = JSON.parse(answer.contents);
   extractor.setBundle(baseUrl, locale);
   var time1 = (new Date()).getTime();
-  var refDate = extractor.findNow(info.contents);
+  var refDate = findNow(info.contents);
   var collected = extractor.extract(info.contents, refDate);
   var startGuess = {};
   var endGuess = {};
@@ -71,6 +71,7 @@ while (mails.hasMoreElements()) {
       endGuess.minute = 0;
     }
   }
+  
   var time2 = (new Date()).getTime();
   var time = time2 - time1;
   total += time;
@@ -112,11 +113,63 @@ function readFile(nsiFile) {
   return info;
 }
 
+function findNow(email) {
+  var now = new Date();
+  
+  // use date header
+  var re = /^Date:\s\w{3},\s+(\d{1,2})\s(\w{3})\s(\d{4})\s(\d{2}):(\d{1,2})/m;
+  var res = re.exec(email);
+
+  now.setDate(parseInt(res[1], 10));
+  switch (res[2]) {
+    case "Jan":
+      now.setMonth(0);
+      break;
+    case "Feb":
+      now.setMonth(1);
+      break;
+    case "Mar":
+      now.setMonth(2);
+      break;
+    case "Apr":
+      now.setMonth(3);
+      break;
+    case "May":
+      now.setMonth(4);
+      break;
+    case "Jun":
+      now.setMonth(5);
+      break;
+    case "Jul":
+      now.setMonth(6);
+      break;
+    case "Aug":
+      now.setMonth(7);
+      break;
+    case "Sep":
+      now.setMonth(8);
+      break;
+    case "Oct":
+      now.setMonth(9);
+      break;
+    case "Nov":
+      now.setMonth(10);
+      break;
+    case "Dec":
+      now.setMonth(11);
+      break;
+  }
+  now.setFullYear(parseInt(res[3], 10));
+  now.setHours(parseInt(res[4], 10));
+  now.setMinutes(parseInt(res[5], 10));
+  
+  return now;
+}
+
 function compare(correct, guessed, guessedEnd) {
   let r = wrSum;
   
   if (correct.year === guessed.year) {
-//     dump("correct year\n");
     corSum++;
   } else {
     dump(correct.year + " S " + guessed.year + " year\n");
@@ -124,7 +177,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.month === guessed.month) {
-//     dump("correct month\n");
     corSum++;
   } else {
     dump(correct.month + " S " + guessed.month + " month\n");
@@ -132,7 +184,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.day === guessed.day) {
-//     dump("correct day\n");
     corSum++;
   } else {
     dump(correct.day + " S " + guessed.day + " day\n");
@@ -140,7 +191,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.hour === guessed.hour) {
-//     dump("correct hour\n");
     corSum++;
   } else {
     dump(correct.hour + " S " + guessed.hour + " hour\n");
@@ -148,7 +198,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.minute === guessed.minute) {
-//     dump("correct minute\n");
     corSum++;
   } else {
     dump(correct.minute + " S " + guessed.minute + " minute\n");
@@ -156,7 +205,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.year2 === guessedEnd.year) {
-//     dump("correct year\n");
     corSum++;
   } else {
     dump(correct.year2 + " E " + guessedEnd.year + " year\n");
@@ -164,7 +212,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.month2 === guessedEnd.month) {
-//     dump("correct month\n");
     corSum++;
   } else {
     dump(correct.month2 + " E " + guessedEnd.month + " month\n");
@@ -172,7 +219,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.day2 === guessedEnd.day) {
-//     dump("correct day\n");
     corSum++;
   } else {
     dump(correct.day2 + " E " + guessedEnd.day + " day\n");
@@ -180,7 +226,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.hour2 === guessedEnd.hour) {
-//     dump("correct hour\n");
     corSum++;
   } else {
     dump(correct.hour2 + " E " + guessedEnd.hour + " hour\n");
@@ -188,7 +233,6 @@ function compare(correct, guessed, guessedEnd) {
   }
   
   if (correct.minute2 === guessedEnd.minute) {
-//     dump("correct minute\n");
     corSum++;
   } else {
     dump(correct.minute2 + " E " + guessedEnd.minute + " minute\n");
