@@ -196,7 +196,7 @@ var extractor = {
     }
   },
 
-  extract: function extract(email, now, dayStart) {
+  extract: function extract(email, now, dayStart, sel) {
     let initial = {};
     let res;
     initial.year = now.getFullYear();
@@ -783,6 +783,8 @@ var extractor = {
     }
     
     this.markContained();
+    if (sel != undefined)
+      this.markSelected(sel);
     this.collected = this.collected.sort(this.sort);
     return this.collected;
   },
@@ -801,6 +803,28 @@ var extractor = {
           
             this.collected[second].use = false;
         }
+      }
+    }
+  },
+  
+  markSelected: function markSelected (sel) {
+    if (sel.rangeCount > 0) {
+      // mark the ones to use
+      for (let i = 0; i < this.collected.length; i++) {
+        for (let j = 0; j < sel.rangeCount; j++) {
+          let selection = sel.getRangeAt(j).toString();
+          this.aConsoleService.logStringMessage(selection + "|" + this.collected[i].str);
+          if (selection.indexOf(this.collected[i].str) != -1) {
+            this.collected[i].use = true;
+            this.aConsoleService.logStringMessage("marked");
+            break;
+          }
+        }
+      }
+      // mark others to avoid using these
+      for (let i = 0; i < this.collected.length; i++) {
+        if (this.collected[i].use != true)
+          this.collected[i].use = false;
       }
     }
   },

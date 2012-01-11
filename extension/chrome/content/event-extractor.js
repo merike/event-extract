@@ -65,7 +65,8 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let baseUrl = "chrome://event-extract/content/locale/";
   let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
   extractor.setBundle(baseUrl, locale);
-  let collected = extractor.extract(title + "\r\n" + content, date, dayStart);
+  let sel = GetMessagePaneFrame().getSelection();
+  let collected = extractor.extract(title + "\r\n" + content, date, dayStart, sel);
   let guessed = extractor.guessStart(collected);
   let endGuess = extractor.guessEnd(collected, guessed);
   let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
@@ -85,32 +86,32 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   cal.alarms.setDefaultValues(item);
   
   if (isEvent) {
-    if (guessed.year)
+    if (guessed.year != undefined)
       item.startDate.year = guessed.year;
-    if (guessed.month)
+    if (guessed.month != undefined)
       item.startDate.month = guessed.month - 1;
-    if (guessed.day)
+    if (guessed.day != undefined)
       item.startDate.day = guessed.day;
-    if (guessed.hour)
+    if (guessed.hour != undefined)
       item.startDate.hour = guessed.hour;
-    if (guessed.minute)
+    if (guessed.minute != undefined)
       item.startDate.minute = guessed.minute;
     
     item.endDate = item.startDate.clone();
     item.endDate.minute += cal.getPrefSafe("calendar.event.defaultlength", 60);
     
-    if (endGuess.year)
+    if (endGuess.year != undefined)
       item.endDate.year = endGuess.year;
-    if (endGuess.month)
+    if (endGuess.month != undefined)
       item.endDate.month = endGuess.month - 1;
-    if (endGuess.day) {
+    if (endGuess.day != undefined) {
       item.endDate.day = endGuess.day;
       if (allDay)
         item.endDate.day++;
     }
-    if (endGuess.hour)
+    if (endGuess.hour != undefined)
       item.endDate.hour = endGuess.hour;
-    if (endGuess.minute)
+    if (endGuess.minute != undefined)
       item.endDate.minute = endGuess.minute;
   } else {
     let dtz = cal.calendarDefaultTimezone();
