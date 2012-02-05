@@ -1,16 +1,9 @@
 /* Experiment on how far you can get with simple regular expressions
- * all times best when guessing one date and time per event
-   correct bits  %    correct events  %   set
-   111/120     93%    16/24         67%   test set
-   189/205     92%    28/41         68%   train/bunch-1 set
-   115/150     77%    18/30         60%   private et set
-   
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   571/650     88%    42/65         65%   enronmeetings
+   530/610     87%    39/61         64%   enronmeetings
    546/600     91%    35/60         58%   mozilla.dev.planning sept set
-   
-   506/600     84%    28/60         47%   private et set
+   511/600     85%    30/60         50%   private et set
  */
 
 var corSum = 0;

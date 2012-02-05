@@ -121,15 +121,15 @@ var extractFromEmail = function extractFromEmail(isEvent) {
     dueDate.setMinutes(0);
     dueDate.setSeconds(0);
     
-    if (guessed.year != undefined)
+    if (endGuess.year != undefined)
       dueDate.setYear(endGuess.year);
-    if (guessed.month  != undefined)
+    if (endGuess.month  != undefined)
       dueDate.setMonth(endGuess.month - 1);
-    if (guessed.day != undefined)
+    if (endGuess.day != undefined)
       dueDate.setDate(endGuess.day);
-    if (guessed.hour != undefined)
+    if (endGuess.hour != undefined)
       dueDate.setHours(endGuess.hour);
-    if (guessed.minute != undefined)
+    if (endGuess.minute != undefined)
       dueDate.setMinutes(endGuess.minute);
     
     setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
