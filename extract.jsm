@@ -243,33 +243,8 @@ var extractor = {
     this.hourlyNumbers = this.hourlyNumbers.replace("|", this.marker, "g");
     allNumbers = allNumbers.replace("|", this.marker, "g");
     
-    re = new RegExp(this.getAlternatives(this.bundle, "today", true), "ig");
-    if ((res = re.exec(this.email)) != null) {
-      if (!this.restrictChars(res, this.email)) {
-        let item = new Date(now.getTime());
-        this.collected.push({year: item.getFullYear(),
-                             month: item.getMonth() + 1,
-                             day: item.getDate(),
-                             start: res.index,
-                             end: res.index + res[0].length - 1,
-                             str: res[0]
-        });
-      }
-    }
-    
-    re = new RegExp(this.getAlternatives(this.bundle, "tomorrow", true), "ig");
-    if ((res = re.exec(this.email)) != null) {
-      if (!this.restrictChars(res, this.email)) {
-        let item = new Date(now.getTime() + 60 * 60 * 24 * 1000);
-        this.collected.push({year: item.getFullYear(),
-                             month: item.getMonth() + 1,
-                             day: item.getDate(),
-                             start: res.index,
-                             end: res.index + res[0].length - 1,
-                             str: res[0]
-        });
-      }
-    }
+    this.extractRelativeDay("today", "start", 0, now);
+    this.extractRelativeDay("tomorrow", "start", 1, now);
     
     // day only
     var alts = this.getRepAlternatives(this.bundle, "ordinal.date",
@@ -777,6 +752,23 @@ var extractor = {
             this.collected.push(guess);
           }
         }
+      }
+    }
+  },
+  
+  extractRelativeDay: function extractRelativeDay(pattern, relation, offset, now) {
+    re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
+    if ((res = re.exec(this.email)) != null) {
+      if (!this.restrictChars(res, this.email)) {
+        let item = new Date(now.getTime() + 60 * 60 * 24 * 1000 * offset);
+        this.collected.push({year: item.getFullYear(),
+                             month: item.getMonth() + 1,
+                             day: item.getDate(),
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             str: res[0],
+                             relation: relation
+        });
       }
     }
   },
