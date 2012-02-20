@@ -325,146 +325,16 @@ var extractor = {
     this.extractHour("hour.only.pm", "start", "post", now);
     
     this.extractHour("until.hour", "end", "none", now);
-        
-    alts = this.getRepAlternatives(this.bundle, "until.hour.minutes",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          let guess = {};
-            res[1] = parseInt(res[1], 10);
-            res[2] = parseInt(res[2], 10);
-            
-            if (this.isValidHour(res[1]) && this.isValidMinute(res[1])) {
-              guess.hour = this.normalizeHour(res[1]);
-              guess.minute = res[2];
-            }
-            
-            guess.start = res.index;
-            guess.end = res.index + res[0].length - 1;
-            guess.ambiguous = true;
-            guess.str = res[0];
-            guess.relation = "end";
-            
-            this.collected.push(guess);
-        }
-      }
-    }
-    
-    alts = this.getRepAlternatives(this.bundle, "until.hour.minutes.am",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          
-          if (res[1] == 12)
-            res[1] = res[1] - 12;
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0], relation: "end"
-            });
-          }
-        }
-      }
-    }
-    
-    alts = this.getRepAlternatives(this.bundle, "until.hour.minutes.pm",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          
-          if (res[1] != 12)
-            res[1] = res[1] + 12;
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0], relation: "end"
-            });
-          }
-        }
-      }
-    }
     
     // hour:minutes
-    alts = this.getRepAlternatives(this.bundle, "hour.minutes",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: this.normalizeHour(res[1]), minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0]
-            });
-          }
-        }
-      }
-    }
-
-    alts = this.getRepAlternatives(this.bundle, "hour.minutes.am",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          
-          if (res[1] == 12)
-            res[1] = res[1] - 12;
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0]
-            });
-          }
-        }
-      }
-    }
+    this.extractHourMinutes("until.hour.minutes", "end", "none", now);
+    this.extractHourMinutes("until.hour.minutes.am", "end", "ante", now);
+    this.extractHourMinutes("until.hour.minutes.pm", "end", "post", now);
     
-    alts = this.getRepAlternatives(this.bundle, "hour.minutes.pm",
-                                   ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
-      re = new RegExp(alts[alt].pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
-          
-          if (res[1] != 12)
-            res[1] = res[1] + 12;
-          
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: res[1], minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0]
-            });
-          }
-        }
-      }
-    }
-
+    this.extractHourMinutes("hour.minutes", "start", "none", now);
+    this.extractHourMinutes("hour.minutes.am", "start", "ante", now);
+    this.extractHourMinutes("hour.minutes.pm", "start", "post", now);
+    
     // month with day
     let months = [];
     for (let i = 0; i < 12; i++) {
@@ -725,7 +595,7 @@ var extractor = {
     for (var alt in alts) {
       let positions = alts[alt].positions;
 
-      re = new RegExp(alts[alt].pattern, "ig");
+      let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
@@ -757,7 +627,7 @@ var extractor = {
   },
   
   extractRelativeDay: function extractRelativeDay(pattern, relation, offset, now) {
-    re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
+    let re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
         let item = new Date(now.getTime() + 60 * 60 * 24 * 1000 * offset);
@@ -774,11 +644,11 @@ var extractor = {
   },
   
   extractHour: function extractHour(pattern, relation, meridiem, now) {
-    alts = this.getRepAlternatives(this.bundle, pattern,
+    let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2}" + this.marker + this.hourlyNumbers + ")"]);
     for (var alt in alts) {
-      pattern = alts[alt].pattern.replace(this.marker, "|", "g");
-      re = new RegExp(pattern, "ig");
+      let pattern = alts[alt].pattern.replace(this.marker, "|", "g");
+      let re = new RegExp(pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[1] = this.parseNumber(res[1], this.numbers);
@@ -793,6 +663,34 @@ var extractor = {
                             start: res.index,
                             end: res.index + res[0].length - 1,
                             ambiguous: true,
+                            str: res[0],
+                            relation: relation
+            });
+          }
+        }
+      }
+    }
+  },
+  
+  extractHourMinutes: function extractHourMinutes(pattern, relation, meridiem, now) {
+    let alts = this.getRepAlternatives(this.bundle, pattern,
+                                   ["(\\d{1,2})", "(\\d{2})"]);
+    for (var alt in alts) {
+      let re = new RegExp(alts[alt].pattern, "ig");
+      while ((res = re.exec(this.email)) != null) {
+        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
+          res[1] = parseInt(res[1], 10);
+          res[2] = parseInt(res[2], 10);
+          
+          if (meridiem == "ante" && res[1] == 12)
+            res[1] = res[1] - 12;
+          if (meridiem == "post" && res[1] != 12)
+            res[1] = res[1] + 12;
+          
+          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+            this.collected.push({hour: this.normalizeHour(res[1]), minute: res[2],
+                            start: res.index,
+                            end: res.index + res[0].length - 1,
                             str: res[0],
                             relation: relation
             });
