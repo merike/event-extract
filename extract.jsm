@@ -524,45 +524,8 @@ var extractor = {
       }
     }
     
-    alts = this.getRepAlternatives(this.bundle, "duration.minutes", ["(\\d{1,2}" + this.marker + allNumbers + ")"]);
-    for (var alt in alts) {
-      pattern = alts[alt].pattern.replace(this.marker, "|", "g");
-      re = new RegExp(pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          let guess = {};
-          res[1] = this.parseNumber(res[1], this.numbers);
-          
-          guess.duration = res[1];
-          guess.start = res.index;
-          guess.end = res.index + res[0].length - 1;
-          guess.str = res[0];
-          guess.relation = "duration";
-          
-          this.collected.push(guess);
-        }
-      }
-    }
-    
-    alts = this.getRepAlternatives(this.bundle, "duration.days", ["(\\d{1,2}" + this.marker + allNumbers + ")"]);
-    for (var alt in alts) {
-      pattern = alts[alt].pattern.replace(this.marker, "|", "g");
-      re = new RegExp(pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          let guess = {};
-          res[1] = this.parseNumber(res[1], this.numbers);
-          
-          guess.duration = res[1] * 60 * 24;
-          guess.start = res.index;
-          guess.end = res.index + res[0].length - 1;
-          guess.str = res[0];
-          guess.relation = "duration";
-          
-          this.collected.push(guess);
-        }
-      }
-    }
+    this.extractDuration("duration.minutes", 1);
+    this.extractDuration("duration.days", 60 * 24);
     
     this.markContained();
     if (sel != undefined)
@@ -695,6 +658,28 @@ var extractor = {
                             relation: relation
             });
           }
+        }
+      }
+    }
+  },
+  
+  extractDuration: function  extractDuration(pattern, unit) {
+    let alts = this.getRepAlternatives(this.bundle, pattern, ["(\\d{1,2}" + this.marker + this.allNumbers + ")"]);
+    for (var alt in alts) {
+      pattern = alts[alt].pattern.replace(this.marker, "|", "g");
+      let re = new RegExp(pattern, "ig");
+      while ((res = re.exec(this.email)) != null) {
+        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
+          let guess = {};
+          res[1] = this.parseNumber(res[1], this.numbers);
+          
+          guess.duration = res[1] * unit;
+          guess.start = res.index;
+          guess.end = res.index + res[0].length - 1;
+          guess.str = res[0];
+          guess.relation = "duration";
+          
+          this.collected.push(guess);
         }
       }
     }
