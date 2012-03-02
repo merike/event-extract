@@ -3,7 +3,7 @@
    correct bits  %    correct events  %   set
    530/610     87%    39/61         64%   enronmeetings
    546/600     91%    35/60         58%   mozilla.dev.planning sept set
-   511/600     85%    30/60         50%   private et set
+   513/600     86%    30/60         50%   private et set
  */
 
 var corSum = 0;
