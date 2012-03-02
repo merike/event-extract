@@ -209,10 +209,6 @@ var extractor = {
   extract: function extract(email, now, dayStart, sel) {
     let initial = {};
     this.collected = [];
-    let pattern;
-    let re;
-    let res;
-    
     this.email = email;
     
     initial.year = now.getFullYear();
@@ -251,82 +247,8 @@ var extractor = {
     }
     this.allMonths = this.months.join(this.marker).replace("|", this.marker, "g");
     
-    this.extractRelativeDay("today", "start", 0, now);
-    this.extractRelativeDay("tomorrow", "start", 1, now);
-    
-    // day only
-    var alts = this.getRepAlternatives(this.bundle, "ordinal.date",
-                                       ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
-    for (var alt in alts) {
-      pattern = alts[alt].pattern.replace(this.marker, "|", "g");
-      re = new RegExp(pattern, "ig");
-      while ((res = re.exec(this.email)) != null) {
-        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          res[1] = this.parseNumber(res[1], this.numbers);
-          if (this.isValidDay(res[1])) {
-            let item = new Date(now.getTime());
-            if (now.getDate() > res[1]) {
-              // find next nth date
-              while (true) {
-                item.setDate(item.getDate() + 1);
-                if (item.getMonth() != now.getMonth() &&
-                  item.getDate() == res[1])
-                  break;
-              }
-            }
-            this.collected.push({year: item.getFullYear(),
-                                 month: item.getMonth() + 1,
-                                 day: res[1],
-                                 start: res.index,
-                                 end: res.index + res[0].length - 1,
-                                 ambiguous: true,
-                                 str: res[0]
-            });
-          }
-        }
-      }
-    }
-    
-    // weekday
-    let days = [];
-    for (let i = 0; i < 7; i++) {
-      days[i] = this.getAlternatives(this.bundle, "weekday." + i, true);
-      re = new RegExp(days[i], "ig");
-      res = re.exec(this.email);
-      if (res) {
-        if (!this.restrictChars(res, this.email)) {
-          let date = new Date();
-          date.setDate(now.getDate());
-          date.setMonth(now.getMonth());
-          date.setYear(now.getFullYear());
-
-          let diff = (i - date.getDay() + 7) % 7;
-          date.setDate(date.getDate() + diff);
-          
-          this.collected.push({year: date.getFullYear(),
-                              month: date.getMonth() + 1,
-                              day: date.getDate(),
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              ambiguous: true,
-                              str: res[0]
-          });
-        }
-      }
-    }
-    
-    // time only
-    re = new RegExp(this.getAlternatives(this.bundle, "noon", true), "ig");
-    if ((res = re.exec(this.email)) != null) {
-      if (!this.restrictChars(res, this.email)) {
-        this.collected.push({hour: 12,
-                             minute: 0,
-                             start: res.index,
-                             end: res.index + res[0].length - 1,
-                             str: res[0]
-        });
-      }
-    }
+    // time
+    this.extractTime("noon", "start", 12, 0);
     
     this.extractHour("hour.only", "start", "none", now);
     this.extractHour("hour.only.am", "start", "ante", now);
@@ -334,7 +256,6 @@ var extractor = {
     
     this.extractHour("until.hour", "end", "none", now);
     
-    // hour:minutes
     this.extractHourMinutes("until.hour.minutes", "end", "none", now);
     this.extractHourMinutes("until.hour.minutes.am", "end", "ante", now);
     this.extractHourMinutes("until.hour.minutes.pm", "end", "post", now);
@@ -343,18 +264,25 @@ var extractor = {
     this.extractHourMinutes("hour.minutes.am", "start", "ante", now);
     this.extractHourMinutes("hour.minutes.pm", "start", "post", now);
     
+    // date
+    this.extractRelativeDay("today", "start", 0, now);
+    this.extractRelativeDay("tomorrow", "start", 1, now);
+    this.extractWeekDay(now); // 1
+
+    this.extractDate("ordinal.date", "start", now);
+
     this.extractDayMonthName("monthname.day", "start", now);
     this.extractDayMonthName("until.monthname.date", "end", now);
     
     this.extractDayMonth("month.day", "start", now);
     this.extractDayMonth("until.month.date", "end", now);
     
-    // date with year
     this.extractDayMonthYear("day.numericmonth.year", "start", now);
     this.extractDayMonthYear("due.day.numericmonth.year", "end", now);
     
     this.extractDayMonthNameYear("day.monthname.year", "start", now);
     
+    // duration
     this.extractDuration("duration.minutes", 1);
     this.extractDuration("duration.days", 60 * 24);
     
@@ -386,7 +314,7 @@ var extractor = {
   extractDayMonthYear: function extractDayMonthYear(pattern, relation, now) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                               ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let positions = alts[alt].positions;
 
       let re = new RegExp(alts[alt].pattern, "ig");
@@ -423,7 +351,7 @@ var extractor = {
   extractDayMonthNameYear: function extractDayMonthNameYear(pattern, relation, now) {
     let alts = this.getRepAlternatives(this.bundle, pattern, ["(\\d{1,2})",
                                       "(" + this.allMonths + ")", "(\\d{2,4})" ]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let pattern = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
 
@@ -446,8 +374,9 @@ var extractor = {
                 guess.end = res.index + res[0].length - 1;
                 guess.str = res[0];
                 
-                if (!this.isPastDate(guess, now))
-                  this.collected.push(guess);
+                if (this.isPastDate(guess, now))
+                  guess.use = false;
+                this.collected.push(guess);
                 break;
               }
             }
@@ -478,7 +407,7 @@ var extractor = {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")",
                                    "(" + this.allMonths + ")"]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let pattern = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
       
@@ -514,7 +443,7 @@ var extractor = {
   extractDayMonth: function extractDayMonth(pattern, relation, now) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2})", "(\\d{1,2})"]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
@@ -550,10 +479,74 @@ var extractor = {
     }
   },
   
+  extractDate: function extractDate (pattern, relation, now) {
+    let alts = this.getRepAlternatives(this.bundle, pattern,
+                                       ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
+    for (let alt in alts) {
+      let pattern = alts[alt].pattern.replace(this.marker, "|", "g");
+      let re = new RegExp(pattern, "ig");
+      while ((res = re.exec(this.email)) != null) {
+        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
+          res[1] = this.parseNumber(res[1], this.numbers);
+          if (this.isValidDay(res[1])) {
+            let item = new Date(now.getTime());
+            if (now.getDate() > res[1]) {
+              // find next nth date
+              while (true) {
+                item.setDate(item.getDate() + 1);
+                if (item.getMonth() != now.getMonth() &&
+                  item.getDate() == res[1])
+                  break;
+              }
+            }
+            this.collected.push({year: item.getFullYear(),
+                                 month: item.getMonth() + 1,
+                                 day: res[1],
+                                 start: res.index,
+                                 end: res.index + res[0].length - 1,
+                                 ambiguous: true,
+                                 str: res[0],
+                                 relation: relation
+            });
+          }
+        }
+      }
+    }
+  },
+  
+  extractWeekDay: function extractWeekDay(now) {
+    let days = [];
+    for (let i = 0; i < 7; i++) {
+      days[i] = this.getAlternatives(this.bundle, "weekday." + i, true);
+      let re = new RegExp(days[i], "ig");
+      let res = re.exec(this.email);
+      if (res) {
+        if (!this.restrictChars(res, this.email)) {
+          let date = new Date();
+          date.setDate(now.getDate());
+          date.setMonth(now.getMonth());
+          date.setYear(now.getFullYear());
+
+          let diff = (i - date.getDay() + 7) % 7;
+          date.setDate(date.getDate() + diff);
+          
+          this.collected.push({year: date.getFullYear(),
+                              month: date.getMonth() + 1,
+                              day: date.getDate(),
+                              start: res.index,
+                              end: res.index + res[0].length - 1,
+                              ambiguous: true,
+                              str: res[0]
+          });
+        }
+      }
+    }
+  },
+  
   extractHour: function extractHour(pattern, relation, meridiem, now) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2}" + this.marker + this.hourlyNumbers + ")"]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let pattern = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
@@ -582,7 +575,7 @@ var extractor = {
   extractHourMinutes: function extractHourMinutes(pattern, relation, meridiem, now) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2})", "(\\d{2})"]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
@@ -607,9 +600,24 @@ var extractor = {
     }
   },
   
-  extractDuration: function  extractDuration(pattern, unit) {
+  extractTime: function extractTime(pattern, relation, hour, minute) {
+    let re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
+    if ((res = re.exec(this.email)) != null) {
+      if (!this.restrictChars(res, this.email)) {
+        this.collected.push({hour: hour,
+                             minute: minute,
+                             start: res.index,
+                             end: res.index + res[0].length - 1,
+                             str: res[0],
+                             relation: relation
+        });
+      }
+    }
+  },
+  
+  extractDuration: function extractDuration(pattern, unit) {
     let alts = this.getRepAlternatives(this.bundle, pattern, ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
-    for (var alt in alts) {
+    for (let alt in alts) {
       pattern = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
@@ -920,7 +928,7 @@ var extractor = {
       let rawValues = this.getAlternatives(bundle, name, false).split("|");
       
       let i = 0;
-      for (var pattern in patterns) {
+      for (let pattern in patterns) {
         // XXX only add information when more than 1 replaceables, not needed otherwise
         let positions = this.getPositionsFor(rawValues[i]);
         alts[i] = {pattern: patterns[i], positions: positions};
