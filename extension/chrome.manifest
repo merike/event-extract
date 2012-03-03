@@ -1,3 +1,6 @@
 resource event-extract .
 content event-extract chrome/content/
+# upto tb 10
 overlay chrome://lightning/content/messenger-overlay-toolbar.xul chrome://event-extract/content/context-menu-overlay.xul
+# tb 11 and forward
+overlay chrome://lightning/content/lightning-menus.xul chrome://event-extract/content/context-menu-overlay.xul
