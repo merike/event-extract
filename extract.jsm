@@ -206,7 +206,7 @@ var extractor = {
     }
   },
 
-  extract: function extract(email, now, dayStart, sel) {
+  extract: function extract(email, now, dayStart, sel, title) {
     let initial = {};
     this.collected = [];
     this.email = email;
@@ -286,29 +286,12 @@ var extractor = {
     this.extractDuration("duration.minutes", 1);
     this.extractDuration("duration.days", 60 * 24);
     
-    this.markContained();
     if (sel != undefined)
-      this.markSelected(sel);
+      this.markSelected(sel, title);
+    this.markContained();
     this.collected = this.collected.sort(this.sort);
+
     return this.collected;
-  },
-  
-  markContained: function markContained() {
-    for (let first = 0; first < this.collected.length; first++) {
-      for (let second = 0; second < this.collected.length; second++) {
-        // included but not exactly the same
-        if (first != second && 
-            this.collected[first].start && this.collected[first].end &&
-            this.collected[second].start && this.collected[second].end &&
-            this.collected[second].start >= this.collected[first].start &&
-            this.collected[second].end <= this.collected[first].end &&
-           !(this.collected[second].start == this.collected[first].start &&
-            this.collected[second].end == this.collected[first].end)) {
-          
-            this.collected[second].use = false;
-        }
-      }
-    }
   },
   
   extractDayMonthYear: function extractDayMonthYear(pattern, relation, now) {
@@ -637,17 +620,38 @@ var extractor = {
     }
   },
   
-  markSelected: function markSelected(sel) {
+  markContained: function markContained() {
+    for (let first = 0; first < this.collected.length; first++) {
+      for (let second = 0; second < this.collected.length; second++) {
+        this.aConsoleService.logStringMessage(this.collected[first].str + " + " + this.collected[second].str);
+        
+        // included but not exactly the same
+        if (first != second &&
+            this.collected[first].start && this.collected[first].end &&
+            this.collected[second].start && this.collected[second].end &&
+            this.collected[second].start >= this.collected[first].start &&
+            this.collected[second].end <= this.collected[first].end &&
+           !(this.collected[second].start == this.collected[first].start &&
+            this.collected[second].end == this.collected[first].end)) {
+            
+            this.aConsoleService.logStringMessage(this.collected[first].str + " - " + this.collected[second].str);
+            this.collected[second].use = false;
+        }
+      }
+    }
+  },
+  
+  markSelected: function markSelected(sel, title) {
     if (sel.rangeCount > 0) {
       // mark the ones to use
       for (let i = 0; i < this.collected.length; i++) {
         for (let j = 0; j < sel.rangeCount; j++) {
           let selection = sel.getRangeAt(j).toString();
           this.aConsoleService.logStringMessage(selection + "|" + this.collected[i].str);
-          if (selection.indexOf(this.collected[i].str) != -1) {
+          if (selection.indexOf(this.collected[i].str) != -1 ||
+              title.indexOf(this.collected[i].str) != -1
+          ) {
             this.collected[i].use = true;
-            this.aConsoleService.logStringMessage("marked");
-            break;
           }
         }
       }
@@ -784,8 +788,10 @@ var extractor = {
       return {};
     else {
       /*for (val in endTimes) {
-         if (endTimes[val].use != false)
+        if (endTimes[val].use != false) {
           dump("E: " + JSON.stringify(endTimes[val]) + "\n");
+          this.aConsoleService.logStringMessage("E: " + JSON.stringify(endTimes[val]));
+        }
       }*/
       
       let withDay = endTimes.filter(function(val) {

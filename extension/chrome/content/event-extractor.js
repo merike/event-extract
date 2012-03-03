@@ -66,7 +66,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
   extractor.setBundle(baseUrl, locale);
   let sel = GetMessagePaneFrame().getSelection();
-  let collected = extractor.extract(title + "\r\n" + content, date, dayStart, sel);
+  let collected = extractor.extract(title + "\r\n" + content, date, dayStart, sel, title);
   let guessed = extractor.guessStart(collected);
   let endGuess = extractor.guessEnd(collected, guessed);
   let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
