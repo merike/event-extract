@@ -272,15 +272,15 @@ var extractor = {
     this.extractDate("ordinal.date", "start", now);
 
     this.extractDayMonthName("monthname.day", "start", now);
-    this.extractDayMonthName("until.monthname.date", "end", now);
+    this.extractDayMonthName("until.monthname.day", "end", now);
     
     this.extractDayMonth("month.day", "start", now);
-    this.extractDayMonth("until.month.date", "end", now);
+    this.extractDayMonth("until.month.day", "end", now);
     
-    this.extractDayMonthYear("day.numericmonth.year", "start", now);
-    this.extractDayMonthYear("due.day.numericmonth.year", "end", now);
+    this.extractDayMonthYear("year.month.day", "start", now);
+    this.extractDayMonthYear("until.year.month.day", "end", now);
     
-    this.extractDayMonthNameYear("day.monthname.year", "start", now);
+    this.extractDayMonthNameYear("year.monthname.day", "start", now);
     
     // duration
     this.extractDuration("duration.minutes", 1);
