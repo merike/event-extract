@@ -1023,8 +1023,8 @@ var extractor = {
   
   restrictChars: function restrictChars(res, email) {
     let alphabet = this.getAlternatives(this.bundle, "alphabet");
-    // for languages without regular alphabet ignore surrounding characters
-    if (alphabet == "abc def ghi")
+    // for languages without regular alphabet surrounding characters are ignored
+    if (alphabet == "")
       return false;
     
     let pattern = email.substring(res.index, res.index + res[0].length);
