@@ -905,6 +905,7 @@ var extractor = {
     try {
       value = bundle.GetStringFromName(name);
       value = value.replace(" |", "|", "g").replace("| ", "|", "g");
+      // TODO handle tabs as well
       value = value.replace(/ +/g, "\\s*");
       let vals = value.split("|");
       if (sort)
