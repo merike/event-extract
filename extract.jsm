@@ -21,13 +21,15 @@ var extractor = {
                   .getService(Components.interfaces.nsIConsoleService),
   
   cleanup: function cleanup(email) {
-    // remove Date: and Sent: lines
+    // remove Date: and Sent: headers
+    // only necessary with saved emails outside of extension
     email = email.replace(/^Date:.+$/m, "");
     email = email.replace(/^Sent:.+$/m, "");
     email = email.replace(/^Saatmisaeg:.+$/m, "");
     
-    // XXX remove earlier correspondence, for now
-    // remove line preceeding quoted message and first line of the quote
+    // XXX remove earlier correspondence
+    // ideally this should be considered with lower certainty to fill missing information
+    // remove last line preceeding quoted message and first line of the quote
     email = email.replace(/\r?\n[^>].*\r?\n>+.*$/m, "");
     // remove the rest of quoted content
     email = email.replace(/^>+.*$/gm, "");
@@ -36,9 +38,8 @@ var extractor = {
     email = email.replace(/<br ?\/?>/gm, "");
     email = email.replace(/^\s[ \t]*$/gm, "");
     
-    // remove urls
-    // TODO cover more urls
-    email = email.replace(/http:\/\/[^\s]+\s/gm, "");
+    // urls often contain dates dates that can confuse extraction
+    email = email.replace(/https?:\/\/[^\s]+\s/gm, "");
     
     // remove standard signature
     email = email.replace(/\r?\n-- \r?\n[\S\s]+$/, "");
@@ -66,19 +67,19 @@ var extractor = {
     }
   },
   
-  avgCharCode: function avgCharCode(email) {
+  avgNonAsciiCharCode: function avgNonAsciiCharCode(email) {
     let sum = 0;
     let cnt = 0;
     
     for (let i = 0; i < email.length; i++) {
-      let ch = email.charAt(i);
-        if (/[^a-zA-Z0-9 .,;:'"()\[\]\r\n\t%?/\-]/.exec(ch)) {
-          sum += ch.charCodeAt();
+      let ch = email.charCodeAt(i);
+      if (ch > 128) {
+          sum += ch;
           cnt++;
-        }
+      }
     }
-    this.aConsoleService.logStringMessage("Average charcode: " + sum/cnt);
-    dump("Average charcode: " + sum/cnt + "\n");
+    this.aConsoleService.logStringMessage("Average non-ascii charcode: " + sum/cnt);
+    dump("Average non-ascii charcode: " + sum/cnt + "\n");
     return sum/cnt;
   },
   
@@ -94,9 +95,13 @@ var extractor = {
     let patterns;
     
     gSpellCheckEngine.getDictionaryList(arr, cnt);
-    let dicts = arr["value"]
+    let dicts = arr["value"];
+    
+    if (dicts.length == 0)
+      this.aConsoleService.logStringMessage("There are no dictionaries installed and enabled. You might want to add some if date and time extraction from emails seems inaccurate.");
     
     for (let dict in dicts) {
+      // dictionary locale and patterns locale match
       if (this.checkBundle(dicts[dict])) {
         let t1 = (new Date()).getTime();
         gSpellCheckEngine.dictionary = dicts[dict];
@@ -104,6 +109,7 @@ var extractor = {
         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         patterns = dicts[dict];
+      // beginning of dictionary locale matches patterns locale
       } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
         let t1 = (new Date()).getTime();
         gSpellCheckEngine.dictionary = dicts[dict];
@@ -111,6 +117,7 @@ var extractor = {
         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         patterns = dicts[dict].substring(0, 2);
+      // dictionary for which patterns aren't present
       } else {
         dump("Dictionary present, rules missing: " + dicts[dict]);
         this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
@@ -140,8 +147,10 @@ var extractor = {
     
     let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
                  .getService(Components.interfaces.nsIStringBundleService);
-    let avgCharCode = this.avgCharCode(email);
-                 
+    let avgCharCode = this.avgNonAsciiCharCode(email);
+    
+    // using dictionaries for language recognition with non-latin letters doesn't work very well
+    // possibly because of bug 471799
     if (avgCharCode > 24000 && avgCharCode < 32000) {
       dump("Using zh-TW patterns\n");
       this.aConsoleService.logStringMessage("Using zh-TW patterns");
@@ -158,10 +167,12 @@ var extractor = {
       dump("Using " + mostLocale + " patterns based on dictionary\n");
       this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
+    // fallbackLocale matches patterns exactly
     } else if (this.checkBundle(this.fallbackLocale)) {
       dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+    // beginning of fallbackLocale matches patterns
     } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
       this.fallbackLocale = this.fallbackLocale.substring(0, 2);
       dump("Falling back to " + this.fallbackLocale + "\n");
@@ -192,13 +203,12 @@ var extractor = {
                          day: initial.day});
     
     this.email = this.cleanup(this.email);
-    this.aConsoleService.logStringMessage("After removing correspondence: \n" + this.email);
+    this.aConsoleService.logStringMessage("Email after processing for extraction: \n" + this.email);
     this.guessLanguage(this.email);
     
     for (let i = 0; i <= 31; i++) {
       this.numbers[i] = this.getAlternatives(this.bundle, "number." + i, true);
     }
-
     this.dailyNumbers = this.numbers.join(this.marker);
     
     this.hourlyNumbers =  this.numbers[0] + this.marker;
@@ -223,19 +233,21 @@ var extractor = {
     this.extractHour("hour.only.pm", "start", "post", now);
     
     this.extractHour("until.hour", "end", "none", now);
-    
-    this.extractHourMinutes("until.hour.minutes", "end", "none", now);
-    this.extractHourMinutes("until.hour.minutes.am", "end", "ante", now);
-    this.extractHourMinutes("until.hour.minutes.pm", "end", "post", now);
+    this.extractHour("until.hour.am", "end", "none", now);
+    this.extractHour("until.hour.pm", "end", "none", now);
     
     this.extractHourMinutes("hour.minutes", "start", "none", now);
     this.extractHourMinutes("hour.minutes.am", "start", "ante", now);
     this.extractHourMinutes("hour.minutes.pm", "start", "post", now);
     
+    this.extractHourMinutes("until.hour.minutes", "end", "none", now);
+    this.extractHourMinutes("until.hour.minutes.am", "end", "ante", now);
+    this.extractHourMinutes("until.hour.minutes.pm", "end", "post", now);
+    
     // date
     this.extractRelativeDay("today", "start", 0, now);
     this.extractRelativeDay("tomorrow", "start", 1, now);
-    this.extractWeekDay(now); // 1
+    this.extractWeekDay(now);
 
     this.extractDate("ordinal.date", "start", now);
 
@@ -249,6 +261,7 @@ var extractor = {
     this.extractDayMonthYear("until.year.month.day", "end", now);
     
     this.extractDayMonthNameYear("year.monthname.day", "start", now);
+    this.extractDayMonthNameYear("until.year.monthname.day", "end", now);
     
     // duration
     this.extractDuration("duration.minutes", 1);
@@ -602,7 +615,7 @@ var extractor = {
   markContained: function markContained() {
     for (let first = 0; first < this.collected.length; first++) {
       for (let second = 0; second < this.collected.length; second++) {
-        this.aConsoleService.logStringMessage(this.collected[first].str + " + " + this.collected[second].str);
+        //this.aConsoleService.logStringMessage(this.collected[first].str + " + " + this.collected[second].str);
         
         // included but not exactly the same
         if (first != second &&
@@ -613,7 +626,7 @@ var extractor = {
            !(this.collected[second].start == this.collected[first].start &&
             this.collected[second].end == this.collected[first].end)) {
             
-            this.aConsoleService.logStringMessage(this.collected[first].str + " - " + this.collected[second].str);
+            //this.aConsoleService.logStringMessage(this.collected[first].str + " - " + this.collected[second].str);
             this.collected[second].use = false;
         }
       }
@@ -883,9 +896,10 @@ var extractor = {
     let value;
     try {
       value = bundle.GetStringFromName(name);
-      value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-      // TODO handle tabs as well
-      value = value.replace(/ +/g, "\\s*");
+      // remove whitespace around | if present
+      value = value.replace(/\s*\|\s*/g, "|");
+      // allow matching for patterns with missing or excessive whitespace
+      value = value.replace(/\s+/g, "\\s*");
       let vals = value.split("|");
       if (sort)
         vals.sort(function(one, two) {return two.length - one.length;});
@@ -906,8 +920,10 @@ var extractor = {
     
     try {
       value = bundle.formatStringFromName(name, replaceables, replaceables.length);
-      value = value.replace(" |", "|", "g").replace("| ", "|", "g");
-      value = value.replace(/ +/g, "\\s*");
+      // remove whitespace around | if present
+      value = value.replace(/\s*\|\s*/g, "|");
+      // allow matching for patterns with missing or excessive whitespace
+      value = value.replace(/\s+/g, "\\s*");
       value = value.sanitize();
       
       let patterns = value.split("|");
@@ -921,11 +937,8 @@ var extractor = {
         i++;
       }
     } catch (ex) {
-//       this.aConsoleService.logStringMessage("Pattern not found: " + name);
+      this.aConsoleService.logStringMessage("Pattern not found: " + name);
       dump("Pattern not found: " + name + "\n");
-      
-      // fake a value to not error out
-      value = "abc def ghi";
     }
     
     return alts;
@@ -948,23 +961,19 @@ var extractor = {
   },
   
   isValidYear: function isValidYear(year) {
-    if (year >= 2000  && year <= 2050) return true;
-    else return false;
+    return (year >= 2000  && year <= 2050);
   },
   
   isValidMonth: function isValidMonth(month) {
-    if (month >= 1 && month <= 12) return true;
-    else return false;
+    return (month >= 1 && month <= 12);
   },
   
   isValidDay: function isValidDay(day) {
-    if (day >= 1 && day <= 31) return true;
-    else return false;
+    return (day >= 1 && day <= 31);
   },
   
   isValidHour: function isValidHour(hour) {
-    if (hour >= 0 && hour <= 23) return true;
-    else return false;
+    return (hour >= 0 && hour <= 23);
   },
   
   isPastDate: function isPastDate(date, refDate) {
@@ -981,8 +990,7 @@ var extractor = {
   },
   
   isValidMinute: function isValidMinute(minute) {
-    if (minute >= 0 && minute <= 59) return true;
-    else return false;
+    return (minute >= 0 && minute <= 59);
   },
   
   normalizeHour: function normalizeHour(hour) {

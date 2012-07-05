@@ -25,7 +25,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
                                             false,
                                             true,
                                             { });
-  aConsoleService.logStringMessage("Original content: \n" + title + "\r\n" + content);
+  aConsoleService.logStringMessage("Original email content: \n" + title + "\r\n" + content);
   let date = new Date(message.date/1000);
   let time = (new Date()).getTime();
   
