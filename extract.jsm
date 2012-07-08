@@ -14,6 +14,7 @@ var extractor = {
   allMonths: "",
   months: [],
   dayStart: 6,
+  now: undefined,
   bundleDir: "",
   bundle: "",
   fallbackLocale: "",
@@ -189,6 +190,7 @@ var extractor = {
     let initial = {};
     this.collected = [];
     this.email = email;
+    this.now = now;
     
     initial.year = now.getFullYear();
     initial.month = now.getMonth() + 1;
@@ -228,40 +230,36 @@ var extractor = {
     // time
     this.extractTime("noon", "start", 12, 0);
     
-    this.extractHour("hour.only", "start", "none", now);
-    this.extractHour("hour.only.am", "start", "ante", now);
-    this.extractHour("hour.only.pm", "start", "post", now);
+    this.extractHour("hour.only", "start", "none");
+    this.extractHour("hour.only.am", "start", "ante");
+    this.extractHour("hour.only.pm", "start", "post");
+    this.extractHour("until.hour", "end", "none");
+    this.extractHour("until.hour.am", "end", "none");
+    this.extractHour("until.hour.pm", "end", "none");
     
-    this.extractHour("until.hour", "end", "none", now);
-    this.extractHour("until.hour.am", "end", "none", now);
-    this.extractHour("until.hour.pm", "end", "none", now);
-    
-    this.extractHourMinutes("hour.minutes", "start", "none", now);
-    this.extractHourMinutes("hour.minutes.am", "start", "ante", now);
-    this.extractHourMinutes("hour.minutes.pm", "start", "post", now);
-    
-    this.extractHourMinutes("until.hour.minutes", "end", "none", now);
-    this.extractHourMinutes("until.hour.minutes.am", "end", "ante", now);
-    this.extractHourMinutes("until.hour.minutes.pm", "end", "post", now);
+    this.extractHourMinutes("hour.minutes", "start", "none");
+    this.extractHourMinutes("hour.minutes.am", "start", "ante");
+    this.extractHourMinutes("hour.minutes.pm", "start", "post");
+    this.extractHourMinutes("until.hour.minutes", "end", "none");
+    this.extractHourMinutes("until.hour.minutes.am", "end", "ante");
+    this.extractHourMinutes("until.hour.minutes.pm", "end", "post");
     
     // date
-    this.extractRelativeDay("today", "start", 0, now);
-    this.extractRelativeDay("tomorrow", "start", 1, now);
-    this.extractWeekDay(now);
-
-    this.extractDate("ordinal.date", "start", now);
-
-    this.extractDayMonthName("monthname.day", "start", now);
-    this.extractDayMonthName("until.monthname.day", "end", now);
+    this.extractRelativeDay("today", "start", 0);
+    this.extractRelativeDay("tomorrow", "start", 1);
+    this.extractWeekDay("weekday.", "start");
+    this.extractWeekDay("until.weekday.", "end");
+    this.extractDate("ordinal.date", "start");
+    this.extractDate("until.ordinal.date", "end");
     
-    this.extractDayMonth("month.day", "start", now);
-    this.extractDayMonth("until.month.day", "end", now);
-    
-    this.extractDayMonthYear("year.month.day", "start", now);
-    this.extractDayMonthYear("until.year.month.day", "end", now);
-    
-    this.extractDayMonthNameYear("year.monthname.day", "start", now);
-    this.extractDayMonthNameYear("until.year.monthname.day", "end", now);
+    this.extractDayMonth("month.day", "start");
+    this.extractDayMonthYear("year.month.day", "start");
+    this.extractDayMonth("until.month.day", "end");
+    this.extractDayMonthYear("until.year.month.day", "end");
+    this.extractDayMonthName("monthname.day", "start");
+    this.extractDayMonthNameYear("year.monthname.day", "start");
+    this.extractDayMonthName("until.monthname.day", "end");
+    this.extractDayMonthNameYear("until.year.monthname.day", "end");
     
     // duration
     this.extractDuration("duration.minutes", 1);
@@ -275,75 +273,55 @@ var extractor = {
     return this.collected;
   },
   
-  extractDayMonthYear: function extractDayMonthYear(pattern, relation, now) {
+  extractDayMonthYear: function extractDayMonthYear(pattern, relation) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                               ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
     for (let alt in alts) {
       let positions = alts[alt].positions;
-
       let re = new RegExp(alts[alt].pattern, "ig");
+
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
           res[positions[2]] = parseInt(res[positions[2]], 10);
-          if (res[positions[3]].length == 2)
-            res[positions[3]] = "20" + res[positions[3]];
+          res[positions[3]] = this.normalizeYear(res[positions[3]]);
           res[positions[3]] = parseInt(res[positions[3]], 10);
+          
           if (this.isValidDay(res[positions[1]]) && 
             this.isValidMonth(res[positions[2]]) && 
             this.isValidYear(res[positions[3]])) {
             
-            let guess = {};
-            guess.year = res[positions[3]];
-            guess.month = res[positions[2]];
-            guess.day = res[positions[1]];
-            guess.start = res.index;
-            guess.end = res.index + res[0].length - 1;
-            guess.str = res[0];
-            guess.relation = relation;
-            guess.pattern = pattern;
-            
-            if (this.isPastDate(guess, now))
-              guess.use = false;
-
-            this.collected.push(guess);
+            this.guess(res[positions[3]], res[positions[2]], res[positions[1]],
+                       undefined, undefined,
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern);
           }
         }
       }
     }
   },
   
-  extractDayMonthNameYear: function extractDayMonthNameYear(pattern, relation, now) {
+  extractDayMonthNameYear: function extractDayMonthNameYear(pattern, relation) {
     let alts = this.getRepAlternatives(this.bundle, pattern, ["(\\d{1,2})",
                                       "(" + this.allMonths + ")", "(\\d{2,4})" ]);
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
-
       let re = new RegExp(exp, "ig");
       
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[positions[1]] = parseInt(res[positions[1]], 10);
-          if (res[positions[3]].length == 2)
-              res[positions[3]] = "20" + res[positions[3]];
+          res[positions[3]] = this.normalizeYear(res[positions[3]]);
           res[positions[3]] = parseInt(res[positions[3]], 10);
+
           if (this.isValidDay(res[positions[1]])) {
             for (let i = 0; i < 12; i++) {
               if (this.months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
-                let guess = {};
-                guess.year = res[positions[3]];
-                guess.month = i + 1;
-                guess.day = res[positions[1]];
-                guess.start = res.index;
-                guess.end = res.index + res[0].length - 1;
-                guess.str = res[0];
-                guess.relation = relation;
-                guess.pattern = pattern;
-                
-                if (this.isPastDate(guess, now))
-                  guess.use = false;
-                this.collected.push(guess);
+                this.guess(res[positions[3]], i + 1, res[positions[1]],
+                           undefined, undefined,
+                           res.index, res.index + res[0].length - 1,
+                           res[0], relation, pattern);
                 break;
               }
             }
@@ -353,32 +331,28 @@ var extractor = {
     }  
   },
   
-  extractRelativeDay: function extractRelativeDay(pattern, relation, offset, now) {
+  extractRelativeDay: function extractRelativeDay(pattern, relation, offset) {
     let re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
-        let item = new Date(now.getTime() + 60 * 60 * 24 * 1000 * offset);
-        this.collected.push({year: item.getFullYear(),
-                             month: item.getMonth() + 1,
-                             day: item.getDate(),
-                             start: res.index,
-                             end: res.index + res[0].length - 1,
-                             str: res[0],
-                             relation: relation
-        });
+        let item = new Date(this.now.getTime() + 60 * 60 * 24 * 1000 * offset);
+        this.guess(item.getFullYear(), item.getMonth() + 1, item.getDate(),
+                   undefined, undefined,
+                   res.index, res.index + res[0].length - 1,
+                   res[0], relation, pattern);
       }
     }
   },
   
-  extractDayMonthName: function extractDayMonthName(pattern, relation, now) {
+  extractDayMonthName: function extractDayMonthName(pattern, relation) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")",
                                    "(" + this.allMonths + ")"]);
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
-      
       let re = new RegExp(exp, "ig");
+      
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[positions[1]] = this.parseNumber(res[positions[1]], this.numbers);
@@ -386,19 +360,24 @@ var extractor = {
             for (let i = 0; i < 12; i++) {
               let ms = this.months[i].unescape().split("|");
               if (ms.indexOf(res[positions[2]].toLowerCase()) != -1) {
-                let year = now.getFullYear();
-                let ref = new Date(now.getTime() - 60 * 60 * 24 * 1000);
-                if (ref > new Date(year, i, res[positions[1]]))
-                  year++;
-                this.collected.push({year: year,
-                                     month: i + 1,
-                                     day: res[positions[1]],
-                                     start: res.index,
-                                     end: res.index + res[0].length - 1,
-                                     str: res[0],
-                                     relation: relation,
-                                     pattern: pattern
-                });
+                let date = {year: this.now.getFullYear(), month: i + 1, day: res[positions[1]]};
+                
+                if (this.isPastDate(date, this.now)) {
+                  // find next such date
+                  let item = new Date(this.now.getTime());
+                  while (true) {
+                    item.setDate(item.getDate() + 1);
+                    if (item.getMonth() == date.month - 1  &&
+                      item.getDate() == date.day) {
+                        date.year = item.getFullYear();
+                        break;
+                      }
+                  }
+                }
+                this.guess(date.year, date.month, date.day,
+                       undefined, undefined,
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern);
                 break;
               }
             }
@@ -408,7 +387,7 @@ var extractor = {
     }
   },
   
-  extractDayMonth: function extractDayMonth(pattern, relation, now) {
+  extractDayMonth: function extractDayMonth(pattern, relation) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2})", "(\\d{1,2})"]);
     for (let alt in alts) {
@@ -419,102 +398,87 @@ var extractor = {
           res[2] = parseInt(res[2], 10);
           
           if (this.isValidMonth(res[2]) && this.isValidDay(res[1])) {
-            let guess = {};
-            guess.year = now.getFullYear();
-            guess.month = res[2];
-            guess.day = res[1];
-            guess.start = res.index;
-            guess.end = res.index + res[0].length - 1;
-            guess.str = res[0];
-            guess.relation = relation;
-            guess.pattern = pattern;
+            let date = {year: this.now.getFullYear(), month: res[2], day: res[1]};
             
-            if (this.isPastDate(guess, now)) {
+            if (this.isPastDate(date, this.now)) {
               // find next such date
-              let item = new Date(now.getTime());
+              let item = new Date(this.now.getTime());
               while (true) {
                 item.setDate(item.getDate() + 1);
-                if (item.getMonth() == res[2] - 1  &&
-                  item.getDate() == res[1]) {
-                    guess.year = item.getFullYear();
+                if (item.getMonth() == date.month - 1  &&
+                  item.getDate() == date.day) {
+                    date.year = item.getFullYear();
                     break;
                   }
               }
             }
-            this.collected.push(guess);
+            this.guess(date.year, date.month, date.day,
+                       undefined, undefined,
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern);
           }
         }
       }
     }
   },
   
-  extractDate: function extractDate (pattern, relation, now) {
+  extractDate: function extractDate (pattern, relation) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                        ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
+      
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[1] = this.parseNumber(res[1], this.numbers);
           if (this.isValidDay(res[1])) {
-            let item = new Date(now.getTime());
-            if (now.getDate() > res[1]) {
+            let item = new Date(this.now.getTime());
+            if (this.now.getDate() > res[1]) {
               // find next nth date
               while (true) {
                 item.setDate(item.getDate() + 1);
-                if (item.getMonth() != now.getMonth() &&
+                if (item.getMonth() != this.now.getMonth() &&
                   item.getDate() == res[1])
                   break;
               }
             }
-            this.collected.push({year: item.getFullYear(),
-                                 month: item.getMonth() + 1,
-                                 day: res[1],
-                                 start: res.index,
-                                 end: res.index + res[0].length - 1,
-                                 ambiguous: true,
-                                 str: res[0],
-                                 relation: relation,
-                                 pattern: pattern
-            });
+            this.guess(item.getFullYear(), item.getMonth() + 1, res[1],
+                       undefined, undefined,
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern, true);
           }
         }
       }
     }
   },
   
-  extractWeekDay: function extractWeekDay(now) {
+  extractWeekDay: function extractWeekDay(pattern, relation) {
     let days = [];
     for (let i = 0; i < 7; i++) {
-      days[i] = this.getAlternatives(this.bundle, "weekday." + i, true);
+      days[i] = this.getAlternatives(this.bundle, pattern + i, true);
       let re = new RegExp(days[i], "ig");
       let res = re.exec(this.email);
       if (res) {
         if (!this.restrictChars(res, this.email)) {
           let date = new Date();
-          date.setDate(now.getDate());
-          date.setMonth(now.getMonth());
-          date.setYear(now.getFullYear());
+          date.setDate(this.now.getDate());
+          date.setMonth(this.now.getMonth());
+          date.setYear(this.now.getFullYear());
 
           let diff = (i - date.getDay() + 7) % 7;
           date.setDate(date.getDate() + diff);
           
-          this.collected.push({year: date.getFullYear(),
-                              month: date.getMonth() + 1,
-                              day: date.getDate(),
-                              start: res.index,
-                              end: res.index + res[0].length - 1,
-                              ambiguous: true,
-                              str: res[0],
-                              pattern: "weekday." + i
-          });
+          this.guess(date.getFullYear(), date.getMonth() + 1, date.getDate(),
+                     undefined, undefined,
+                     res.index, res.index + res[0].length - 1,
+                     res[0], relation, pattern + i, true);
         }
       }
     }
   },
   
-  extractHour: function extractHour(pattern, relation, meridiem, now) {
+  extractHour: function extractHour(pattern, relation, meridiem) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2}" + this.marker + this.hourlyNumbers + ")"]);
     for (let alt in alts) {
@@ -530,21 +494,17 @@ var extractor = {
             res[1] = res[1] + 12;
           
           if (this.isValidHour(res[1])) {
-            this.collected.push({hour: this.normalizeHour(res[1]), minute: 0,
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            ambiguous: true,
-                            str: res[0],
-                            relation: relation,
-                            pattern: pattern
-            });
+            this.guess(undefined, undefined, undefined,
+                       this.normalizeHour(res[1]), 0,
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern, true);
           }
         }
       }
     }
   },
   
-  extractHourMinutes: function extractHourMinutes(pattern, relation, meridiem, now) {
+  extractHourMinutes: function extractHourMinutes(pattern, relation, meridiem) {
     let alts = this.getRepAlternatives(this.bundle, pattern,
                                    ["(\\d{1,2})", "(\\d{2})"]);
     for (let alt in alts) {
@@ -560,13 +520,10 @@ var extractor = {
             res[1] = res[1] + 12;
           
           if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
-            this.collected.push({hour: this.normalizeHour(res[1]), minute: res[2],
-                            start: res.index,
-                            end: res.index + res[0].length - 1,
-                            str: res[0],
-                            relation: relation,
-                            pattern: pattern
-            });
+            this.guess(undefined, undefined, undefined,
+                       this.normalizeHour(res[1]), res[2],
+                       res.index, res.index + res[0].length - 1,
+                       res[0], relation, pattern);
           }
         }
       }
@@ -577,14 +534,10 @@ var extractor = {
     let re = new RegExp(this.getAlternatives(this.bundle, pattern, true), "ig");
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
-        this.collected.push({hour: hour,
-                             minute: minute,
-                             start: res.index,
-                             end: res.index + res[0].length - 1,
-                             str: res[0],
-                             relation: relation,
-                             pattern: pattern
-        });
+        this.guess(undefined, undefined, undefined,
+                   hour, minute,
+                   res.index, res.index + res[0].length - 1,
+                   res[0], relation, pattern);
       }
     }
   },
@@ -596,16 +549,14 @@ var extractor = {
       let re = new RegExp(exp, "ig");
       while ((res = re.exec(this.email)) != null) {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
-          let guess = {};
           res[1] = this.parseNumber(res[1], this.numbers);
-          
+          let guess = {};
           guess.duration = res[1] * unit;
           guess.start = res.index;
           guess.end = res.index + res[0].length - 1;
           guess.str = res[0];
           guess.relation = "duration";
           guess.pattern = pattern;
-          
           this.collected.push(guess);
         }
       }
@@ -1000,6 +951,13 @@ var extractor = {
       return hour;
   },
   
+  normalizeYear: function normalizeYear(year) {
+    if (year.length == 2)
+      return "20" + year;
+    else
+      return year;
+  },
+  
   restrictNumbers: function restrictNumbers(res, email) {
     let pattern = email.substring(res.index, res.index + res[0].length);
     let before = email.charAt(res.index - 1);
@@ -1038,6 +996,18 @@ var extractor = {
     } else {
       return r;
     }
+  },
+  
+  guess: function guess(year, month, day, hour, minute, start, end, str,
+                        relation, pattern, ambiguous) {
+    let guess = {year: year, month: month, day: day,
+                hour: hour, minute: minute,
+                start: start, end: end,
+                str: str, relation: relation, pattern: pattern, ambiguous: ambiguous};
+    // past dates are not used for final event but are kept for containment checks
+    if (this.isPastDate(guess, this.now))
+      guess.use = false;
+    this.collected.push(guess);
   }
 }
 
