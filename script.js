@@ -1,8 +1,14 @@
 /* Experiment on how far you can get with simple regular expressions
  * all times best when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   530/610     87%    39/61         64%   enronmeetings
+   575/610     96%    50/61         82%   enronmeetings
    546/600     91%    35/60         58%   mozilla.dev.planning sept set
+   516/600     86%    33/60         55%   private et set
+   
+  * latest when guessing one or two (where appropriate) dates and times per event
+   correct bits  %    correct events  %   set
+   575/610     96%    50/61         82%   enronmeetings
+   513/600     86%    31/60         52%   mozilla.dev.planning sept set
    516/600     86%    33/60         55%   private et set
  */
 
