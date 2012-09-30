@@ -3,7 +3,7 @@
    correct bits  %    correct events  %   set
    530/610     87%    39/61         64%   enronmeetings
    546/600     91%    35/60         58%   mozilla.dev.planning sept set
-   513/600     86%    30/60         50%   private et set
+   516/600     86%    33/60         55%   private et set
  */
 
 var corSum = 0;
@@ -108,12 +108,13 @@ function readFile(nsiFile) {
 
 function findNow(email) {
   var now = new Date();
+  now.setDate(1); // else some guesses at the end of month come out wrong
   
   // use date header
   var re = /^Date:\s\w{3},\s+(\d{1,2})\s(\w{3})\s(\d{4})\s(\d{2}):(\d{1,2})/m;
   var res = re.exec(email);
-
-  now.setDate(parseInt(res[1], 10));
+  
+  now.setFullYear(parseInt(res[3], 10));
   switch (res[2]) {
     case "Jan":
       now.setMonth(0);
@@ -152,7 +153,7 @@ function findNow(email) {
       now.setMonth(11);
       break;
   }
-  now.setFullYear(parseInt(res[3], 10));
+  now.setDate(parseInt(res[1], 10));
   now.setHours(parseInt(res[4], 10));
   now.setMinutes(parseInt(res[5], 10));
   
