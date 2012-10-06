@@ -86,7 +86,7 @@ var extractor = {
     
     let nonAscii = sum/cnt || 0;
     this.aConsoleService.logStringMessage("Average non-ascii charcode: " + nonAscii);
-    dump("Average non-ascii charcode: " + nonAscii + "\n");
+//     dump("Average non-ascii charcode: " + nonAscii + "\n");
     return nonAscii;
   },
   
@@ -113,7 +113,7 @@ var extractor = {
         let t1 = (new Date()).getTime();
         gSpellCheckEngine.dictionary = dicts[dict];
         let dur = (new Date()).getTime() - t1;
-        dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+//         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         patterns = dicts[dict];
       // beginning of dictionary locale matches patterns locale
@@ -121,12 +121,12 @@ var extractor = {
         let t1 = (new Date()).getTime();
         gSpellCheckEngine.dictionary = dicts[dict];
         let dur = (new Date()).getTime() - t1;
-        dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+//         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
         patterns = dicts[dict].substring(0, 2);
       // dictionary for which patterns aren't present
       } else {
-        dump("Dictionary present, rules missing: " + dicts[dict]);
+//         dump("Dictionary present, rules missing: " + dicts[dict]);
         this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
         continue;
       }
@@ -143,8 +143,8 @@ var extractor = {
       }
       
       let percentage = correct/total * 100.0;
-      dump(dicts[dict] + " matches " + percentage + "% of words\n");
-      this.aConsoleService.logStringMessage(dicts[dict] + " matches " + percentage + "% of words");
+//       dump(dicts[dict] + " matches " + percentage + "% of words\n");
+      this.aConsoleService.logStringMessage(dicts[dict] + " dictionary matches " + percentage + "% of words");
       
       if (percentage > 50.0 && percentage > most) {
         mostLocale = patterns;
@@ -159,34 +159,34 @@ var extractor = {
     // using dictionaries for language recognition with non-latin letters doesn't work very well
     // possibly because of bug 471799
     if (avgCharCode > 24000 && avgCharCode < 32000) {
-      dump("Using zh-TW patterns\n");
+//       dump("Using zh-TW patterns\n");
       this.aConsoleService.logStringMessage("Using zh-TW patterns");
       this.bundle = service.createBundle(this.bundleDir + "extract_zh-TW.properties");
     } else if (avgCharCode > 14000 && avgCharCode < 24000) {
-      dump("Using ja patterns\n");
+//       dump("Using ja patterns\n");
       this.aConsoleService.logStringMessage("Using ja patterns");
       this.bundle = service.createBundle(this.bundleDir + "extract_ja.properties");
     } else if (avgCharCode > 1000 && avgCharCode < 1200) {
-      dump("Using ru patterns\n");
+//       dump("Using ru patterns\n");
       this.aConsoleService.logStringMessage("Using ru patterns");
       this.bundle = service.createBundle(this.bundleDir + "extract_ru.properties");
     } else if (most > 0) {
-      dump("Using " + mostLocale + " patterns based on dictionary\n");
+//       dump("Using " + mostLocale + " patterns based on dictionary\n");
       this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
       this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
     // fallbackLocale matches patterns exactly
     } else if (this.checkBundle(this.fallbackLocale)) {
-      dump("Falling back to " + this.fallbackLocale + "\n");
+//       dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
     // beginning of fallbackLocale matches patterns
     } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
       this.fallbackLocale = this.fallbackLocale.substring(0, 2);
-      dump("Falling back to " + this.fallbackLocale + "\n");
+//       dump("Falling back to " + this.fallbackLocale + "\n");
       this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
       this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
     } else {
-      dump("Using en-US\n");
+//       dump("Using en-US\n");
       this.aConsoleService.logStringMessage("Using en-US");
       this.bundle = service.createBundle(this.bundleDir + "extract_en-US.properties");
     }
@@ -567,7 +567,6 @@ var extractor = {
   },
   
   extractDuration: function extractDuration(pattern, unit) {
-    // TODO should support number.x as well
     let alts = this.getRepAlternatives(pattern, ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
@@ -591,7 +590,6 @@ var extractor = {
   markContained: function markContained() {
     for (let outer = 0; outer < this.collected.length; outer++) {
       for (let inner = 0; inner < this.collected.length; inner++) {
-        //this.aConsoleService.logStringMessage(this.collected[outer].str + " + " + this.collected[inner].str);
         
         // included but not exactly the same
         if (outer != inner &&
@@ -602,7 +600,7 @@ var extractor = {
            !(this.collected[inner].start == this.collected[outer].start &&
               this.collected[inner].end == this.collected[outer].end)) {
             
-            //this.aConsoleService.logStringMessage(this.collected[outer].str + " - " + this.collected[inner].str);
+            this.aConsoleService.logStringMessage(this.collected[outer].str + " - " + this.collected[inner].str);
             this.collected[inner].relation = "notadatetime";
         }
       }
@@ -683,7 +681,7 @@ var extractor = {
       return {};
     else {
       for (val in startTimes) {
-        dump("Start: " + JSON.stringify(startTimes[val]) + "\n");
+//         dump("Start: " + JSON.stringify(startTimes[val]) + "\n");
         this.aConsoleService.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
       }
       
@@ -749,7 +747,7 @@ var extractor = {
       return {};
     else {
       for (val in endTimes) {
-        dump("End: " + JSON.stringify(endTimes[val]) + "\n");
+//         dump("End: " + JSON.stringify(endTimes[val]) + "\n");
         this.aConsoleService.logStringMessage("End: " + JSON.stringify(endTimes[val]));
       }
       
@@ -824,12 +822,9 @@ var extractor = {
         let duration = 0;
         
         for (val in durations) {
-          dump("Dur: " + JSON.stringify(durations[val]) + "\n");
-          this.aConsoleService.logStringMessage("Dur: " + JSON.stringify(durations[val]));
-        }
-        
-        for (val in durations) {
           duration += durations[val].duration;
+//           dump("Dur: " + JSON.stringify(durations[val]) + "\n");
+          this.aConsoleService.logStringMessage("Dur: " + JSON.stringify(durations[val]));
         }
         
         if (duration != 0) {
@@ -870,7 +865,7 @@ var extractor = {
       value = this.bundle.GetStringFromName(name);
       if (value.trim() == "") {
         this.aConsoleService.logStringMessage("Pattern not found: " + name);
-        dump("Pattern not found: " + name + "\n");
+//         dump("Pattern not found: " + name + "\n");
         return def;
       }
       // remove whitespace around | if present
@@ -883,7 +878,7 @@ var extractor = {
       return value.sanitize();
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);
-      dump("Pattern not found: " + name + "\n");
+//       dump("Pattern not found: " + name + "\n");
       
       // fake a value to not error out
       return def;
@@ -910,14 +905,17 @@ var extractor = {
       
       let i = 0;
       for (let pattern in patterns) {
-        // XXX only add information when more than 1 replaceables, not needed otherwise
-        let positions = this.getPositionsFor(rawValues[i]);
+        let positions = new Array();
+        if (replaceables.length == 1)
+          positions[1] = 1;
+        else
+          positions = this.getPositionsFor(rawValues[i]);
         alts[i] = {pattern: patterns[i], positions: positions};
         i++;
       }
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);
-      dump("Pattern not found: " + name + "\n");
+//       dump("Pattern not found: " + name + "\n");
     }
     
     return alts;
@@ -926,13 +924,10 @@ var extractor = {
   getPositionsFor: function getPositionsFor(s) {
     let positions = new Array();
     let re = /\%(\d)\$S/g;
-    let match = true;
+    let match;
     let i = 0;
-    while (true) {
+    while (match = re.exec(s)) {
       i++;
-      match = re.exec(s);
-      if (!match)
-        break;
       positions[parseInt(match[1], 10)] = i;
     }
     
