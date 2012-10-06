@@ -680,7 +680,7 @@ var extractor = {
     if (startTimes.length == 0)
       return {};
     else {
-      for (val in startTimes) {
+      for (let val in startTimes) {
 //         dump("Start: " + JSON.stringify(startTimes[val]) + "\n");
         this.aConsoleService.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
       }
@@ -935,7 +935,7 @@ var extractor = {
     for(i = 1; i <= count; i++) {
       if (positions[i] == undefined) {
         dump("Faulty extraction pattern " + name + ", missing parameter %" + i + "$S\n");
-        this.aConsoleService.logStringMessage("Faulty extraction pattern " + name + ", missing parameter %" + i + "$S");
+        Components.utils.reportError("Faulty extraction pattern " + name + ", missing parameter %" + i + "$S");
       }
     }
     return positions;
