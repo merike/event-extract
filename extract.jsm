@@ -219,7 +219,7 @@ var extractor = {
     this.guessLanguage(this.email);
     
     for (let i = 0; i <= 31; i++) {
-      this.numbers[i] = this.getAlternatives("number." + i, true);
+      this.numbers[i] = this.getAlternatives("number." + i);
     }
     this.dailyNumbers = this.numbers.join(this.marker);
     
@@ -233,7 +233,7 @@ var extractor = {
     this.dailyNumbers = this.dailyNumbers.replace("|", this.marker, "g");
     
     for (let i = 0; i < 12; i++) {
-      this.months[i] = this.getAlternatives("month." + (i + 1), true);
+      this.months[i] = this.getAlternatives("month." + (i + 1));
     }
     this.allMonths = this.months.join(this.marker).replace("|", this.marker, "g");
     
@@ -347,7 +347,7 @@ var extractor = {
   },
   
   extractRelativeDay: function extractRelativeDay(pattern, relation, offset) {
-    let re = new RegExp(this.getAlternatives(pattern, true), "ig");
+    let re = new RegExp(this.getAlternatives(pattern), "ig");
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
         let item = new Date(this.now.getTime() + 60 * 60 * 24 * 1000 * offset);
@@ -377,7 +377,6 @@ var extractor = {
               let ms = this.months[i].unescape().split("|");
               if (ms.indexOf(res[positions[2]].toLowerCase()) != -1) {
                 let date = {year: this.now.getFullYear(), month: i + 1, day: res[positions[1]]};
-                
                 if (this.isPastDate(date, this.now)) {
                   // find next such date
                   let item = new Date(this.now.getTime());
@@ -476,7 +475,7 @@ var extractor = {
   extractWeekDay: function extractWeekDay(pattern, relation) {
     let days = [];
     for (let i = 0; i < 7; i++) {
-      days[i] = this.getAlternatives(pattern + i, true);
+      days[i] = this.getAlternatives(pattern + i);
       let re = new RegExp(days[i], "ig");
       let res = re.exec(this.email);
       if (res) {
@@ -555,7 +554,7 @@ var extractor = {
   },
   
   extractTime: function extractTime(pattern, relation, hour, minute) {
-    let re = new RegExp(this.getAlternatives(pattern, true), "ig");
+    let re = new RegExp(this.getAlternatives(pattern), "ig");
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
         let rev = this.prefixSuffixStartEnd(res, relation, this.email);
@@ -864,7 +863,7 @@ var extractor = {
     }
   },
 
-  getAlternatives: function getAlternatives(name, sort) {
+  getAlternatives: function getAlternatives(name) {
     let value;
     let def = "abcd";
     try {
@@ -879,8 +878,7 @@ var extractor = {
       // allow matching for patterns with missing or excessive whitespace
       value = value.replace(/\s+/g, "\\s*");
       let vals = value.split("|");
-      if (sort)
-        vals.sort(function(one, two) {return two.length - one.length;});
+      vals.sort(function(one, two) {return two.length - one.length;});
       value = vals.join("|");
       return value.sanitize();
     } catch (ex) {
@@ -907,7 +905,8 @@ var extractor = {
       value = value.sanitize();
       
       let patterns = value.split("|");
-      let rawValues = this.getAlternatives(name, false).split("|");
+      patterns.sort(function(one, two) {return two.length - one.length;});
+      let rawValues = this.getAlternatives(name).split("|");
       
       let i = 0;
       for (let pattern in patterns) {
@@ -1020,40 +1019,40 @@ var extractor = {
     let ch = "\\s*";
     let res;
     
-    let re = new RegExp("(" + this.getAlternatives("end.prefix", true) + ")" + ch + "$", "ig");
+    let re = new RegExp("(" + this.getAlternatives("end.prefix") + ")" + ch + "$", "ig");
     if ((res = re.exec(prev)) != null) {
       prefixSuffix.relation = "end";
       prefixSuffix.start = res.index;
       prefixSuffix.pattern = res[0] + pattern;
     }
     
-    re = new RegExp("^" + ch + "(" + this.getAlternatives("end.suffix", true) + ")", "ig");
+    re = new RegExp("^" + ch + "(" + this.getAlternatives("end.suffix") + ")", "ig");
     if ((res = re.exec(next)) != null) {
       prefixSuffix.relation = "end";
       prefixSuffix.end = prefixSuffix.end + res[0].length;
       prefixSuffix.pattern = pattern + res[0];
     }
     
-    re = new RegExp("(" + this.getAlternatives("start.prefix", true) + ")" + ch + "$", "ig");
+    re = new RegExp("(" + this.getAlternatives("start.prefix") + ")" + ch + "$", "ig");
     if ((res = re.exec(prev)) != null) {
       prefixSuffix.relation = "start";
       prefixSuffix.start = res.index;
       prefixSuffix.pattern = res[0] + pattern;
     }
     
-    re = new RegExp("^" + ch + "(" + this.getAlternatives("start.suffix", true) + ")", "ig");
+    re = new RegExp("^" + ch + "(" + this.getAlternatives("start.suffix") + ")", "ig");
     if ((res = re.exec(next)) != null) {
       prefixSuffix.relation = "start";
       prefixSuffix.end = prefixSuffix.end + res[0].length;
       prefixSuffix.pattern = pattern + res[0];
     }
     
-    re = new RegExp("(" + this.getAlternatives("no.datetime.prefix", true) + ")" + ch + "$", "ig");
+    re = new RegExp("(" + this.getAlternatives("no.datetime.prefix") + ")" + ch + "$", "ig");
     if ((res = re.exec(prev)) != null) {
       prefixSuffix.relation = "notadatetime";
     }
     
-    re = new RegExp("^" + ch + "(" + this.getAlternatives("no.datetime.suffix", true) + ")", "ig");
+    re = new RegExp("^" + ch + "(" + this.getAlternatives("no.datetime.suffix") + ")", "ig");
     if ((res = re.exec(next)) != null) {
       prefixSuffix.relation = "notadatetime";
     }
