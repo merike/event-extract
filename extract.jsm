@@ -909,7 +909,7 @@ var extractor = {
         if (replaceables.length == 1)
           positions[1] = 1;
         else
-          positions = this.getPositionsFor(rawValues[i]);
+          positions = this.getPositionsFor(rawValues[i], name, replaceables.length);
         alts[i] = {pattern: patterns[i], positions: positions};
         i++;
       }
@@ -921,7 +921,7 @@ var extractor = {
     return alts;
   },
 
-  getPositionsFor: function getPositionsFor(s) {
+  getPositionsFor: function getPositionsFor(s, name, count) {
     let positions = new Array();
     let re = /\%(\d)\$S/g;
     let match;
@@ -931,6 +931,13 @@ var extractor = {
       positions[parseInt(match[1], 10)] = i;
     }
     
+    // sanity checking
+    for(i = 1; i <= count; i++) {
+      if (positions[i] == undefined) {
+        dump("Faulty extraction pattern " + name + ", missing parameter %" + i + "$S\n");
+        this.aConsoleService.logStringMessage("Faulty extraction pattern " + name + ", missing parameter %" + i + "$S");
+      }
+    }
     return positions;
   },
   
