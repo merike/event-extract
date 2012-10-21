@@ -29,7 +29,7 @@ var extractFromEmail = function extractFromEmail(isEvent) {
   let date = new Date(message.date/1000);
   let time = (new Date()).getTime();
   
-  let locale = getPrefSafe("general.useragent.locale", "en-US");
+  let locale = cal.getPrefSafe("general.useragent.locale", "en-US");
   let baseUrl = "chrome://event-extract/content/locale/";
   let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
   extractor.setBundle(baseUrl, locale);

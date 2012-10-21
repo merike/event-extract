@@ -18,6 +18,7 @@ var extractor = {
   bundleDir: "",
   bundle: "",
   fallbackLocale: "",
+  overrides: {},
   aConsoleService: Components.classes["@mozilla.org/consoleservice;1"]
                   .getService(Components.interfaces.nsIConsoleService),
   
@@ -217,6 +218,10 @@ var extractor = {
     this.email = this.cleanup(this.email);
     this.aConsoleService.logStringMessage("Email after processing for extraction: \n" + this.email);
     this.guessLanguage(this.email);
+    
+    try {
+      this.overrides = cal.getPrefSafe("calendar.patterns.override", {});
+    } catch (ex) {}
     
     for (let i = 0; i <= 31; i++) {
       this.numbers[i] = this.getAlternatives("number." + i);
@@ -575,11 +580,12 @@ var extractor = {
         if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
           res[1] = this.parseNumber(res[1], this.numbers);
           let guess = {};
+          let rev = this.prefixSuffixStartEnd(res, "duration", this.email);
           guess.duration = res[1] * unit;
-          guess.start = res.index;
-          guess.end = res.index + res[0].length - 1;
-          guess.str = res[0];
-          guess.relation = "duration";
+          guess.start = rev.start;
+          guess.end = rev.end;
+          guess.str = rev.pattern;
+          guess.relation = rev.relation;
           guess.pattern = pattern;
           this.collected.push(guess);
         }
@@ -832,11 +838,16 @@ var extractor = {
           if (start.hour != undefined) {
             startDate.setHours(start.hour);
             startDate.setMinutes(start.minute);
+          } else {
+            startDate.setHours(0);
+            startDate.setMinutes(0);
+          }
             
-            let endTime = new Date(startDate.getTime() + duration * 60 * 1000);
-            guess.year = endTime.getFullYear();
-            guess.month = endTime.getMonth() + 1;
-            guess.day = endTime.getDate();
+          let endTime = new Date(startDate.getTime() + duration * 60 * 1000);
+          guess.year = endTime.getFullYear();
+          guess.month = endTime.getMonth() + 1;
+          guess.day = endTime.getDate();
+          if (!(endTime.getHours() == 0 && endTime.getMinutes() == 0)) {
             guess.hour = endTime.getHours()
             guess.minute = endTime.getMinutes();
           }
@@ -865,20 +876,23 @@ var extractor = {
       value = this.bundle.GetStringFromName(name);
       if (value.trim() == "") {
         this.aConsoleService.logStringMessage("Pattern not found: " + name);
-//         dump("Pattern not found: " + name + "\n");
         return def;
       }
-      // remove whitespace around | if present
-      value = value.replace(/\s*\|\s*/g, "|");
-      // allow matching for patterns with missing or excessive whitespace
-      value = value.replace(/\s+/g, "\\s*");
-      let vals = value.split("|");
+      
+      let vals = this.cleanPatterns(value).split("|");
+      if (this.overrides[name] != undefined && this.overrides[name]["add"] != undefined) {
+        let additions = this.overrides[name]["add"];
+        additions = this.cleanPatterns(additions).split("|");
+        for (let pattern in additions) {
+          vals.push(additions[pattern]);
+          this.aConsoleService.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
+        }
+      }
+      
       vals.sort(function(one, two) {return two.length - one.length;});
-      value = vals.join("|");
-      return value.sanitize();
+      return vals.join("|");
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);
-//       dump("Pattern not found: " + name + "\n");
       
       // fake a value to not error out
       return def;
@@ -893,15 +907,24 @@ var extractor = {
       if (value.trim() == "")
         throw "";
       
-      // remove whitespace around | if present
-      value = value.replace(/\s*\|\s*/g, "|");
-      // allow matching for patterns with missing or excessive whitespace
-      value = value.replace(/\s+/g, "\\s*");
-      value = value.sanitize();
-      
-      let patterns = value.split("|");
-      patterns.sort(function(one, two) {return two.length - one.length;});
       let rawValues = this.getAlternatives(name).split("|");
+      value = this.cleanPatterns(value);
+      let patterns = value.split("|");
+      
+      if (this.overrides[name] != undefined && this.overrides[name]["add"] != undefined) {
+        let additions = this.overrides[name]["add"];
+        additions = this.cleanPatterns(additions).split("|");
+        for (let pattern in additions) {
+          let cnt = 1;
+          for (let replaceable in replaceables) {
+            additions[pattern] = additions[pattern].replace("$" + cnt + "%S", replaceables[cnt - 1], "g");
+            cnt++;
+          }
+          patterns.push(additions[pattern]);
+          this.aConsoleService.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
+        }
+      }
+      //patterns.sort(function(one, two) {return two.length - one.length;});
       
       let i = 0;
       for (let pattern in patterns) {
@@ -915,9 +938,7 @@ var extractor = {
       }
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);
-//       dump("Pattern not found: " + name + "\n");
     }
-    
     return alts;
   },
 
@@ -939,6 +960,13 @@ var extractor = {
       }
     }
     return positions;
+  },
+  
+  cleanPatterns: function cleanPatterns(pattern) {
+    // remove whitespace around | if present
+    let value = pattern.replace(/\s*\|\s*/g, "|");
+    // allow matching for patterns with missing or excessive whitespace
+    return value.replace(/\s+/g, "\\s*").sanitize();
   },
   
   isValidYear: function isValidYear(year) {
