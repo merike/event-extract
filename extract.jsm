@@ -916,6 +916,7 @@ var extractor = {
         additions = this.cleanPatterns(additions).split("|");
         for (let pattern in additions) {
           let cnt = 1;
+          rawValues.push(additions[pattern]);
           for (let replaceable in replaceables) {
             additions[pattern] = additions[pattern].replace("$" + cnt + "%S", replaceables[cnt - 1], "g");
             cnt++;
@@ -924,7 +925,10 @@ var extractor = {
           this.aConsoleService.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
         }
       }
-      //patterns.sort(function(one, two) {return two.length - one.length;});
+      
+      // needed because rawValues are sorted
+      rawValues.sort(function(one, two) {return two.length - one.length;});
+      patterns.sort(function(one, two) {return two.length - one.length;});
       
       let i = 0;
       for (let pattern in patterns) {
