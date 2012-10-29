@@ -287,7 +287,7 @@ var extractor = {
       this.markSelected(sel, title);
     this.markContained();
     this.collected = this.collected.sort(this.sort);
-
+    
     return this.collected;
   },
   
@@ -889,6 +889,18 @@ var extractor = {
         }
       }
       
+      if (this.overrides[name] != undefined && this.overrides[name]["remove"] != undefined) {
+        let removals = this.overrides[name]["remove"];
+        removals = this.cleanPatterns(removals).split("|");
+        for (let pattern in removals) {
+          let idx = vals.indexOf(removals[pattern]);
+          if (idx != -1) {
+            vals.splice(idx, 1);
+            this.aConsoleService.logStringMessage("Removed " + removals[pattern] + " from " + name + "\n");
+          }
+        }
+      }
+      
       vals.sort(function(one, two) {return two.length - one.length;});
       return vals.join("|");
     } catch (ex) {
@@ -901,44 +913,53 @@ var extractor = {
 
   getRepAlternatives: function getRepAlternatives(name, replaceables) {
     let alts = new Array();
+    let patterns = new Array();
     
     try {
-      let value = this.bundle.formatStringFromName(name, replaceables, replaceables.length);
+      let value = this.bundle.GetStringFromName(name);
       if (value.trim() == "")
         throw "";
       
-      let rawValues = this.getAlternatives(name).split("|");
-      value = this.cleanPatterns(value);
-      let patterns = value.split("|");
-      
+      let vals = this.cleanPatterns(value).split("|");
       if (this.overrides[name] != undefined && this.overrides[name]["add"] != undefined) {
         let additions = this.overrides[name]["add"];
         additions = this.cleanPatterns(additions).split("|");
         for (let pattern in additions) {
-          let cnt = 1;
-          rawValues.push(additions[pattern]);
-          for (let replaceable in replaceables) {
-            additions[pattern] = additions[pattern].replace("$" + cnt + "%S", replaceables[cnt - 1], "g");
-            cnt++;
-          }
-          patterns.push(additions[pattern]);
+          vals.push(additions[pattern]);
           this.aConsoleService.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
         }
       }
       
-      // needed because rawValues are sorted
-      rawValues.sort(function(one, two) {return two.length - one.length;});
-      patterns.sort(function(one, two) {return two.length - one.length;});
+      if (this.overrides[name] != undefined && this.overrides[name]["remove"] != undefined) {
+        let removals = this.overrides[name]["remove"];
+        removals = this.cleanPatterns(removals).split("|");
+        for (let pattern in removals) {
+          let idx = vals.indexOf(removals[pattern]);
+          if (idx != -1) {
+            vals.splice(idx, 1);
+            this.aConsoleService.logStringMessage("Removed " + removals[pattern] + " from " + name + "\n");
+          }
+        }
+      }
       
-      let i = 0;
-      for (let pattern in patterns) {
+      vals.sort(function(one, two) {return two.length - one.length;});
+      for (let val in vals) {
+        let pattern = vals[val];
+        let cnt = 1;
+        for (let replaceable in replaceables) {
+            pattern = pattern.replace("%" + cnt + "$S", replaceables[cnt - 1], "g");
+            cnt++;
+        }
+        patterns.push(pattern);
+      }
+      
+      for (let val in vals) {
         let positions = new Array();
         if (replaceables.length == 1)
           positions[1] = 1;
         else
-          positions = this.getPositionsFor(rawValues[i], name, replaceables.length);
-        alts[i] = {pattern: patterns[i], positions: positions};
-        i++;
+          positions = this.getPositionsFor(vals[val], name, replaceables.length);
+        alts[val] = {pattern: patterns[val], positions: positions};
       }
     } catch (ex) {
       this.aConsoleService.logStringMessage("Pattern not found: " + name);

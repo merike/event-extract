@@ -7,8 +7,8 @@
    
   * latest when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   575/610     96%    50/61         82%   enronmeetings
-   513/600     86%    31/60         52%   mozilla.dev.planning sept set
+   570/610     93%    48/61         79%   enronmeetings
+   517/600     86%    31/60         52%   mozilla.dev.planning sept set
    516/600     86%    33/60         55%   private et set
  */
 
