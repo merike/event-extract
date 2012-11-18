@@ -560,6 +560,7 @@ var extractor = {
   
   extractTime: function extractTime(pattern, relation, hour, minute) {
     let re = new RegExp(this.getAlternatives(pattern), "ig");
+    let res;
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
         let rev = this.prefixSuffixStartEnd(res, relation, this.email);

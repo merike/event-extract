@@ -1,6 +1,12 @@
 resource event-extract .
 content event-extract chrome/content/
+skin event-extract classic/1.0 skin/
+
 # upto tb 10
 overlay chrome://lightning/content/messenger-overlay-toolbar.xul chrome://event-extract/content/context-menu-overlay.xul
 # tb 11 and forward
 overlay chrome://lightning/content/lightning-menus.xul chrome://event-extract/content/context-menu-overlay.xul
+
+overlay chrome://messenger/content/messenger.xul chrome://event-extract/content/msgHeaderOverlay.xul
+overlay chrome://messenger/content/messageWindow.xul chrome://event-extract/content/msgHeaderOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul chrome://event-extract/content/customizeToolbarOverlay.xul

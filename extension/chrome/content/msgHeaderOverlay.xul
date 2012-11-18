@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<?xml-stylesheet href="chrome://event-extract/skin/msgHeader.css" type="text/css"?>
+   
+<overlay id="msg-header-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+  <script type="application/javascript" src="chrome://event-extract/content/event-extractor.js"/>
+  
+  <toolbar id="header-view-toolbar">
+    <toolbarbutton id="hdrExtractEventButton" label="Extract as event" tooltiptext="Extract as event to calendar" oncommand="extract.extractFromEmail(true)" class="toolbarbutton-1 msgHeaderView-button" type="menu-button" removable="true">
+      <menupopup id="extractEventDropdown">
+        <menuitem id="extractTaskButton" label="Extract as task" tooltiptext="Extract as task to calendar" oncommand="extract.extractFromEmail(false); event.stopPropagation();"/>
+      </menupopup>
+    </toolbarbutton>
+  </toolbar>
+  
+  <toolbar id="mail-bar3">
+    <toolbarbutton id="extractEventButton" label="Extract as event" tooltiptext="Extract as event to calendar" oncommand="extract.extractFromEmail(true)" class="toolbarbutton-1" type="menu-button" removable="true">
+      <menupopup id="extractEventDropdown">
+        <menuitem id="extractTaskButton" label="Extract as task" tooltiptext="Extract as task to calendar" oncommand="extract.extractFromEmail(false); event.stopPropagation();"/>
+      </menupopup>
+    </toolbarbutton>
+  </toolbar>
+</overlay>

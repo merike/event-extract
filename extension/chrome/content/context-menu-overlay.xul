@@ -15,11 +15,11 @@
         <menuitem id="mailContext-calendar-convert-event-menuitem"
                   label="Event..."
                   accesskey="E"
-                  oncommand="extractFromEmail(true)"/>
+                  oncommand="extract.extractFromEmail(true)"/>
         <menuitem id="mailContext-calendar-convert-task-menuitem"
                   label="Task..."
                   accesskey="T"
-                  oncommand="extractFromEmail(false)"/>
+                  oncommand="extract.extractFromEmail(false)"/>
       </menupopup>
     </menu>
   </menupopup>
