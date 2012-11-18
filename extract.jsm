@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var EXPORTED_SYMBOLS = ["extractor"];
+Components.utils.import("resource://calendar/modules/calUtils.jsm");
 
 var extractor = {
   email: "",
@@ -19,6 +20,7 @@ var extractor = {
   bundle: "",
   fallbackLocale: "",
   overrides: {},
+  fixedLang: true,
   aConsoleService: Components.classes["@mozilla.org/consoleservice;1"]
                   .getService(Components.interfaces.nsIConsoleService),
   
@@ -91,105 +93,109 @@ var extractor = {
     return nonAscii;
   },
   
-  guessLanguage: function guessLanguage(email) {
-    let spellclass = "@mozilla.org/spellchecker/engine;1";
-    let gSpellCheckEngine = Components.classes[spellclass]
-                       .createInstance(Components.interfaces.mozISpellCheckingEngine);
-    let arr = {};
-    let cnt = {};
-    let words = email.split(/\s+/);
-    let most = 0;
-    let mostLocale;
-    let patterns;
+  setLanguage: function setLanguage(email) {
+    let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
+                  .getService(Components.interfaces.nsIStringBundleService);
     
-    gSpellCheckEngine.getDictionaryList(arr, cnt);
-    let dicts = arr["value"];
-    
-    if (dicts.length == 0)
-      this.aConsoleService.logStringMessage("There are no dictionaries installed and enabled. You might want to add some if date and time extraction from emails seems inaccurate.");
-    
-    for (let dict in dicts) {
-      // dictionary locale and patterns locale match
-      if (this.checkBundle(dicts[dict])) {
-        let t1 = (new Date()).getTime();
-        gSpellCheckEngine.dictionary = dicts[dict];
-        let dur = (new Date()).getTime() - t1;
-//         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
-        this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
-        patterns = dicts[dict];
-      // beginning of dictionary locale matches patterns locale
-      } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
-        let t1 = (new Date()).getTime();
-        gSpellCheckEngine.dictionary = dicts[dict];
-        let dur = (new Date()).getTime() - t1;
-//         dump("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
-        this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
-        patterns = dicts[dict].substring(0, 2);
-      // dictionary for which patterns aren't present
+    if (this.fixedLang == true) {
+      if (this.checkBundle(this.fallbackLocale)) {
+        ;
+      } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
+        this.fallbackLocale = this.fallbackLocale.substring(0, 2);
       } else {
-//         dump("Dictionary present, rules missing: " + dicts[dict]);
-        this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
-        continue;
+        this.fallbackLocale = "en-US";
       }
       
-      let correct = 0;
-      let total = 0;
-      for (let word in words) {
-        words[word] = words[word].replace(/[()\d,;:?!#\.]/g, "");
-        if (words[word].length >= 2) {
-          total++;
-          if (gSpellCheckEngine.check(words[word]))
-            correct++;
+      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+      this.aConsoleService.logStringMessage("Application locale was used to choose " + this.fallbackLocale + " patterns.");
+    } else {
+      let spellclass = "@mozilla.org/spellchecker/engine;1";
+      let gSpellCheckEngine = Components.classes[spellclass]
+                        .createInstance(Components.interfaces.mozISpellCheckingEngine);
+      
+      let arr = {};
+      let cnt = {};
+      gSpellCheckEngine.getDictionaryList(arr, cnt);
+      let dicts = arr["value"];
+      
+      if (dicts.length == 0)
+        this.aConsoleService.logStringMessage("There are no dictionaries installed and enabled. You might want to add some if date and time extraction from emails seems inaccurate.");
+      
+      let patterns;
+      let words = email.split(/\s+/);
+      let most = 0;
+      let mostLocale;
+      for (let dict in dicts) {
+        // dictionary locale and patterns locale match
+        if (this.checkBundle(dicts[dict])) {
+          let t1 = (new Date()).getTime();
+          gSpellCheckEngine.dictionary = dicts[dict];
+          let dur = (new Date()).getTime() - t1;
+          this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+          patterns = dicts[dict];
+        // beginning of dictionary locale matches patterns locale
+        } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
+          let t1 = (new Date()).getTime();
+          gSpellCheckEngine.dictionary = dicts[dict];
+          let dur = (new Date()).getTime() - t1;
+          this.aConsoleService.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+          patterns = dicts[dict].substring(0, 2);
+        // dictionary for which patterns aren't present
+        } else {
+          this.aConsoleService.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
+          continue;
+        }
+        
+        let correct = 0;
+        let total = 0;
+        for (let word in words) {
+          words[word] = words[word].replace(/[()\d,;:?!#\.]/g, "");
+          if (words[word].length >= 2) {
+            total++;
+            if (gSpellCheckEngine.check(words[word]))
+              correct++;
+          }
+        }
+        
+        let percentage = correct/total * 100.0;
+        this.aConsoleService.logStringMessage(dicts[dict] + " dictionary matches " + percentage + "% of words");
+        
+        if (percentage > 50.0 && percentage > most) {
+          mostLocale = patterns;
+          most = percentage;
         }
       }
       
-      let percentage = correct/total * 100.0;
-//       dump(dicts[dict] + " matches " + percentage + "% of words\n");
-      this.aConsoleService.logStringMessage(dicts[dict] + " dictionary matches " + percentage + "% of words");
+      let avgCharCode = this.avgNonAsciiCharCode(email);
       
-      if (percentage > 50.0 && percentage > most) {
-        mostLocale = patterns;
-        most = percentage;
+      // using dictionaries for language recognition with non-latin letters doesn't work very well
+      // possibly because of bug 471799
+      if (avgCharCode > 24000 && avgCharCode < 32000) {
+        this.aConsoleService.logStringMessage("Using zh-TW patterns");
+        this.bundle = service.createBundle(this.bundleDir + "extract_zh-TW.properties");
+      } else if (avgCharCode > 14000 && avgCharCode < 24000) {
+        this.aConsoleService.logStringMessage("Using ja patterns");
+        this.bundle = service.createBundle(this.bundleDir + "extract_ja.properties");
+      } else if (avgCharCode > 1000 && avgCharCode < 1200) {
+        this.aConsoleService.logStringMessage("Using ru patterns");
+        this.bundle = service.createBundle(this.bundleDir + "extract_ru.properties");
+      // dictionary based
+      } else if (most > 0) {
+        this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
+        this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
+      // fallbackLocale matches patterns exactly
+      } else if (this.checkBundle(this.fallbackLocale)) {
+        this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
+        this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+      // beginning of fallbackLocale matches patterns
+      } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
+        this.fallbackLocale = this.fallbackLocale.substring(0, 2);
+        this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
+        this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+      } else {
+        this.aConsoleService.logStringMessage("Using en-US");
+        this.bundle = service.createBundle(this.bundleDir + "extract_en-US.properties");
       }
-    }
-    
-    let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
-                 .getService(Components.interfaces.nsIStringBundleService);
-    let avgCharCode = this.avgNonAsciiCharCode(email);
-    
-    // using dictionaries for language recognition with non-latin letters doesn't work very well
-    // possibly because of bug 471799
-    if (avgCharCode > 24000 && avgCharCode < 32000) {
-//       dump("Using zh-TW patterns\n");
-      this.aConsoleService.logStringMessage("Using zh-TW patterns");
-      this.bundle = service.createBundle(this.bundleDir + "extract_zh-TW.properties");
-    } else if (avgCharCode > 14000 && avgCharCode < 24000) {
-//       dump("Using ja patterns\n");
-      this.aConsoleService.logStringMessage("Using ja patterns");
-      this.bundle = service.createBundle(this.bundleDir + "extract_ja.properties");
-    } else if (avgCharCode > 1000 && avgCharCode < 1200) {
-//       dump("Using ru patterns\n");
-      this.aConsoleService.logStringMessage("Using ru patterns");
-      this.bundle = service.createBundle(this.bundleDir + "extract_ru.properties");
-    } else if (most > 0) {
-//       dump("Using " + mostLocale + " patterns based on dictionary\n");
-      this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
-      this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
-    // fallbackLocale matches patterns exactly
-    } else if (this.checkBundle(this.fallbackLocale)) {
-//       dump("Falling back to " + this.fallbackLocale + "\n");
-      this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
-      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
-    // beginning of fallbackLocale matches patterns
-    } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
-      this.fallbackLocale = this.fallbackLocale.substring(0, 2);
-//       dump("Falling back to " + this.fallbackLocale + "\n");
-      this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
-      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
-    } else {
-//       dump("Using en-US\n");
-      this.aConsoleService.logStringMessage("Using en-US");
-      this.bundle = service.createBundle(this.bundleDir + "extract_en-US.properties");
     }
   },
 
@@ -217,11 +223,13 @@ var extractor = {
     
     this.email = this.cleanup(this.email);
     this.aConsoleService.logStringMessage("Email after processing for extraction: \n" + this.email);
-    this.guessLanguage(this.email);
     
     try {
+      this.fixedLang = cal.getPrefSafe("calendar.patterns.fixed.locale", true);
       this.overrides = cal.getPrefSafe("calendar.patterns.override", {});
     } catch (ex) {}
+    
+    this.setLanguage(this.email);
     
     for (let i = 0; i <= 31; i++) {
       this.numbers[i] = this.getAlternatives("number." + i);
@@ -294,6 +302,7 @@ var extractor = {
   extractDayMonthYear: function extractDayMonthYear(pattern, relation) {
     let alts = this.getRepAlternatives(pattern,
                               ["(\\d{1,2})", "(\\d{1,2})", "(\\d{2,4})" ]);
+    let res;
     for (let alt in alts) {
       let positions = alts[alt].positions;
       let re = new RegExp(alts[alt].pattern, "ig");
@@ -323,6 +332,7 @@ var extractor = {
   extractDayMonthNameYear: function extractDayMonthNameYear(pattern, relation) {
     let alts = this.getRepAlternatives(pattern, ["(\\d{1,2})",
                                       "(" + this.allMonths + ")", "(\\d{2,4})" ]);
+    let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
@@ -353,6 +363,7 @@ var extractor = {
   
   extractRelativeDay: function extractRelativeDay(pattern, relation, offset) {
     let re = new RegExp(this.getAlternatives(pattern), "ig");
+    let res;
     if ((res = re.exec(this.email)) != null) {
       if (!this.restrictChars(res, this.email)) {
         let item = new Date(this.now.getTime() + 60 * 60 * 24 * 1000 * offset);
@@ -369,6 +380,7 @@ var extractor = {
     let alts = this.getRepAlternatives(pattern,
                                    ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")",
                                    "(" + this.allMonths + ")"]);
+    let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let positions = alts[alt].positions;
@@ -411,6 +423,7 @@ var extractor = {
   
   extractDayMonth: function extractDayMonth(pattern, relation) {
     let alts = this.getRepAlternatives(pattern, ["(\\d{1,2})", "(\\d{1,2})"]);
+    let res;
     for (let alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       while ((res = re.exec(this.email)) != null) {
@@ -447,6 +460,7 @@ var extractor = {
   extractDate: function extractDate (pattern, relation) {
     let alts = this.getRepAlternatives(pattern,
                                        ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
+    let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
@@ -506,6 +520,7 @@ var extractor = {
   extractHour: function extractHour(pattern, relation, meridiem) {
     let alts = this.getRepAlternatives(pattern,
                                    ["(\\d{1,2}" + this.marker + this.hourlyNumbers + ")"]);
+    let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
@@ -533,6 +548,7 @@ var extractor = {
   extractHourMinutes: function extractHourMinutes(pattern, relation, meridiem) {
     let alts = this.getRepAlternatives(pattern,
                                    ["(\\d{1,2})", "(\\d{2})"]);
+    let res;
     for (let alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
       
@@ -574,6 +590,7 @@ var extractor = {
   
   extractDuration: function extractDuration(pattern, unit) {
     let alts = this.getRepAlternatives(pattern, ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
+    let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
