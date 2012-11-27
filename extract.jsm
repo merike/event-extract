@@ -44,6 +44,7 @@ var extractor = {
     
     // urls often contain dates dates that can confuse extraction
     email = email.replace(/https?:\/\/[^\s]+\s/gm, "");
+    email = email.replace(/www\.[^\s]+\s/gm, "");
     
     // remove phone numbers
     // TODO allow locale specific configuration of formats
@@ -698,7 +699,7 @@ var extractor = {
     }
   },
   
-  guessStart: function guessStart(collected) {
+  guessStart: function guessStart(collected, isTask) {
     let startTimes = collected.filter(function(val) {
         return (val.relation == "start");});
     if (startTimes.length == 0)
@@ -710,12 +711,23 @@ var extractor = {
       }
       
       var guess = {};
+      let withDayInit = startTimes.filter(function(val) {
+        return (val.day != undefined && val.start == undefined);});
+      // with tasks we don't try to guess start but assume email date
+      if (isTask) {
+        guess.year = withDayInit[0].year;
+        guess.month = withDayInit[0].month;
+        guess.day = withDayInit[0].day;
+        guess.hour = withDayInit[0].hour;
+        guess.minute = withDayInit[0].minute;
+        return guess;
+      }
+      
       let withDay = startTimes.filter(function(val) {
         return (val.day != undefined && val.start != undefined);});
       let withDayNA = withDay.filter(function(val) {
         return (val.ambiguous == undefined);});
-      let withDayInit = startTimes.filter(function(val) {
-        return (val.day != undefined && val.start == undefined);});
+      
       let withMinute = startTimes.filter(function(val) {
         return (val.minute != undefined && val.start != undefined);});
       let withMinuteNA = withMinute.filter(function(val) {
@@ -881,7 +893,12 @@ var extractor = {
           guess.day = undefined;
           guess.hour = undefined;
           guess.minute = undefined;
-        }
+      }
+      
+      if (guess.year != undefined && guess.minute == undefined && isTask) {
+          guess.hour = 0;
+          guess.minute = 0;
+      }
       
       return guess;
     }

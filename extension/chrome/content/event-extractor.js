@@ -37,8 +37,8 @@ var extract = {
     extractor.setBundle(baseUrl, locale);
     let sel = GetMessagePaneFrame().getSelection();
     let collected = extractor.extract(title + "\r\n" + content, date, dayStart, sel, title);
-    let guessed = extractor.guessStart(collected);
-    let endGuess = extractor.guessEnd(collected, guessed);
+    let guessed = extractor.guessStart(collected, !isEvent);
+    let endGuess = extractor.guessEnd(collected, guessed, !isEvent);
     let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
                 isEvent;
     
@@ -103,7 +103,8 @@ var extract = {
         dueDate.setMinutes(endGuess.minute);
       
       setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
-      setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
+      if (endGuess.year != undefined)
+        setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
     }
     
     let timeSpent = (new Date()).getTime() - time;

@@ -8,8 +8,8 @@
   * latest when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
    573/610     94%    49/61         80%   enronmeetings
-   517/600     86%    31/60         52%   mozilla.dev.planning sept set
-   516/600     86%    33/60         55%   private et set
+   515/600     86%    31/60         52%   mozilla.dev.planning sept set
+   512/600     85%    33/60         55%   private et set
  */
 
 var corSum = 0;
@@ -59,16 +59,8 @@ while (mails.hasMoreElements()) {
     startGuess = extractor.guessStart(collected);
     endGuess = extractor.guessEnd(collected, startGuess);
   } else {
-    startGuess.year = refDate.getFullYear();
-    startGuess.month = refDate.getMonth() + 1;
-    startGuess.day = refDate.getDate();
-    startGuess.hour = refDate.getHours();
-    startGuess.minute = refDate.getMinutes();
+    startGuess = extractor.guessStart(collected, true);
     endGuess = extractor.guessEnd(collected, startGuess, true);
-    if (endGuess.hour == undefined) {
-      endGuess.hour = 0;
-      endGuess.minute = 0;
-    }
   }
   
   var time2 = (new Date()).getTime();
