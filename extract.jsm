@@ -69,7 +69,7 @@ var extractor = {
     let bundle = service.createBundle(this.bundleDir + "extract_" + locale + ".properties");
     
     try {
-      bundle.formatStringFromName("today", [], 0);
+      bundle.formatStringFromName("from.today", [], 0);
       return true;
     } catch (ex) {
       return false;
@@ -252,38 +252,38 @@ var extractor = {
     this.allMonths = this.months.join(this.marker).replace("|", this.marker, "g");
     
     // time
-    this.extractTime("noon", "start", 12, 0);
+    this.extractTime("from.noon", "start", 12, 0);
     this.extractTime("until.noon", "end", 12, 0);
     
-    this.extractHour("hour.only", "start", "none");
-    this.extractHour("hour.only.am", "start", "ante");
-    this.extractHour("hour.only.pm", "start", "post");
+    this.extractHour("from.hour", "start", "none");
+    this.extractHour("from.hour.am", "start", "ante");
+    this.extractHour("from.hour.pm", "start", "post");
     this.extractHour("until.hour", "end", "none");
     this.extractHour("until.hour.am", "end", "none");
     this.extractHour("until.hour.pm", "end", "none");
     
-    this.extractHourMinutes("hour.minutes", "start", "none");
-    this.extractHourMinutes("hour.minutes.am", "start", "ante");
-    this.extractHourMinutes("hour.minutes.pm", "start", "post");
+    this.extractHourMinutes("from.hour.minutes", "start", "none");
+    this.extractHourMinutes("from.hour.minutes.am", "start", "ante");
+    this.extractHourMinutes("from.hour.minutes.pm", "start", "post");
     this.extractHourMinutes("until.hour.minutes", "end", "none");
     this.extractHourMinutes("until.hour.minutes.am", "end", "ante");
     this.extractHourMinutes("until.hour.minutes.pm", "end", "post");
     
     // date
-    this.extractRelativeDay("today", "start", 0);
-    this.extractRelativeDay("tomorrow", "start", 1);
+    this.extractRelativeDay("from.today", "start", 0);
+    this.extractRelativeDay("from.tomorrow", "start", 1);
     this.extractRelativeDay("until.tomorrow", "end", 1);
-    this.extractWeekDay("weekday.", "start");
+    this.extractWeekDay("from.weekday.", "start");
     this.extractWeekDay("until.weekday.", "end");
-    this.extractDate("ordinal.date", "start");
+    this.extractDate("from.ordinal.date", "start");
     this.extractDate("until.ordinal.date", "end");
     
-    this.extractDayMonth("month.day", "start");
-    this.extractDayMonthYear("year.month.day", "start");
+    this.extractDayMonth("from.month.day", "start");
+    this.extractDayMonthYear("from.year.month.day", "start");
     this.extractDayMonth("until.month.day", "end");
     this.extractDayMonthYear("until.year.month.day", "end");
-    this.extractDayMonthName("monthname.day", "start");
-    this.extractDayMonthNameYear("year.monthname.day", "start");
+    this.extractDayMonthName("from.monthname.day", "start");
+    this.extractDayMonthNameYear("from.year.monthname.day", "start");
     this.extractDayMonthName("until.monthname.day", "end");
     this.extractDayMonthNameYear("until.year.monthname.day", "end");
     
@@ -1137,7 +1137,8 @@ var extractor = {
       prefixSuffix.pattern = pattern + res[0];
     }
     
-    re = new RegExp("(" + this.getAlternatives("no.datetime.prefix") + ")" + ch + "$", "ig");
+    re = new RegExp("\\s(" + this.getAlternatives("no.datetime.prefix") + ")" + ch + "$", "ig");
+
     if ((res = re.exec(prev)) != null) {
       prefixSuffix.relation = "notadatetime";
     }
