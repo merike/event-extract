@@ -32,11 +32,11 @@ var extract = {
     let time = (new Date()).getTime();
     
     let locale = cal.getPrefSafe("general.useragent.locale", "en-US");
-    let baseUrl = "chrome://event-extract/content/locale/";
+    let baseUrl = "jar:resource://calendar/chrome/calendar-LOCALE.jar!/locale/LOCALE/calendar/calendar-extract.properties";
     let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
     extractor.setBundle(baseUrl, locale);
     let sel = GetMessagePaneFrame().getSelection();
-    let collected = extractor.extract(title + "\r\n" + content, date, dayStart, sel, title);
+    let collected = extractor.extract(content, date, dayStart, sel, title);
     let guessed = extractor.guessStart(collected, !isEvent);
     let endGuess = extractor.guessEnd(collected, guessed, !isEvent);
     let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&

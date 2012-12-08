@@ -16,7 +16,7 @@ var extractor = {
   months: [],
   dayStart: 6,
   now: undefined,
-  bundleDir: "",
+  bundleFile: "",
   bundle: "",
   fallbackLocale: "",
   overrides: {},
@@ -58,15 +58,15 @@ var extractor = {
     return email;
   },
   
-  setBundle: function setBundle(dir, fallbackLocale) {
-    this.bundleDir = dir;
+  setBundle: function setBundle(baseUrl, fallbackLocale) {
+    this.bundleFile = baseUrl;
     this.fallbackLocale = fallbackLocale;
   },
   
   checkBundle: function checkBundle(locale) {
     let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
                  .getService(Components.interfaces.nsIStringBundleService);
-    let bundle = service.createBundle(this.bundleDir + "extract_" + locale + ".properties");
+    let bundle = service.createBundle(this.bundleFile.replace("LOCALE", locale, "g"));
     
     try {
       bundle.formatStringFromName("from.today", [], 0);
@@ -107,7 +107,7 @@ var extractor = {
         this.fallbackLocale = "en-US";
       }
       
-      this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+      this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
       this.aConsoleService.logStringMessage("Application locale was used to choose " + this.fallbackLocale + " patterns.");
     } else {
       let spellclass = "@mozilla.org/spellchecker/engine;1";
@@ -173,37 +173,37 @@ var extractor = {
       // possibly because of bug 471799
       if (avgCharCode > 24000 && avgCharCode < 32000) {
         this.aConsoleService.logStringMessage("Using zh-TW patterns");
-        this.bundle = service.createBundle(this.bundleDir + "extract_zh-TW.properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "zh-TW", "g"));
       } else if (avgCharCode > 14000 && avgCharCode < 24000) {
         this.aConsoleService.logStringMessage("Using ja patterns");
-        this.bundle = service.createBundle(this.bundleDir + "extract_ja.properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "ja", "g"));
       } else if (avgCharCode > 1000 && avgCharCode < 1200) {
         this.aConsoleService.logStringMessage("Using ru patterns");
-        this.bundle = service.createBundle(this.bundleDir + "extract_ru.properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "ru", "g"));
       // dictionary based
       } else if (most > 0) {
         this.aConsoleService.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
-        this.bundle = service.createBundle(this.bundleDir + "extract_" + mostLocale + ".properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", mostLocale, "g"));
       // fallbackLocale matches patterns exactly
       } else if (this.checkBundle(this.fallbackLocale)) {
         this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
-        this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
       // beginning of fallbackLocale matches patterns
       } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
         this.fallbackLocale = this.fallbackLocale.substring(0, 2);
         this.aConsoleService.logStringMessage("Falling back to " + this.fallbackLocale);
-        this.bundle = service.createBundle(this.bundleDir + "extract_" + this.fallbackLocale + ".properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
       } else {
         this.aConsoleService.logStringMessage("Using en-US");
-        this.bundle = service.createBundle(this.bundleDir + "extract_en-US.properties");
+        this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "en-US", "g"));
       }
     }
   },
 
-  extract: function extract(email, now, dayStart, sel, title) {
+  extract: function extract(body, now, dayStart, sel, title) {
     let initial = {};
     this.collected = [];
-    this.email = email;
+    this.email = title + "\r\n" + body;
     this.now = now;
     
     initial.year = now.getFullYear();

@@ -33,7 +33,7 @@ fileCor.initWithPath(arguments[0] + "../" + file.leafName + "_cor");
 
 if (arguments[1])
   locale = arguments[1];
-let baseUrl = "file:/media/Meedia/tty/lt/event-extract/patterns/";
+let baseUrl = "file:/media/Meedia/tty/lt/event-extract/patterns/extract_LOCALE.properties";
 
 var mails = file.directoryEntries;
 var ans = fileCor.directoryEntries;
