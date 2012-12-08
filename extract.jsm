@@ -262,6 +262,11 @@ var extractor = {
     this.extractHour("until.hour.am", "end", "none");
     this.extractHour("until.hour.pm", "end", "none");
     
+    this.extractHalfHour("from.half.hour.before", "start", "ante");
+    this.extractHalfHour("until.half.hour.before", "end", "ante");
+    this.extractHalfHour("from.half.hour.after", "start", "post");
+    this.extractHalfHour("until.half.hour.after", "end", "post");
+    
     this.extractHourMinutes("from.hour.minutes", "start", "none");
     this.extractHourMinutes("from.hour.minutes.am", "start", "ante");
     this.extractHourMinutes("from.hour.minutes.pm", "start", "post");
@@ -538,6 +543,35 @@ var extractor = {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
             this.guess(undefined, undefined, undefined,
                        this.normalizeHour(res[1]), 0,
+                       rev.start, rev.end,
+                       rev.pattern, rev.relation, pattern, true);
+          }
+        }
+      }
+    }
+  },
+  
+  extractHalfHour: function extractHalfHour(pattern, relation, direction) {
+    let alts = this.getRepAlternatives(pattern,
+                                   ["(\\d{1,2}" + this.marker + this.hourlyNumbers + ")"]);
+    let res;
+    for (let alt in alts) {
+      let exp = alts[alt].pattern.replace(this.marker, "|", "g");
+      let re = new RegExp(exp, "ig");
+      while ((res = re.exec(this.email)) != null) {
+        if (res && !this.restrictNumbers(res, this.email) && !this.restrictChars(res, this.email)) {
+          res[1] = this.parseNumber(res[1], this.numbers);
+          
+          if (direction == "ante")
+            if (res[1] == 1)
+              res[1] = 12;
+            else
+              res[1] = res[1] - 1;
+          
+          if (this.isValidHour(res[1])) {
+            let rev = this.prefixSuffixStartEnd(res, relation, this.email);
+            this.guess(undefined, undefined, undefined,
+                       this.normalizeHour(res[1]), 30,
                        rev.start, rev.end,
                        rev.pattern, rev.relation, pattern, true);
           }
