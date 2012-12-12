@@ -23,44 +23,50 @@ var extractor = {
   fixedLang: true,
   aConsoleService: Components.classes["@mozilla.org/consoleservice;1"]
                   .getService(Components.interfaces.nsIConsoleService),
+
+  init: function init(baseUrl, fallbackLocale, dayStart) {
+    this.bundleFile = baseUrl;
+    this.fallbackLocale = fallbackLocale;
+    
+    if (dayStart != undefined)
+      this.dayStart = dayStart;
+  },
   
-  cleanup: function cleanup(email) {
+  /**
+   * Removes confusing data like urls, timezones and phone numbers from email
+   * Also removes standard signatures and quoted content from previous emails
+   */
+  cleanup: function cleanup() {
     // remove Date: and Sent: headers
     // only necessary with saved emails outside of extension
-    email = email.replace(/^Date:.+$/m, "");
-    email = email.replace(/^Sent:.+$/m, "");
-    email = email.replace(/^Saatmisaeg:.+$/m, "");
+    this.email = this.email.replace(/^Date:.+$/m, "");
+    this.email = this.email.replace(/^Sent:.+$/m, "");
+    this.email = this.email.replace(/^Saatmisaeg:.+$/m, "");
     
     // XXX remove earlier correspondence
     // ideally this should be considered with lower certainty to fill missing information
     // remove last line preceeding quoted message and first line of the quote
-    email = email.replace(/\r?\n[^>].*\r?\n>+.*$/m, "");
+    this.email = this.email.replace(/\r?\n[^>].*\r?\n>+.*$/m, "");
     // remove the rest of quoted content
-    email = email.replace(/^>+.*$/gm, "");
+    this.email = this.email.replace(/^>+.*$/gm, "");
     
     // remove empty lines
-    email = email.replace(/<br ?\/?>/gm, "");
-    email = email.replace(/^\s[ \t]*$/gm, "");
+    this.email = this.email.replace(/<br ?\/?>/gm, "");
+    this.email = this.email.replace(/^\s[ \t]*$/gm, "");
     
     // urls often contain dates dates that can confuse extraction
-    email = email.replace(/https?:\/\/[^\s]+\s/gm, "");
-    email = email.replace(/www\.[^\s]+\s/gm, "");
+    this.email = this.email.replace(/https?:\/\/[^\s]+\s/gm, "");
+    this.email = this.email.replace(/www\.[^\s]+\s/gm, "");
     
     // remove phone numbers
     // TODO allow locale specific configuration of formats
-    email = email.replace(/\d-\d\d\d-\d\d\d-\d\d\d\d/gm, "");
+    this.email = this.email.replace(/\d-\d\d\d-\d\d\d-\d\d\d\d/gm, "");
     
     // remove standard signature
-    email = email.replace(/\r?\n-- \r?\n[\S\s]+$/, "");
+    this.email = this.email.replace(/\r?\n-- \r?\n[\S\s]+$/, "");
     
     // XXX remove timezone info, for now
-    email = email.replace(/gmt[+-]\d{2}:\d{2}/gi, "");
-    return email;
-  },
-  
-  setBundle: function setBundle(baseUrl, fallbackLocale) {
-    this.bundleFile = baseUrl;
-    this.fallbackLocale = fallbackLocale;
+    this.email = this.email.replace(/gmt[+-]\d{2}:\d{2}/gi, "");
   },
   
   checkBundle: function checkBundle(locale) {
@@ -200,7 +206,17 @@ var extractor = {
     }
   },
 
-  extract: function extract(body, now, dayStart, sel, title) {
+  /**
+   * Extracts dates, times and durations from email
+   * 
+   * @param body  email body
+   * @param now   reference time against which relative times are interpreted
+   * @param sel   selection object of email content, when not null times
+   *                outside selection are disgarded
+   * @param title email title
+   * @return      sorted list of extracted datetime objects
+   */
+  extract: function extract(title, body, now, sel) {
     let initial = {};
     this.collected = [];
     this.email = title + "\r\n" + body;
@@ -212,8 +228,6 @@ var extractor = {
     initial.hour = now.getHours();
     initial.minute = now.getMinutes();
     
-    if (dayStart != undefined)
-      this.dayStart = dayStart;
     this.collected.push({year: initial.year,
                          month: initial.month,
                          day: initial.day,
@@ -222,7 +236,7 @@ var extractor = {
                          relation: "start"
     });
     
-    this.email = this.cleanup(this.email);
+    this.cleanup();
     this.aConsoleService.logStringMessage("Email after processing for extraction: \n" + this.email);
     
     try {
@@ -733,6 +747,13 @@ var extractor = {
     }
   },
   
+  /**
+   * Guesses start time from list of guessed datetimes
+   * 
+   * @param collected list of datetimes extracted by extract()
+   * @param isTask    whether start time should be guessed for task or event 
+   * @return          datetime object for start time
+   */
   guessStart: function guessStart(collected, isTask) {
     let startTimes = collected.filter(function(val) {
         return (val.relation == "start");});
@@ -807,6 +828,14 @@ var extractor = {
     }
   },
   
+  /**
+   * Guesses end time from list of guessed datetimes relative to start time
+   * 
+   * @param collected list of datetimes extracted by extract()
+   * @param start     start time to consider when guessing
+   * @param isTask    whether start time should be guessed for task or event
+   * @return          datetime object for end time
+   */
   guessEnd: function guessEnd(collected, start, isTask) {
     var guess = {};
     let endTimes = collected.filter(function(val) {
@@ -1079,6 +1108,10 @@ var extractor = {
     return (hour >= 0 && hour <= 23);
   },
   
+  isValidMinute: function isValidMinute(minute) {
+    return (minute >= 0 && minute <= 59);
+  },
+  
   isPastDate: function isPastDate(date, refDate) {
     // avoid changing original refDate
     let refDate = new Date(refDate.getTime());
@@ -1090,10 +1123,6 @@ var extractor = {
     if (date.day != undefined)
       jsDate = new Date(date.year, date.month - 1, date.day);
     return jsDate < refDate;
-  },
-  
-  isValidMinute: function isValidMinute(minute) {
-    return (minute >= 0 && minute <= 59);
   },
   
   normalizeHour: function normalizeHour(hour) {

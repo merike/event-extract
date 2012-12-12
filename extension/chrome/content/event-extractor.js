@@ -34,9 +34,9 @@ var extract = {
     let locale = cal.getPrefSafe("general.useragent.locale", "en-US");
     let baseUrl = "jar:resource://calendar/chrome/calendar-LOCALE.jar!/locale/LOCALE/calendar/calendar-extract.properties";
     let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
-    extractor.setBundle(baseUrl, locale);
+    extractor.init(baseUrl, locale, dayStart);
     let sel = GetMessagePaneFrame().getSelection();
-    let collected = extractor.extract(content, date, dayStart, sel, title);
+    let collected = extractor.extract(title, content, date, sel);
     let guessed = extractor.guessStart(collected, !isEvent);
     let endGuess = extractor.guessEnd(collected, guessed, !isEvent);
     let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&

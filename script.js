@@ -49,10 +49,10 @@ while (mails.hasMoreElements()) {
   var answer = readFile(corFile);
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
-  extractor.setBundle(baseUrl, locale);
+  extractor.init(baseUrl, locale);
   var time1 = (new Date()).getTime();
   var refDate = findNow(info.contents);
-  var collected = extractor.extract(info.contents, refDate);
+  var collected = extractor.extract(null, info.contents, refDate);
   var startGuess = {};
   var endGuess = {};
   if (expected.to != "task") {
