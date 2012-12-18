@@ -673,7 +673,7 @@ var extractor = {
            !(this.collected[inner].start == this.collected[outer].start &&
               this.collected[inner].end == this.collected[outer].end)) {
             
-            this.aConsoleService.logStringMessage(this.collected[outer].str + " - " + this.collected[inner].str);
+            this.aConsoleService.logStringMessage(this.collected[outer].str + " found as well, disgarding " + this.collected[inner].str);
             this.collected[inner].relation = "notadatetime";
         }
       }
@@ -683,14 +683,16 @@ var extractor = {
   markSelected: function markSelected(sel, title) {
     if (sel.rangeCount > 0) {
       // mark the ones to not use
-      for (let i = 0; i < this.collected.length; i++) {
-        for (let j = 0; j < sel.rangeCount; j++) {
-          let selection = sel.getRangeAt(j).toString();
-
-          if (selection.indexOf(this.collected[i].str) == -1 ||
-              title.indexOf(this.collected[i].str) == -1
+      for (let i = 0; i < sel.rangeCount; i++) {
+        this.aConsoleService.logStringMessage("Selection " + i + " is " + selection);
+        for (let j = 0; j < this.collected.length; j++) {
+          let selection = sel.getRangeAt(i).toString();
+          
+          if (selection.indexOf(this.collected[j].str) == -1 &&
+              title.indexOf(this.collected[j].str) == -1
           ) {
-            this.collected[i].relation = "notadatetime";
+            this.collected[j].relation = "notadatetime";
+            this.aConsoleService.logStringMessage("Marked " + JSON.stringify(this.collected[j]) + " as notadatetime");
           }
         }
       }
