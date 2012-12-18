@@ -688,8 +688,8 @@ var extractor = {
         for (let j = 0; j < this.collected.length; j++) {
           let selection = sel.getRangeAt(i).toString();
           
-          if (selection.indexOf(this.collected[j].str) == -1 &&
-              title.indexOf(this.collected[j].str) == -1
+          if (!selection.contains(this.collected[j].str) &&
+              !title.contains(this.collected[j].str)
           ) {
             this.collected[j].relation = "notadatetime";
             this.aConsoleService.logStringMessage("Marked " + JSON.stringify(this.collected[j]) + " as notadatetime");
@@ -1221,7 +1221,7 @@ var extractor = {
     if (isNaN(r)) {
       for (let i = 0; i <= 31; i++) {
         let ns = numbers[i].split("|");
-        if (ns.indexOf(number.toLowerCase()) != -1) {
+        if (ns.indexOf(number.toLowerCase() != -1)) {
           return i;
         }
       }
