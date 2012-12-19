@@ -1221,7 +1221,7 @@ var extractor = {
     if (isNaN(r)) {
       for (let i = 0; i <= 31; i++) {
         let ns = numbers[i].split("|");
-        if (ns.indexOf(number.toLowerCase() != -1)) {
+        if (ns.indexOf(number.toLowerCase()) != -1) {
           return i;
         }
       }
