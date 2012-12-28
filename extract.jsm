@@ -80,12 +80,12 @@ var extractor = {
     }
   },
 
-  avgNonAsciiCharCode: function avgNonAsciiCharCode(email) {
+  avgNonAsciiCharCode: function avgNonAsciiCharCode() {
     let sum = 0;
     let cnt = 0;
 
-    for (let i = 0; i < email.length; i++) {
-      let ch = email.charCodeAt(i);
+    for (let i = 0; i < this.email.length; i++) {
+      let ch = this.email.charCodeAt(i);
       if (ch > 128) {
           sum += ch;
           cnt++;
@@ -97,7 +97,7 @@ var extractor = {
     return nonAscii;
   },
 
-  setLanguage: function setLanguage(email) {
+  setLanguage: function setLanguage() {
     let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
                   .getService(Components.interfaces.nsIStringBundleService);
 
@@ -128,7 +128,7 @@ var extractor = {
                                   "from emails seems inaccurate.");
 
       let patterns;
-      let words = email.split(/\s+/);
+      let words = this.email.split(/\s+/);
       let most = 0;
       let mostLocale;
       for (let dict in dicts) {
@@ -172,7 +172,7 @@ var extractor = {
         }
       }
 
-      let avgCharCode = this.avgNonAsciiCharCode(email);
+      let avgCharCode = this.avgNonAsciiCharCode();
 
       // using dictionaries for language recognition with non-latin letters doesn't work very well
       // possibly because of bug 471799
@@ -240,10 +240,10 @@ var extractor = {
 
     try {
       this.fixedLang = cal.getPrefSafe("calendar.patterns.fixed.locale", true);
-      this.overrides = cal.getPrefSafe("calendar.patterns.override", {});
+      this.overrides = JSON.parse(cal.getPrefSafe("calendar.patterns.override", "{}"));
     } catch (ex) {}
 
-    this.setLanguage(this.email);
+    this.setLanguage();
 
     for (let i = 0; i <= 31; i++) {
       this.numbers[i] = this.getPatterns("number." + i);
