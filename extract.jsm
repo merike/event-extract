@@ -328,20 +328,16 @@ var extractor = {
 
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[positions[1]] = parseInt(res[positions[1]], 10);
-          res[positions[2]] = parseInt(res[positions[2]], 10);
-          res[positions[3]] = this.normalizeYear(res[positions[3]]);
-          res[positions[3]] = parseInt(res[positions[3]], 10);
+          let day = parseInt(res[positions[1]], 10);
+          let month = parseInt(res[positions[2]], 10);
+          let year = parseInt(this.normalizeYear(res[positions[3]]), 10);
 
-          if (this.isValidDay(res[positions[1]]) &&
-            this.isValidMonth(res[positions[2]]) &&
-            this.isValidYear(res[positions[3]])) {
+          if (this.isValidDay(day) && this.isValidMonth(month) &&
+              this.isValidYear(year)) {
 
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(res[positions[3]], res[positions[2]], res[positions[1]],
-                       undefined, undefined,
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern);
+            this.guess(year, month, day, undefined, undefined,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
       }
@@ -360,18 +356,16 @@ var extractor = {
 
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[positions[1]] = parseInt(res[positions[1]], 10);
-          res[positions[3]] = this.normalizeYear(res[positions[3]]);
-          res[positions[3]] = parseInt(res[positions[3]], 10);
+          let day = parseInt(res[positions[1]], 10);
+          let month = res[positions[2]];
+          let year = parseInt(this.normalizeYear(res[positions[3]]), 10);
 
-          if (this.isValidDay(res[positions[1]])) {
+          if (this.isValidDay(day)) {
             for (let i = 0; i < 12; i++) {
-              if (this.months[i].split("|").indexOf(res[positions[2]].toLowerCase()) != -1) {
+              if (this.months[i].split("|").indexOf(month.toLowerCase()) != -1) {
                 let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-                this.guess(res[positions[3]], i + 1, res[positions[1]],
-                           undefined, undefined,
-                           rev.start, rev.end,
-                           rev.pattern, rev.relation, pattern);
+                this.guess(year, i + 1, day, undefined, undefined,
+                           rev.start, rev.end, rev.pattern, rev.relation, pattern);
                 break;
               }
             }
@@ -408,30 +402,30 @@ var extractor = {
 
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[positions[1]] = this.parseNumber(res[positions[1]], this.numbers);
-          if (this.isValidDay(res[positions[1]])) {
+          let day = this.parseNumber(res[positions[1]], this.numbers);
+          let month = res[positions[2]];
+
+          if (this.isValidDay(day)) {
             for (let i = 0; i < 12; i++) {
               let ms = this.months[i].unescape().split("|");
-              if (ms.indexOf(res[positions[2]].toLowerCase()) != -1) {
-                let date = {year: this.now.getFullYear(), month: i + 1, day: res[positions[1]]};
+              if (ms.indexOf(month.toLowerCase()) != -1) {
+                let date = {year: this.now.getFullYear(), month: i + 1, day: day};
                 if (this.isPastDate(date, this.now)) {
                   // find next such date
                   let item = new Date(this.now.getTime());
                   while (true) {
                     item.setDate(item.getDate() + 1);
                     if (item.getMonth() == date.month - 1  &&
-                      item.getDate() == date.day) {
-                        date.year = item.getFullYear();
-                        break;
-                      }
+                        item.getDate() == date.day) {
+                      date.year = item.getFullYear();
+                      break;
+                    }
                   }
                 }
 
                 let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-                this.guess(date.year, date.month, date.day,
-                       undefined, undefined,
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern);
+                this.guess(date.year, date.month, date.day, undefined, undefined,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern);
                 break;
               }
             }
@@ -446,13 +440,15 @@ var extractor = {
     let res;
     for (let alt in alts) {
       let re = new RegExp(alts[alt].pattern, "ig");
+      let positions = alts[alt].positions;
+
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
+          let day = parseInt(res[positions[1]], 10);
+          let month = parseInt(res[positions[2]], 10);
 
-          if (this.isValidMonth(res[2]) && this.isValidDay(res[1])) {
-            let date = {year: this.now.getFullYear(), month: res[2], day: res[1]};
+          if (this.isValidMonth(month) && this.isValidDay(day)) {
+            let date = {year: this.now.getFullYear(), month: month, day: day};
 
             if (this.isPastDate(date, this.now)) {
               // find next such date
@@ -460,17 +456,16 @@ var extractor = {
               while (true) {
                 item.setDate(item.getDate() + 1);
                 if (item.getMonth() == date.month - 1  &&
-                  item.getDate() == date.day) {
-                    date.year = item.getFullYear();
-                    break;
-                  }
+                    item.getDate() == date.day) {
+                  date.year = item.getFullYear();
+                  break;
+                }
               }
             }
 
-            let rev = this.prefixSuffixStartEnd(res, relation, this.email);            this.guess(date.year, date.month, date.day,
-                       undefined, undefined,
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern);
+            let rev = this.prefixSuffixStartEnd(res, relation, this.email);
+            this.guess(date.year, date.month, date.day, undefined, undefined,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
       }
@@ -487,21 +482,21 @@ var extractor = {
 
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = this.parseNumber(res[1], this.numbers);
-          if (this.isValidDay(res[1])) {
+          let day = this.parseNumber(res[1], this.numbers);
+          if (this.isValidDay(day)) {
             let item = new Date(this.now.getTime());
-            if (this.now.getDate() > res[1]) {
+            if (this.now.getDate() > day) {
               // find next nth date
               while (true) {
                 item.setDate(item.getDate() + 1);
                 if (item.getMonth() != this.now.getMonth() &&
-                  item.getDate() == res[1])
+                  item.getDate() == day)
                   break;
               }
             }
 
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(item.getFullYear(), item.getMonth() + 1, res[1],
+            this.guess(item.getFullYear(), item.getMonth() + 1, day,
                        undefined, undefined,
                        rev.start, rev.end,
                        rev.pattern, rev.relation, pattern, true);
@@ -544,19 +539,20 @@ var extractor = {
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
+
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = this.parseNumber(res[1], this.numbers);
+          let hour = this.parseNumber(res[1], this.numbers);
 
-          if (meridiem == "ante" && res[1] == 12)
-            res[1] = res[1] - 12;
-          if (meridiem == "post" && res[1] != 12)
-            res[1] = res[1] + 12;
+          if (meridiem == "ante" && hour == 12)
+            hour = hour - 12;
+          if (meridiem == "post" && hour != 12)
+            hour = hour + 12;
 
           if (this.isValidHour(res[1])) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
             this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(res[1]), 0,
+                       this.normalizeHour(hour), 0,
                        rev.start, rev.end,
                        rev.pattern, rev.relation, pattern, true);
           }
@@ -572,20 +568,21 @@ var extractor = {
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
+
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = this.parseNumber(res[1], this.numbers);
+          let hour = this.parseNumber(res[1], this.numbers);
 
           if (direction == "ante")
-            if (res[1] == 1)
-              res[1] = 12;
+            if (hour == 1)
+              hour = 12;
             else
-              res[1] = res[1] - 1;
+              hour = hour - 1;
 
-          if (this.isValidHour(res[1])) {
+          if (this.isValidHour(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
             this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(res[1]), 30,
+                       this.normalizeHour(hour), 30,
                        rev.start, rev.end,
                        rev.pattern, rev.relation, pattern, true);
           }
@@ -598,24 +595,24 @@ var extractor = {
     let alts = this.getRepPatterns(pattern, ["(\\d{1,2})", "(\\d{2})"]);
     let res;
     for (let alt in alts) {
+      let positions = alts[alt].positions;
       let re = new RegExp(alts[alt].pattern, "ig");
 
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = parseInt(res[1], 10);
-          res[2] = parseInt(res[2], 10);
+          let hour = parseInt(res[positions[1]], 10);
+          let minute = parseInt(res[positions[2]], 10);
 
-          if (meridiem == "ante" && res[1] == 12)
-            res[1] = res[1] - 12;
-          if (meridiem == "post" && res[1] != 12)
-            res[1] = res[1] + 12;
+          if (meridiem == "ante" && hour == 12)
+            hour = hour - 12;
+          if (meridiem == "post" && hour != 12)
+            hour = hour + 12;
 
-          if (this.isValidHour(res[1]) && this.isValidMinute(res[2])) {
+          if (this.isValidHour(hour) && this.isValidMinute(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
             this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(res[1]), res[2],
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern);
+                       this.normalizeHour(hour), minute,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
       }
@@ -628,26 +625,26 @@ var extractor = {
     if ((res = re.exec(this.email)) != null) {
       if (!this.limitChars(res, this.email)) {
         let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-        this.guess(undefined, undefined, undefined,
-                   hour, minute,
-                   rev.start, rev.end,
-                   rev.pattern, rev.relation, pattern);
+        this.guess(undefined, undefined, undefined, hour, minute,
+                   rev.start, rev.end, rev.pattern, rev.relation, pattern);
       }
     }
   },
 
   extractDuration: function extractDuration(pattern, unit) {
-    let alts = this.getRepPatterns(pattern, ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
+    let alts = this.getRepPatterns(pattern,
+                                   ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
     let res;
     for (let alt in alts) {
       let exp = alts[alt].pattern.replace(this.marker, "|", "g");
       let re = new RegExp(exp, "ig");
+
       while ((res = re.exec(this.email)) != null) {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
-          res[1] = this.parseNumber(res[1], this.numbers);
+          let length = this.parseNumber(res[1], this.numbers);
           let guess = {};
           let rev = this.prefixSuffixStartEnd(res, "duration", this.email);
-          guess.duration = res[1] * unit;
+          guess.duration = length * unit;
           guess.start = rev.start;
           guess.end = rev.end;
           guess.str = rev.pattern;
