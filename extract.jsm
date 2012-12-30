@@ -680,7 +680,7 @@ var extractor = {
     if (sel.rangeCount > 0) {
       // mark the ones to not use
       for (let i = 0; i < sel.rangeCount; i++) {
-        this.acs.logStringMessage("Selection " + i + " is " + selection);
+        this.acs.logStringMessage("Selection " + i + " is " + sel);
         for (let j = 0; j < this.collected.length; j++) {
           let selection = sel.getRangeAt(i).toString();
 
