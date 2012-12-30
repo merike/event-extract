@@ -548,13 +548,13 @@ var extractor = {
             hour = hour - 12;
           if (meridiem == "post" && hour != 12)
             hour = hour + 12;
+          if (meridiem == "none")
+            hour = this.normalizeHour(hour);
 
           if (this.isValidHour(res[1])) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(hour), 0,
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern, true);
+            this.guess(undefined, undefined, undefined, hour, 0,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern, true);
           }
         }
       }
@@ -573,6 +573,7 @@ var extractor = {
         if (!this.limitNums(res, this.email) && !this.limitChars(res, this.email)) {
           let hour = this.parseNumber(res[1], this.numbers);
 
+          hour = this.normalizeHour(hour);
           if (direction == "ante")
             if (hour == 1)
               hour = 12;
@@ -581,10 +582,8 @@ var extractor = {
 
           if (this.isValidHour(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(hour), 30,
-                       rev.start, rev.end,
-                       rev.pattern, rev.relation, pattern, true);
+            this.guess(undefined, undefined, undefined, hour, 30,
+                       rev.start, rev.end, rev.pattern, rev.relation, pattern, true);
           }
         }
       }
@@ -607,11 +606,12 @@ var extractor = {
             hour = hour - 12;
           if (meridiem == "post" && hour != 12)
             hour = hour + 12;
+          if (meridiem == "none")
+            hour = this.normalizeHour(hour);
 
           if (this.isValidHour(hour) && this.isValidMinute(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined,
-                       this.normalizeHour(hour), minute,
+            this.guess(undefined, undefined, undefined, hour, minute,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
