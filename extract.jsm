@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var EXPORTED_SYMBOLS = ["extractor"];
+const EXPORTED_SYMBOLS = ["extractor"];
 Components.utils.import("resource://calendar/modules/calUtils.jsm");
 
 var extractor = {
@@ -15,7 +15,7 @@ var extractor = {
   allMonths: "",
   months: [],
   dayStart: 6,
-  now: undefined,
+  now: new Date(),
   bundleFile: "",
   bundle: "",
   fallbackLocale: "",
@@ -24,11 +24,22 @@ var extractor = {
   acs: Components.classes["@mozilla.org/consoleservice;1"]
                  .getService(Components.interfaces.nsIConsoleService),
 
+  /**
+   * Initializes extraction
+   *
+   * @param baseUrl         path for the properties file containing patterns,
+   *                          locale in path should be substituted with LOCALE
+   * @param fallbackLocale  locale to use when others are not found or
+   *                          detection is disabled
+   * @param dayStart        ambiguous hours earlier than this are considered to
+   *                          be in the afternoon, when null then by default
+   *                          set to 6
+   */
   init: function init(baseUrl, fallbackLocale, dayStart) {
     this.bundleFile = baseUrl;
     this.fallbackLocale = fallbackLocale;
 
-    if (dayStart != undefined)
+    if (dayStart != null)
       this.dayStart = dayStart;
   },
 
@@ -209,8 +220,9 @@ var extractor = {
    * Extracts dates, times and durations from email
    *
    * @param body  email body
-   * @param now   reference time against which relative times are interpreted
-   * @param sel   selection object of email content, when not null times
+   * @param now   reference time against which relative times are interpreted,
+   *                when null current time is used
+   * @param sel   selection object of email content, when defined times
    *                outside selection are disgarded
    * @param title email title
    * @return      sorted list of extracted datetime objects
@@ -219,7 +231,8 @@ var extractor = {
     let initial = {};
     this.collected = [];
     this.email = title + "\r\n" + body;
-    this.now = now;
+    if (now != null)
+      this.now = now;
 
     initial.year = now.getFullYear();
     initial.month = now.getMonth() + 1;
@@ -310,7 +323,7 @@ var extractor = {
     this.extractDuration("duration.hours", 60);
     this.extractDuration("duration.days", 60 * 24);
 
-    if (sel != undefined)
+    if (sel !== undefined)
       this.markSelected(sel, title);
     this.markContained();
     this.collected = this.collected.sort(this.sort);
@@ -336,7 +349,7 @@ var extractor = {
               this.isValidYear(year)) {
 
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(year, month, day, undefined, undefined,
+            this.guess(year, month, day, null, null,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
@@ -364,7 +377,7 @@ var extractor = {
             for (let i = 0; i < 12; i++) {
               if (this.months[i].split("|").indexOf(month.toLowerCase()) != -1) {
                 let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-                this.guess(year, i + 1, day, undefined, undefined,
+                this.guess(year, i + 1, day, null, null,
                            rev.start, rev.end, rev.pattern, rev.relation, pattern);
                 break;
               }
@@ -383,9 +396,8 @@ var extractor = {
         let item = new Date(this.now.getTime() + 60 * 60 * 24 * 1000 * offset);
         let rev = this.prefixSuffixStartEnd(res, relation, this.email);
         this.guess(item.getFullYear(), item.getMonth() + 1, item.getDate(),
-                   undefined, undefined,
-                   rev.start, rev.end,
-                   rev.pattern, rev.relation, pattern);
+                   null, null,
+                   rev.start, rev.end, rev.pattern, rev.relation, pattern);
       }
     }
   },
@@ -424,7 +436,7 @@ var extractor = {
                 }
 
                 let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-                this.guess(date.year, date.month, date.day, undefined, undefined,
+                this.guess(date.year, date.month, date.day, null, null,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern);
                 break;
               }
@@ -464,7 +476,7 @@ var extractor = {
             }
 
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(date.year, date.month, date.day, undefined, undefined,
+            this.guess(date.year, date.month, date.day, null, null,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
@@ -497,7 +509,7 @@ var extractor = {
 
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
             this.guess(item.getFullYear(), item.getMonth() + 1, day,
-                       undefined, undefined,
+                       null, null,
                        rev.start, rev.end,
                        rev.pattern, rev.relation, pattern, true);
           }
@@ -524,7 +536,7 @@ var extractor = {
 
           let rev = this.prefixSuffixStartEnd(res, relation, this.email);
           this.guess(date.getFullYear(), date.getMonth() + 1, date.getDate(),
-                     undefined, undefined,
+                     null, null,
                      rev.start, rev.end,
                      rev.pattern, rev.relation, pattern + i, true);
         }
@@ -553,7 +565,7 @@ var extractor = {
 
           if (this.isValidHour(res[1])) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined, hour, 0,
+            this.guess(null, null, null, hour, 0,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern, true);
           }
         }
@@ -582,7 +594,7 @@ var extractor = {
 
           if (this.isValidHour(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined, hour, 30,
+            this.guess(null, null, null, hour, 30,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern, true);
           }
         }
@@ -611,7 +623,7 @@ var extractor = {
 
           if (this.isValidHour(hour) && this.isValidMinute(hour)) {
             let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-            this.guess(undefined, undefined, undefined, hour, minute,
+            this.guess(null, null, null, hour, minute,
                        rev.start, rev.end, rev.pattern, rev.relation, pattern);
           }
         }
@@ -625,7 +637,7 @@ var extractor = {
     if ((res = re.exec(this.email)) != null) {
       if (!this.limitChars(res, this.email)) {
         let rev = this.prefixSuffixStartEnd(res, relation, this.email);
-        this.guess(undefined, undefined, undefined, hour, minute,
+        this.guess(null, null, null, hour, minute,
                    rev.start, rev.end, rev.pattern, rev.relation, pattern);
       }
     }
@@ -697,18 +709,18 @@ var extractor = {
 
   sort: function sort(one, two) {
     // sort the guess from email date as the last one
-    if (one.start == undefined && two.start != undefined) {
+    if (one.start == null && two.start != null) {
       return 1;
-    } else if (one.start != undefined && two.start == undefined) {
+    } else if (one.start != null && two.start == null) {
       return -1;
-    } else if (one.start == undefined && two.start == undefined) {
+    } else if (one.start == null && two.start == null) {
       return 0;
       // sort dates before times
-    } else if (one.year != undefined && two.year == undefined) {
+    } else if (one.year != null && two.year == null) {
       return -1;
-    } else if (one.year == undefined && two.year != undefined) {
+    } else if (one.year == null && two.year != null) {
       return 1;
-    } else if (one.year != undefined && two.year != undefined) {
+    } else if (one.year != null && two.year != null) {
       if (one.year < two.year) {
         return -1;
       } else if (one.year > two.year) {
@@ -757,74 +769,73 @@ var extractor = {
         return (val.relation == "start");});
     if (startTimes.length == 0)
       return {};
-    else {
-      for (let val in startTimes) {
+
+    for (let val in startTimes) {
 //         dump("Start: " + JSON.stringify(startTimes[val]) + "\n");
-        this.acs.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
-      }
+      this.acs.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
+    }
 
-      var guess = {};
-      let wDayInit = startTimes.filter(function(val) {
-        return (val.day != undefined && val.start == undefined);});
-      // with tasks we don't try to guess start but assume email date
-      if (isTask) {
-        guess.year = wDayInit[0].year;
-        guess.month = wDayInit[0].month;
-        guess.day = wDayInit[0].day;
-        guess.hour = wDayInit[0].hour;
-        guess.minute = wDayInit[0].minute;
-        return guess;
-      }
-
-      let wDay = startTimes.filter(function(val) {
-        return (val.day != undefined && val.start != undefined);});
-      let wDayNA = wDay.filter(function(val) {
-        return (val.ambiguous == undefined);});
-
-      let wMinute = startTimes.filter(function(val) {
-        return (val.minute != undefined && val.start != undefined);});
-      let wMinuteNA = wMinute.filter(function(val) {
-        return (val.ambiguous == undefined);});
-      let wMinuteInit = startTimes.filter(function(val) {
-        return (val.minute != undefined && val.start == undefined);});
-
-      if (wMinuteNA.length != 0) {
-        guess.hour = wMinuteNA[0].hour;
-        guess.minute = wMinuteNA[0].minute;
-      } else if (wMinute.length != 0) {
-        guess.hour = wMinute[0].hour;
-        guess.minute = wMinute[0].minute;
-      }
-
-      // first use unambiguous guesses
-      if (wDayNA.length != 0) {
-        guess.year = wDayNA[0].year;
-        guess.month = wDayNA[0].month;
-        guess.day = wDayNA[0].day;
-      // then also ambiguous ones
-      } else if (wDay.length != 0) {
-        guess.year = wDay[0].year;
-        guess.month = wDay[0].month;
-        guess.day = wDay[0].day;
-      // next possible day considering time
-      } else if (guess.hour != undefined &&
-                 (wDayInit[0].hour > guess.hour ||
-                  (wDayInit[0].hour == guess.hour &&
-                   wDayInit[0].minute > guess.minute))) {
-        let nextDay = new Date(wDayInit[0].year, wDayInit[0].month - 1, wDayInit[0].day);
-        nextDay.setTime(nextDay.getTime() + 60 * 60 * 24 * 1000);
-        guess.year = nextDay.getFullYear();
-        guess.month = nextDay.getMonth() + 1;
-        guess.day = nextDay.getDate();
-      // and finally when nothing was found then use initial guess from send time
-      } else {
-        guess.year = wDayInit[0].year;
-        guess.month = wDayInit[0].month;
-        guess.day = wDayInit[0].day;
-      }
-
+    var guess = {};
+    let wDayInit = startTimes.filter(function(val) {
+      return (val.day != null && val.start === undefined);});
+    // with tasks we don't try to guess start but assume email date
+    if (isTask) {
+      guess.year = wDayInit[0].year;
+      guess.month = wDayInit[0].month;
+      guess.day = wDayInit[0].day;
+      guess.hour = wDayInit[0].hour;
+      guess.minute = wDayInit[0].minute;
       return guess;
     }
+
+    let wDay = startTimes.filter(function(val) {
+      return (val.day != null && val.start !== undefined);});
+    let wDayNA = wDay.filter(function(val) {
+      return (val.ambiguous === undefined);});
+
+    let wMinute = startTimes.filter(function(val) {
+      return (val.minute != null && val.start !== undefined);});
+    let wMinuteNA = wMinute.filter(function(val) {
+      return (val.ambiguous === undefined);});
+    let wMinuteInit = startTimes.filter(function(val) {
+      return (val.minute != null && val.start === undefined);});
+
+    if (wMinuteNA.length != 0) {
+      guess.hour = wMinuteNA[0].hour;
+      guess.minute = wMinuteNA[0].minute;
+    } else if (wMinute.length != 0) {
+      guess.hour = wMinute[0].hour;
+      guess.minute = wMinute[0].minute;
+    }
+
+    // first use unambiguous guesses
+    if (wDayNA.length != 0) {
+      guess.year = wDayNA[0].year;
+      guess.month = wDayNA[0].month;
+      guess.day = wDayNA[0].day;
+    // then also ambiguous ones
+    } else if (wDay.length != 0) {
+      guess.year = wDay[0].year;
+      guess.month = wDay[0].month;
+      guess.day = wDay[0].day;
+    // next possible day considering time
+    } else if (guess.hour != null &&
+                (wDayInit[0].hour > guess.hour ||
+                (wDayInit[0].hour == guess.hour &&
+                  wDayInit[0].minute > guess.minute))) {
+      let nextDay = new Date(wDayInit[0].year, wDayInit[0].month - 1, wDayInit[0].day);
+      nextDay.setTime(nextDay.getTime() + 60 * 60 * 24 * 1000);
+      guess.year = nextDay.getFullYear();
+      guess.month = nextDay.getMonth() + 1;
+      guess.day = nextDay.getDate();
+    // and finally when nothing was found then use initial guess from send time
+    } else {
+      guess.year = wDayInit[0].year;
+      guess.month = wDayInit[0].month;
+      guess.day = wDayInit[0].day;
+    }
+
+    return guess;
   },
 
   /**
@@ -850,13 +861,13 @@ var extractor = {
       }
 
       let wDay = endTimes.filter(function(val) {
-        return (val.day != undefined);});
+        return (val.day != null);});
       let wDayNA = wDay.filter(function(val) {
-        return (val.ambiguous == undefined);});
+        return (val.ambiguous === undefined);});
       let wMinute = endTimes.filter(function(val) {
-        return (val.minute != undefined);});
+        return (val.minute != null);});
       let wMinuteNA = wMinute.filter(function(val) {
-        return (val.ambiguous == undefined);});
+        return (val.ambiguous === undefined);});
 
       // first set non-ambiguous dates
       let pos = isTask == true ? 0 : wDayNA.length - 1;
@@ -877,7 +888,7 @@ var extractor = {
         pos = isTask == true ? 0 : wMinuteNA.length - 1;
         guess.hour = wMinuteNA[pos].hour;
         guess.minute = wMinuteNA[pos].minute;
-        if (guess.day == undefined || guess.day == start.day) {
+        if (guess.day == null || guess.day == start.day) {
           if (wMinuteNA[pos].hour < start.hour ||
               (wMinuteNA[pos].hour == start.hour &&
               wMinuteNA[pos].minute < start.minute)
@@ -894,7 +905,7 @@ var extractor = {
         pos = isTask == true ? 0 : wMinute.length - 1;
         guess.hour = wMinute[pos].hour;
         guess.minute = wMinute[pos].minute;
-        if (guess.day == undefined || guess.day == start.day) {
+        if (guess.day == null || guess.day == start.day) {
           if (wMinute[pos].hour < start.hour ||
               (wMinute[pos].hour == start.hour &&
               wMinute[pos].minute < start.minute)
@@ -909,14 +920,14 @@ var extractor = {
       }
 
       // fill in date when date was guessed
-      if (guess.minute != undefined && guess.day == undefined) {
+      if (guess.minute != null && guess.day == null) {
         guess.year = start.year;
         guess.month = start.month;
         guess.day = start.day;
       }
 
       // fill in end from total duration
-      if (guess.day == undefined && guess.hour == undefined) {
+      if (guess.day == null && guess.hour == null) {
         let duration = 0;
 
         for (val in durations) {
@@ -927,7 +938,7 @@ var extractor = {
 
         if (duration != 0) {
           let startDate = new Date(start.year, start.month - 1, start.day);
-          if (start.hour != undefined) {
+          if (start.hour != null) {
             startDate.setHours(start.hour);
             startDate.setMinutes(start.minute);
           } else {
@@ -950,14 +961,14 @@ var extractor = {
       if (guess.year == start.year && guess.month == start.month
         && guess.day == start.day && guess.hour == start.hour
         && guess.minute == start.minute) {
-          guess.year = undefined;
-          guess.month = undefined;
-          guess.day = undefined;
-          guess.hour = undefined;
-          guess.minute = undefined;
+          guess.year = null;
+          guess.month = null;
+          guess.day = null;
+          guess.hour = null;
+          guess.minute = null;
       }
 
-      if (guess.year != undefined && guess.minute == undefined && isTask) {
+      if (guess.year != null && guess.minute == null && isTask) {
           guess.hour = 0;
           guess.minute = 0;
       }
@@ -977,8 +988,8 @@ var extractor = {
       }
 
       let vals = this.cleanPatterns(value).split("|");
-      if (this.overrides[name] != undefined &&
-          this.overrides[name]["add"] != undefined) {
+      if (this.overrides[name] !== undefined &&
+          this.overrides[name]["add"] !== undefined) {
         let additions = this.overrides[name]["add"];
         additions = this.cleanPatterns(additions).split("|");
         for (let pattern in additions) {
@@ -987,8 +998,8 @@ var extractor = {
         }
       }
 
-      if (this.overrides[name] != undefined &&
-          this.overrides[name]["remove"] != undefined) {
+      if (this.overrides[name] !== undefined &&
+          this.overrides[name]["remove"] !== undefined) {
         let removals = this.overrides[name]["remove"];
         removals = this.cleanPatterns(removals).split("|");
         for (let pattern in removals) {
@@ -1005,7 +1016,7 @@ var extractor = {
     } catch (ex) {
       this.acs.logStringMessage("Pattern not found: " + name);
 
-      // fake a value to not error out
+      // fake a value to avoid empty regexes creating endless loops
       return def;
     }
   },
@@ -1016,12 +1027,14 @@ var extractor = {
 
     try {
       let value = this.bundle.GetStringFromName(name);
-      if (value.trim() == "")
-        throw "";
+      if (value.trim() == "") {
+        cal.LOG("Pattern empty: " + name);
+        return alts;
+      }
 
       let vals = this.cleanPatterns(value).split("|");
-      if (this.overrides[name] != undefined &&
-          this.overrides[name]["add"] != undefined) {
+      if (this.overrides[name] !== undefined &&
+          this.overrides[name]["add"] !== undefined) {
         let additions = this.overrides[name]["add"];
         additions = this.cleanPatterns(additions).split("|");
         for (let pattern in additions) {
@@ -1030,8 +1043,8 @@ var extractor = {
         }
       }
 
-      if (this.overrides[name] != undefined &&
-          this.overrides[name]["remove"] != undefined) {
+      if (this.overrides[name] !== undefined &&
+          this.overrides[name]["remove"] !== undefined) {
         let removals = this.overrides[name]["remove"];
         removals = this.cleanPatterns(removals).split("|");
         for (let pattern in removals) {
@@ -1080,7 +1093,7 @@ var extractor = {
 
     // correctness checking
     for(i = 1; i <= count; i++) {
-      if (positions[i] == undefined) {
+      if (positions[i] === undefined) {
         Components.utils.reportError("Faulty extraction pattern " + name +
                                      ", missing parameter %" + i + "$S");
       }
@@ -1123,7 +1136,7 @@ var extractor = {
     refDate.setSeconds(0);
     refDate.setMilliseconds(0);
     let jsDate;
-    if (date.day != undefined)
+    if (date.day != null)
       jsDate = new Date(date.year, date.month - 1, date.day);
     return jsDate < refDate;
   },
@@ -1131,15 +1144,11 @@ var extractor = {
   normalizeHour: function normalizeHour(hour) {
     if (hour < this.dayStart && hour <= 11)
       return hour + 12;
-    else
-      return hour;
+    return hour;
   },
 
   normalizeYear: function normalizeYear(year) {
-    if (year.length == 2)
-      return "20" + year;
-    else
-      return year;
+    return (year.length == 2) ? "20" + year : year;
   },
 
   limitNums: function limitNums(res, email) {
@@ -1243,7 +1252,7 @@ var extractor = {
       guess.relation = "notadatetime";
     this.collected.push(guess);
   }
-}
+};
 
 // XXX should replace all special characters for regexp not just .
 String.prototype.sanitize = function() {

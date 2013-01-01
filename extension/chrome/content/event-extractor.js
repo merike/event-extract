@@ -39,7 +39,7 @@ var extract = {
     let collected = extractor.extract(title, content, date, sel);
     let guessed = extractor.guessStart(collected, !isEvent);
     let endGuess = extractor.guessEnd(collected, guessed, !isEvent);
-    let allDay = (guessed.hour == undefined || guessed.minute == undefined) &&
+    let allDay = (guessed.hour == null || guessed.minute == null) &&
                 isEvent;
     
     var item;
@@ -56,32 +56,32 @@ var extract = {
     cal.alarms.setDefaultValues(item);
     
     if (isEvent) {
-      if (guessed.year != undefined)
+      if (guessed.year != null)
         item.startDate.year = guessed.year;
-      if (guessed.month != undefined)
+      if (guessed.month != null)
         item.startDate.month = guessed.month - 1;
-      if (guessed.day != undefined)
+      if (guessed.day != null)
         item.startDate.day = guessed.day;
-      if (guessed.hour != undefined)
+      if (guessed.hour != null)
         item.startDate.hour = guessed.hour;
-      if (guessed.minute != undefined)
+      if (guessed.minute != null)
         item.startDate.minute = guessed.minute;
       
       item.endDate = item.startDate.clone();
       item.endDate.minute += cal.getPrefSafe("calendar.event.defaultlength", 60);
       
-      if (endGuess.year != undefined)
+      if (endGuess.year != null)
         item.endDate.year = endGuess.year;
-      if (endGuess.month != undefined)
+      if (endGuess.month != null)
         item.endDate.month = endGuess.month - 1;
-      if (endGuess.day != undefined) {
+      if (endGuess.day != null) {
         item.endDate.day = endGuess.day;
         if (allDay)
           item.endDate.day++;
       }
-      if (endGuess.hour != undefined)
+      if (endGuess.hour != null)
         item.endDate.hour = endGuess.hour;
-      if (endGuess.minute != undefined)
+      if (endGuess.minute != null)
         item.endDate.minute = endGuess.minute;
     } else {
       let dtz = cal.calendarDefaultTimezone();
@@ -91,19 +91,19 @@ var extract = {
       dueDate.setMinutes(0);
       dueDate.setSeconds(0);
       
-      if (endGuess.year != undefined)
+      if (endGuess.year != null)
         dueDate.setYear(endGuess.year);
-      if (endGuess.month  != undefined)
+      if (endGuess.month  != null)
         dueDate.setMonth(endGuess.month - 1);
-      if (endGuess.day != undefined)
+      if (endGuess.day != null)
         dueDate.setDate(endGuess.day);
-      if (endGuess.hour != undefined)
+      if (endGuess.hour != null)
         dueDate.setHours(endGuess.hour);
-      if (endGuess.minute != undefined)
+      if (endGuess.minute != null)
         dueDate.setMinutes(endGuess.minute);
       
       setItemProperty(item, "entryDate", cal.jsDateToDateTime(date, dtz));
-      if (endGuess.year != undefined)
+      if (endGuess.year != null)
         setItemProperty(item, "dueDate", cal.jsDateToDateTime(dueDate, dtz));
     }
     

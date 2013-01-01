@@ -161,70 +161,87 @@ function findNow(email) {
 function compare(correct, guessed, guessedEnd) {
   let r = wrSum;
   
-  if (correct.year === guessed.year) {
+  if (correct.year === guessed.year ||
+      correct.year === undefined && guessed.year === null) {
     corSum++;
   } else {
     dump(correct.year + " S " + guessed.year + " year\n");
     wrSum++;
   }
   
-  if (correct.month === guessed.month) {
+  if (correct.month === guessed.month ||
+      correct.month === undefined && guessed.month === null) {
     corSum++;
   } else {
     dump(correct.month + " S " + guessed.month + " month\n");
     wrSum++;
   }
   
-  if (correct.day === guessed.day) {
+  if (correct.day === guessed.day ||
+      correct.day === undefined && guessed.day === null) {
     corSum++;
   } else {
     dump(correct.day + " S " + guessed.day + " day\n");
     wrSum++;
   }
   
-  if (correct.hour === guessed.hour) {
+  if (correct.hour === guessed.hour ||
+      correct.hour === undefined && guessed.hour === null
+  ) {
     corSum++;
   } else {
     dump(correct.hour + " S " + guessed.hour + " hour\n");
     wrSum++;
   }
   
-  if (correct.minute === guessed.minute) {
+  if (correct.minute === guessed.minute ||
+      correct.minute ===  undefined && guessed.minute === null
+  ) {
     corSum++;
   } else {
     dump(correct.minute + " S " + guessed.minute + " minute\n");
     wrSum++;
   }
   
-  if (correct.year2 === guessedEnd.year) {
+  if (correct.year2 === guessedEnd.year ||
+      correct.year2 === undefined && guessedEnd.year === null
+  ) {
     corSum++;
   } else {
     dump(correct.year2 + " E " + guessedEnd.year + " year\n");
     wrSum++;
   }
   
-  if (correct.month2 === guessedEnd.month) {
+  if (correct.month2 === guessedEnd.month ||
+      correct.month2 === undefined && guessedEnd.month === null
+  ) {
     corSum++;
   } else {
     dump(correct.month2 + " E " + guessedEnd.month + " month\n");
     wrSum++;
   }
   
-  if (correct.day2 === guessedEnd.day) {
+  if (correct.day2 === guessedEnd.day ||
+      correct.day2 === undefined && guessedEnd.day === null
+  ) {
     corSum++;
   } else {
     dump(correct.day2 + " E " + guessedEnd.day + " day\n");
     wrSum++;
   }
   
-  if (correct.hour2 === guessedEnd.hour) {
+  if (correct.hour2 === guessedEnd.hour ||
+      correct.hour2 === undefined && guessedEnd.hour === null
+  ) {
     corSum++;
   } else {
     dump(correct.hour2 + " E " + guessedEnd.hour + " hour\n");
     wrSum++;
   }
   
-  if (correct.minute2 === guessedEnd.minute) {
+  if (correct.minute2 === guessedEnd.minute ||
+      correct.minute2 === undefined && guessedEnd.minute === null
+  ) {
     corSum++;
   } else {
     dump(correct.minute2 + " E " + guessedEnd.minute + " minute\n");
