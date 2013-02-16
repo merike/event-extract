@@ -130,12 +130,15 @@ var extract = {
   },
 
   setButtons: function setButtons () {
-    let button = document.getElementById("extractEventButton");
-    if (button) {
+    let eventButton = document.getElementById("extractEventButton");
+    let taskButton = document.getElementById("extractTaskButton");
+    if (eventButton) {
       if (gFolderDisplay.selectedCount == 0) {
-        button.disabled = true;
+        eventButton.disabled = true;
+        taskButton.disabled = true;
       } else {
-        button.disabled = false;
+        eventButton.disabled = false;
+        taskButton.disabled = false;
       }
     }
   }

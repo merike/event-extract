@@ -8,18 +8,24 @@
   <script type="application/javascript" src="chrome://event-extract/content/event-extractor.js"/>
   
   <toolbar id="header-view-toolbar">
-    <toolbarbutton id="hdrExtractEventButton" label="Extract as event" tooltiptext="Extract as event to calendar" oncommand="extract.extractFromEmail(true)" class="toolbarbutton-1 msgHeaderView-button" type="menu-button" removable="true">
-      <menupopup id="extractEventDropdown">
-        <menuitem id="extractTaskButton" label="Extract as task" tooltiptext="Extract as task to calendar" oncommand="extract.extractFromEmail(false); event.stopPropagation();"/>
-      </menupopup>
-    </toolbarbutton>
+    <toolbarbutton id="hdrExtractEventButton" label="Extract as event"
+                   tooltiptext="Extract as event to calendar"
+                   oncommand="extract.extractFromEmail(true)"
+                   class="toolbarbutton-1 msgHeaderView-button" removable="true" />
+    <toolbarbutton id="hdrExtractTaskButton" label="Extract as task"
+                   tooltiptext="Extract as task to calendar"
+                   oncommand="extract.extractFromEmail(false)"
+                   class="toolbarbutton-1 msgHeaderView-button" removable="true" />
   </toolbar>
   
   <toolbar id="mail-bar3">
-    <toolbarbutton id="extractEventButton" label="Extract as event" tooltiptext="Extract as event to calendar" oncommand="extract.extractFromEmail(true)" class="toolbarbutton-1" type="menu-button" removable="true">
-      <menupopup id="extractEventDropdown">
-        <menuitem id="extractTaskButton" label="Extract as task" tooltiptext="Extract as task to calendar" oncommand="extract.extractFromEmail(false); event.stopPropagation();"/>
-      </menupopup>
-    </toolbarbutton>
+    <toolbarbutton id="extractEventButton" label="Extract as event"
+                   tooltiptext="Extract as event to calendar"
+                   oncommand="extract.extractFromEmail(true)"
+                   class="toolbarbutton-1" removable="true" />
+    <toolbarbutton id="extractTaskButton" label="Extract as task"
+                   tooltiptext="Extract as task to calendar"
+                   oncommand="extract.extractFromEmail(false)"
+                   class="toolbarbutton-1" removable="true" />
   </toolbar>
 </overlay>
