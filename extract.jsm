@@ -979,7 +979,8 @@ var extractor = {
 
   getPatterns: function getPatterns(name) {
     let value;
-    let def = "abcd";
+    // this should never be found in an email
+    let def = "061dc19c-719f-47f3-b2b5-e767e6f02b7a";
     try {
       value = this.bundle.GetStringFromName(name);
       if (value.trim() == "") {
