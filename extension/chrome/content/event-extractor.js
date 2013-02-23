@@ -132,14 +132,12 @@ var extract = {
   setButtons: function setButtons () {
     let eventButton = document.getElementById("extractEventButton");
     let taskButton = document.getElementById("extractTaskButton");
+    let state = (gFolderDisplay.selectedCount == 0);
     if (eventButton) {
-      if (gFolderDisplay.selectedCount == 0) {
-        eventButton.disabled = true;
-        taskButton.disabled = true;
-      } else {
-        eventButton.disabled = false;
-        taskButton.disabled = false;
-      }
+      eventButton.disabled = state
+    }
+    if (taskButton) {
+      taskButton.disabled = state;
     }
   }
 }
