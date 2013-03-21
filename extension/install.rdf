@@ -6,7 +6,7 @@
   xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>event-extract@tricky-bits.eu</em:id>
-    <em:version>0.1</em:version>
+    <em:version>0.2</em:version>
     <em:name>Event extractor</em:name>
     <em:description>Extract event/task information from email when converting to event or task</em:description>
     <em:creator>Merike Sell</em:creator>
