@@ -7,7 +7,7 @@
    
   * latest when guessing one or two (where appropriate) dates and times per event
    correct bits  %    correct events  %   set
-   572/610     94%    49/61         80%   enronmeetings
+   575/610     94%    50/61         82%   enronmeetings
    515/600     86%    31/60         52%   mozilla.dev.planning sept set
    514/600     86%    34/60         57%   private et set
  */
@@ -49,18 +49,18 @@ while (mails.hasMoreElements()) {
   var answer = readFile(corFile);
   dump(info.filename + " " + answer.filename + "\n");
   var expected = JSON.parse(answer.contents);
-  extractor.init(baseUrl, locale);
+  var extr = new Extractor(baseUrl, locale);
   var time1 = (new Date()).getTime();
   var refDate = findNow(info.contents);
-  var collected = extractor.extract(null, info.contents, refDate);
+  extr.extract(null, info.contents, refDate);
   var startGuess = {};
   var endGuess = {};
   if (expected.to != "task") {
-    startGuess = extractor.guessStart(collected);
-    endGuess = extractor.guessEnd(collected, startGuess);
+    startGuess = extr.guessStart();
+    endGuess = extr.guessEnd(startGuess);
   } else {
-    startGuess = extractor.guessStart(collected, true);
-    endGuess = extractor.guessEnd(collected, startGuess, true);
+    startGuess = extr.guessStart(true);
+    endGuess = extr.guessEnd(startGuess, true);
   }
   
   var time2 = (new Date()).getTime();

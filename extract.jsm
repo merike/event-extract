@@ -2,48 +2,46 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-const EXPORTED_SYMBOLS = ["extractor"];
+const EXPORTED_SYMBOLS = ["Extractor"];
 Components.utils.import("resource://calendar/modules/calUtils.jsm");
 
-var extractor = {
-    email: "",
-    marker: "--MARK--",
-    collected: [],
-    numbers: [],
-    hourlyNumbers: [],
-    dailyNumbers: [],
-    allMonths: "",
-    months: [],
-    dayStart: 6,
-    now: new Date(),
-    bundleFile: "",
-    bundle: "",
-    fallbackLocale: "",
-    overrides: {},
-    fixedLang: true,
-    acs: Components.classes["@mozilla.org/consoleservice;1"]
-                   .getService(Components.interfaces.nsIConsoleService),
+/**
+* Initializes extraction
+*
+* @param baseUrl         path for the properties file containing patterns,
+*                            locale in path should be substituted with LOCALE
+* @param fallbackLocale  locale to use when others are not found or
+*                            detection is disabled
+* @param dayStart        ambiguous hours earlier than this are considered to
+*                            be in the afternoon, when null then by default
+*                            set to 6
+*/
+function Extractor(baseUrl, fallbackLocale, dayStart) {
+    this.bundleFile = baseUrl;
+    this.fallbackLocale = fallbackLocale;
 
-    /**
-    * Initializes extraction
-    *
-    * @param baseUrl         path for the properties file containing patterns,
-    *                            locale in path should be substituted with LOCALE
-    * @param fallbackLocale  locale to use when others are not found or
-    *                            detection is disabled
-    * @param dayStart        ambiguous hours earlier than this are considered to
-    *                            be in the afternoon, when null then by default
-    *                            set to 6
-    */
-    init: function init(baseUrl, fallbackLocale, dayStart) {
-        this.bundleFile = baseUrl;
-        this.fallbackLocale = fallbackLocale;
+    if (dayStart != null) {
+        this.dayStart = dayStart;
+    }
 
-        if (dayStart != null) {
-            this.dayStart = dayStart;
-        }
-    },
+    this.email = "";
+    this.marker = "--MARK--";
+    this.collected = [];
+    this.numbers = [];
+    this.hourlyNumbers = [];
+    this.dailyNumbers = [];
+    this.allMonths = "";
+    this.months = [];
+    this.dayStart = 6;
+    this.now = new Date();
+    this.bundle = "";
+    this.overrides = {};
+    this.fixedLang = true;
+    this.acs = Components.classes["@mozilla.org/consoleservice;1"]
+                         .getService(Components.interfaces.nsIConsoleService);
+}
 
+Extractor.prototype = {
     /**
     * Removes confusing data like urls, timezones and phone numbers from email
     * Also removes standard signatures and quoted content from previous emails
@@ -232,7 +230,6 @@ var extractor = {
     */
     extract: function extract(title, body, now, sel) {
         let initial = {};
-        this.collected = [];
         this.email = title + "\r\n" + body;
         if (now != null) {
             this.now = now;
@@ -768,12 +765,11 @@ var extractor = {
     /**
     * Guesses start time from list of guessed datetimes
     *
-    * @param collected list of datetimes extracted by extract()
     * @param isTask    whether start time should be guessed for task or event
     * @return          datetime object for start time
     */
-    guessStart: function guessStart(collected, isTask) {
-        let startTimes = collected.filter(function(val) {
+    guessStart: function guessStart(isTask) {
+        let startTimes = this.collected.filter(function(val) {
             return (val.relation == "start");});
         if (startTimes.length == 0) {
             return {};
@@ -850,16 +846,15 @@ var extractor = {
     /**
     * Guesses end time from list of guessed datetimes relative to start time
     *
-    * @param collected list of datetimes extracted by extract()
     * @param start     start time to consider when guessing
     * @param isTask    whether start time should be guessed for task or event
     * @return          datetime object for end time
     */
-    guessEnd: function guessEnd(collected, start, isTask) {
+    guessEnd: function guessEnd(start, isTask) {
         var guess = {};
-        let endTimes = collected.filter(function(val) {
+        let endTimes = this.collected.filter(function(val) {
             return (val.relation == "end");});
-        let durations = collected.filter(function(val) {
+        let durations = this.collected.filter(function(val) {
             return (val.relation == "duration");});
         if (endTimes.length == 0 && durations.length == 0) {
             return {};
