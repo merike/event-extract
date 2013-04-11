@@ -17,7 +17,7 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
 *                            set to 6
 */
 function Extractor(baseUrl, fallbackLocale, dayStart) {
-    this.bundleFile = baseUrl;
+    this.bundleUrl = baseUrl;
     this.fallbackLocale = fallbackLocale;
 
     if (dayStart != null) {
@@ -80,10 +80,10 @@ Extractor.prototype = {
     checkBundle: function checkBundle(locale) {
         let service = Components.classes["@mozilla.org/intl/stringbundle;1"]
                                 .getService(Components.interfaces.nsIStringBundleService);
-        let bundle = service.createBundle(this.bundleFile.replace("LOCALE", locale, "g"));
+        let bundle = service.createBundle(this.bundleUrl.replace("LOCALE", locale, "g"));
 
         try {
-            bundle.formatStringFromName("from.today", [], 0);
+            bundle.GetStringFromName("from.today");
             return true;
         } catch (ex) {
             return false;
@@ -120,7 +120,7 @@ Extractor.prototype = {
                 this.fallbackLocale = "en-US";
             }
 
-          this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
+          this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
           this.acs.logStringMessage("Application locale was used to choose " + this.fallbackLocale + " patterns.");
         } else {
             let spellclass = "@mozilla.org/spellchecker/engine;1";
@@ -190,29 +190,29 @@ Extractor.prototype = {
             // possibly because of bug 471799
             if (avgCharCode > 24000 && avgCharCode < 32000) {
                 this.acs.logStringMessage("Using zh-TW patterns");
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "zh-TW", "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "zh-TW", "g"));
             } else if (avgCharCode > 14000 && avgCharCode < 24000) {
                 this.acs.logStringMessage("Using ja patterns");
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "ja", "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ja", "g"));
             } else if (avgCharCode > 1000 && avgCharCode < 1200) {
                 this.acs.logStringMessage("Using ru patterns");
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "ru", "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ru", "g"));
             // dictionary based
             } else if (most > 0) {
                 this.acs.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", mostLocale, "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", mostLocale, "g"));
             // fallbackLocale matches patterns exactly
             } else if (this.checkBundle(this.fallbackLocale)) {
                 this.acs.logStringMessage("Falling back to " + this.fallbackLocale);
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
             // beginning of fallbackLocale matches patterns
             } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
                 this.fallbackLocale = this.fallbackLocale.substring(0, 2);
                 this.acs.logStringMessage("Falling back to " + this.fallbackLocale);
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", this.fallbackLocale, "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
             } else {
                 this.acs.logStringMessage("Using en-US");
-                this.bundle = service.createBundle(this.bundleFile.replace("LOCALE", "en-US", "g"));
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "en-US", "g"));
             }
         }
     },
@@ -230,6 +230,7 @@ Extractor.prototype = {
     */
     extract: function extract(title, body, now, sel) {
         let initial = {};
+        this.collected = [];
         this.email = title + "\r\n" + body;
         if (now != null) {
             this.now = now;
@@ -713,6 +714,7 @@ Extractor.prototype = {
     },
 
     sort: function sort(one, two) {
+        let rc;
         // sort the guess from email date as the last one
         if (one.start == null && two.start != null) {
             return 1;
@@ -726,38 +728,25 @@ Extractor.prototype = {
         } else if (one.year == null && two.year != null) {
             return 1;
         } else if (one.year != null && two.year != null) {
-            if (one.year < two.year) {
-                return -1;
-            } else if (one.year > two.year) {
-                return 1;
+            rc = (one.year > two.year) - (one.year < two.year);
+            if (rc != 0) {
+                return rc;
             } else {
-                if (one.month < two.month) {
-                    return -1;
-                } else if (one.month > two.month) {
-                    return 1;
+                rc = (one.month > two.month) - (one.month < two.month);
+                if (rc != 0) {
+                    return rc;
                 } else {
-                    if (one.day < two.day) {
-                        return -1;
-                    } else if (one.day > two.day) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
+                    rc = (one.day > two.day) - (one.day < two.day);
+                    return rc;
                 }
             }
         } else {
-            if (one.hour < two.hour) {
-                return -1;
-            } else if (one.hour > two.hour) {
-                return 1;
+            rc = (one.hour > two.hour) - (one.hour < two.hour);
+            if (rc != 0) {
+                return rc;
             } else {
-                if (one.minute < two.minute) {
-                    return -1;
-                } else if (one.minute > two.minute) {
-                    return 1;
-                } else {
-                    return 0;
-                }
+                rc = (one.minute > two.minute) - (one.minute < two.minute)
+                return rc;
             }
         }
     },
@@ -780,7 +769,7 @@ Extractor.prototype = {
             this.acs.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
         }
 
-        var guess = {};
+        let guess = {};
         let wDayInit = startTimes.filter(function(val) {
             return (val.day != null && val.start === undefined);});
         // with tasks we don't try to guess start but assume email date
@@ -851,7 +840,7 @@ Extractor.prototype = {
     * @return          datetime object for end time
     */
     guessEnd: function guessEnd(start, isTask) {
-        var guess = {};
+        let guess = {};
         let endTimes = this.collected.filter(function(val) {
             return (val.relation == "end");});
         let durations = this.collected.filter(function(val) {

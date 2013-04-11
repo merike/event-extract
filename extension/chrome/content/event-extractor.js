@@ -34,15 +34,15 @@ var extract = {
     let locale = cal.getPrefSafe("general.useragent.locale", "en-US");
     let baseUrl = "jar:resource://calendar/chrome/calendar-LOCALE.jar!/locale/LOCALE/calendar/calendar-extract.properties";
     let dayStart = cal.getPrefSafe("calendar.view.daystarthour", 6);
-    extractor.init(baseUrl, locale, dayStart);
+    let extractor = new Extractor(baseUrl, locale, dayStart);
     let sel = GetMessagePaneFrame().getSelection();
     let collected = extractor.extract(title, content, date, sel);
-    let guessed = extractor.guessStart(collected, !isEvent);
-    let endGuess = extractor.guessEnd(collected, guessed, !isEvent);
+    let guessed = extractor.guessStart(!isEvent);
+    let endGuess = extractor.guessEnd(guessed, !isEvent);
     let allDay = (guessed.hour == null || guessed.minute == null) &&
                 isEvent;
     
-    var item;
+    let item;
     if (isEvent) {
       item = createEvent();
     } else {
