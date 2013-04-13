@@ -103,7 +103,7 @@ Extractor.prototype = {
         }
 
         let nonAscii = sum/cnt || 0;
-        this.acs.logStringMessage("Average non-ascii charcode: " + nonAscii);
+        this.acs.logStringMessage("[calExtract] Average non-ascii charcode: " + nonAscii);
         return nonAscii;
     },
 
@@ -121,7 +121,7 @@ Extractor.prototype = {
             }
 
           this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
-          this.acs.logStringMessage("Application locale was used to choose " + this.fallbackLocale + " patterns.");
+          this.acs.logStringMessage("[calExtract] Application locale was used to choose " + this.fallbackLocale + " patterns.");
         } else {
             let spellclass = "@mozilla.org/spellchecker/engine;1";
             let sp = Components.classes[spellclass]
@@ -133,7 +133,7 @@ Extractor.prototype = {
             let dicts = arr["value"];
 
             if (dicts.length == 0) {
-                this.acs.logStringMessage("There are no dictionaries installed and enabled. " +
+                this.acs.logStringMessage("[calExtract] There are no dictionaries installed and enabled. " +
                                           "You might want to add some if date and time extraction " +
                                           "from emails seems inaccurate.");
             }
@@ -148,18 +148,18 @@ Extractor.prototype = {
                     let t1 = (new Date()).getTime();
                     sp.dictionary = dicts[dict];
                     let dur = (new Date()).getTime() - t1;
-                    this.acs.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
                     patterns = dicts[dict];
                 // beginning of dictionary locale matches patterns locale
                 } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
                     let t1 = (new Date()).getTime();
                     sp.dictionary = dicts[dict];
                     let dur = (new Date()).getTime() - t1;
-                    this.acs.logStringMessage("Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
                     patterns = dicts[dict].substring(0, 2);
                 // dictionary for which patterns aren't present
                 } else {
-                    this.acs.logStringMessage("Dictionary present, rules missing: " + dicts[dict]);
+                    this.acs.logStringMessage("[calExtract] Dictionary present, rules missing: " + dicts[dict]);
                     continue;
                 }
 
@@ -176,7 +176,7 @@ Extractor.prototype = {
                 }
 
                 let percentage = correct/total * 100.0;
-                this.acs.logStringMessage(dicts[dict] + " dictionary matches " + percentage + "% of words");
+                this.acs.logStringMessage("[calExtract] " + dicts[dict] + " dictionary matches " + percentage + "% of words");
 
                 if (percentage > 50.0 && percentage > most) {
                     mostLocale = patterns;
@@ -189,29 +189,29 @@ Extractor.prototype = {
             // using dictionaries for language recognition with non-latin letters doesn't work very well
             // possibly because of bug 471799
             if (avgCharCode > 24000 && avgCharCode < 32000) {
-                this.acs.logStringMessage("Using zh-TW patterns");
+                this.acs.logStringMessage("[calExtract] Using zh-TW patterns");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "zh-TW", "g"));
             } else if (avgCharCode > 14000 && avgCharCode < 24000) {
-                this.acs.logStringMessage("Using ja patterns");
+                this.acs.logStringMessage("[calExtract] Using ja patterns");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ja", "g"));
             } else if (avgCharCode > 1000 && avgCharCode < 1200) {
-                this.acs.logStringMessage("Using ru patterns");
+                this.acs.logStringMessage("[calExtract] Using ru patterns");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ru", "g"));
             // dictionary based
             } else if (most > 0) {
-                this.acs.logStringMessage("Using " + mostLocale + " patterns based on dictionary");
+                this.acs.logStringMessage("[calExtract] Using " + mostLocale + " patterns based on dictionary");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", mostLocale, "g"));
             // fallbackLocale matches patterns exactly
             } else if (this.checkBundle(this.fallbackLocale)) {
-                this.acs.logStringMessage("Falling back to " + this.fallbackLocale);
+                this.acs.logStringMessage("[calExtract] Falling back to " + this.fallbackLocale);
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
             // beginning of fallbackLocale matches patterns
             } else if (this.checkBundle(this.fallbackLocale.substring(0, 2))) {
                 this.fallbackLocale = this.fallbackLocale.substring(0, 2);
-                this.acs.logStringMessage("Falling back to " + this.fallbackLocale);
+                this.acs.logStringMessage("[calExtract] Falling back to " + this.fallbackLocale);
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", this.fallbackLocale, "g"));
             } else {
-                this.acs.logStringMessage("Using en-US");
+                this.acs.logStringMessage("[calExtract] Using en-US");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "en-US", "g"));
             }
         }
@@ -251,7 +251,7 @@ Extractor.prototype = {
         });
 
         this.cleanup();
-        this.acs.logStringMessage("Email after processing for extraction: \n" + this.email);
+        this.acs.logStringMessage("[calExtract] Email after processing for extraction: \n" + this.email);
 
         try {
             this.fixedLang = cal.getPrefSafe("calendar.patterns.fixed.locale", true);
@@ -688,7 +688,7 @@ Extractor.prototype = {
                     !(this.collected[inner].start == this.collected[outer].start &&
                         this.collected[inner].end == this.collected[outer].end)) {
 
-                        this.acs.logStringMessage(this.collected[outer].str + " found as well, disgarding " + this.collected[inner].str);
+                        this.acs.logStringMessage("[calExtract] " + this.collected[outer].str + " found as well, disgarding " + this.collected[inner].str);
                         this.collected[inner].relation = "notadatetime";
                 }
             }
@@ -699,14 +699,14 @@ Extractor.prototype = {
         if (sel.rangeCount > 0) {
             // mark the ones to not use
             for (let i = 0; i < sel.rangeCount; i++) {
-                this.acs.logStringMessage("Selection " + i + " is " + sel);
+                this.acs.logStringMessage("[calExtract] Selection " + i + " is " + sel);
                 for (let j = 0; j < this.collected.length; j++) {
                     let selection = sel.getRangeAt(i).toString();
 
                     if (!selection.contains(this.collected[j].str) &&
                         !title.contains(this.collected[j].str)) {
                         this.collected[j].relation = "notadatetime";
-                        this.acs.logStringMessage("Marked " + JSON.stringify(this.collected[j]) + " as notadatetime");
+                        this.acs.logStringMessage("[calExtract] Marked " + JSON.stringify(this.collected[j]) + " as notadatetime");
                     }
                 }
             }
@@ -758,20 +758,19 @@ Extractor.prototype = {
     * @return          datetime object for start time
     */
     guessStart: function guessStart(isTask) {
-        let startTimes = this.collected.filter(function(val) {
-            return (val.relation == "start");});
+        let startTimes = this.collected.filter(function(val) val.relation == "start");
         if (startTimes.length == 0) {
             return {};
         }
 
         for (let val in startTimes) {
 //             dump("Start: " + JSON.stringify(startTimes[val]) + "\n");
-            this.acs.logStringMessage("Start: " + JSON.stringify(startTimes[val]));
+            this.acs.logStringMessage("[calExtract] Start: " + JSON.stringify(startTimes[val]));
         }
 
         let guess = {};
-        let wDayInit = startTimes.filter(function(val) {
-            return (val.day != null && val.start === undefined);});
+        let wDayInit = startTimes.filter(function(val) val.day != null && val.start === undefined);
+
         // with tasks we don't try to guess start but assume email date
         if (isTask) {
             guess.year = wDayInit[0].year;
@@ -782,17 +781,12 @@ Extractor.prototype = {
             return guess;
         }
 
-        let wDay = startTimes.filter(function(val) {
-            return (val.day != null && val.start !== undefined);});
-        let wDayNA = wDay.filter(function(val) {
-            return (val.ambiguous === undefined);});
+        let wDay = startTimes.filter(function(val) val.day != null && val.start !== undefined);
+        let wDayNA = wDay.filter(function(val) val.ambiguous === undefined);
 
-        let wMinute = startTimes.filter(function(val) {
-            return (val.minute != null && val.start !== undefined);});
-        let wMinuteNA = wMinute.filter(function(val) {
-            return (val.ambiguous === undefined);});
-        let wMinuteInit = startTimes.filter(function(val) {
-            return (val.minute != null && val.start === undefined);});
+        let wMinute = startTimes.filter(function(val) val.minute != null && val.start !== undefined);
+        let wMinuteNA = wMinute.filter(function(val) val.ambiguous === undefined);
+        let wMinuteInit = startTimes.filter(function(val) val.minute != null && val.start === undefined);
 
         if (wMinuteNA.length != 0) {
             guess.hour = wMinuteNA[0].hour;
@@ -829,6 +823,7 @@ Extractor.prototype = {
             guess.day = wDayInit[0].day;
         }
 
+        this.acs.logStringMessage("[calExtract] Start picked: " + JSON.stringify(guess));
         return guess;
     },
 
@@ -841,26 +836,20 @@ Extractor.prototype = {
     */
     guessEnd: function guessEnd(start, isTask) {
         let guess = {};
-        let endTimes = this.collected.filter(function(val) {
-            return (val.relation == "end");});
-        let durations = this.collected.filter(function(val) {
-            return (val.relation == "duration");});
+        let endTimes = this.collected.filter(function(val) val.relation == "end");
+        let durations = this.collected.filter(function(val) val.relation == "duration");
         if (endTimes.length == 0 && durations.length == 0) {
             return {};
         } else {
             for (val in endTimes) {
 //                 dump("End: " + JSON.stringify(endTimes[val]) + "\n");
-                this.acs.logStringMessage("End: " + JSON.stringify(endTimes[val]));
+                this.acs.logStringMessage("[calExtract] End: " + JSON.stringify(endTimes[val]));
             }
 
-            let wDay = endTimes.filter(function(val) {
-                return (val.day != null);});
-            let wDayNA = wDay.filter(function(val) {
-                return (val.ambiguous === undefined);});
-            let wMinute = endTimes.filter(function(val) {
-                return (val.minute != null);});
-            let wMinuteNA = wMinute.filter(function(val) {
-                return (val.ambiguous === undefined);});
+            let wDay = endTimes.filter(function(val) val.day != null);
+            let wDayNA = wDay.filter(function(val) val.ambiguous === undefined);
+            let wMinute = endTimes.filter(function(val) val.minute != null);
+            let wMinuteNA = wMinute.filter(function(val) val.ambiguous === undefined);
 
             // first set non-ambiguous dates
             let pos = isTask == true ? 0 : wDayNA.length - 1;
@@ -910,7 +899,7 @@ Extractor.prototype = {
                 }
             }
 
-            // fill in date when date was guessed
+            // fill in date when time was guessed
             if (guess.minute != null && guess.day == null) {
                 guess.year = start.year;
                 guess.month = start.month;
@@ -924,7 +913,7 @@ Extractor.prototype = {
                 for (val in durations) {
                     duration += durations[val].duration;
 //                     dump("Dur: " + JSON.stringify(durations[val]) + "\n");
-                    this.acs.logStringMessage("Dur: " + JSON.stringify(durations[val]));
+                    this.acs.logStringMessage("[calExtract] Dur: " + JSON.stringify(durations[val]));
                 }
 
                 if (duration != 0) {
@@ -964,6 +953,7 @@ Extractor.prototype = {
                 guess.minute = 0;
             }
 
+            this.acs.logStringMessage("[calExtract] End picked: " + JSON.stringify(guess));
             return guess;
         }
     },
@@ -975,7 +965,7 @@ Extractor.prototype = {
         try {
             value = this.bundle.GetStringFromName(name);
             if (value.trim() == "") {
-                this.acs.logStringMessage("Pattern not found: " + name);
+                this.acs.logStringMessage("[calExtract] Pattern not found: " + name);
                 return def;
             }
 
@@ -986,7 +976,7 @@ Extractor.prototype = {
                 additions = this.cleanPatterns(additions).split("|");
                 for (let pattern in additions) {
                     vals.push(additions[pattern]);
-                    this.acs.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
+                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name + "\n");
                 }
             }
 
@@ -998,7 +988,7 @@ Extractor.prototype = {
                     let idx = vals.indexOf(removals[pattern]);
                     if (idx != -1) {
                         vals.splice(idx, 1);
-                        this.acs.logStringMessage("Removed " + removals[pattern] + " from " + name + "\n");
+                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name + "\n");
                     }
                 }
             }
@@ -1006,7 +996,7 @@ Extractor.prototype = {
             vals.sort(function(one, two) {return two.length - one.length;});
             return vals.join("|");
         } catch (ex) {
-            this.acs.logStringMessage("Pattern not found: " + name);
+            this.acs.logStringMessage("[calExtract] Pattern not found: " + name);
 
             // fake a value to avoid empty regexes creating endless loops
             return def;
@@ -1020,7 +1010,7 @@ Extractor.prototype = {
         try {
             let value = this.bundle.GetStringFromName(name);
             if (value.trim() == "") {
-                cal.LOG("Pattern empty: " + name);
+                cal.LOG("[calExtract] Pattern empty: " + name);
                 return alts;
             }
 
@@ -1031,7 +1021,7 @@ Extractor.prototype = {
                 additions = this.cleanPatterns(additions).split("|");
                 for (let pattern in additions) {
                     vals.push(additions[pattern]);
-                    this.acs.logStringMessage("Added " + additions[pattern] + " to " + name + "\n");
+                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name + "\n");
                 }
             }
 
@@ -1043,7 +1033,7 @@ Extractor.prototype = {
                     let idx = vals.indexOf(removals[pattern]);
                     if (idx != -1) {
                         vals.splice(idx, 1);
-                        this.acs.logStringMessage("Removed " + removals[pattern] + " from " + name + "\n");
+                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name + "\n");
                     }
                 }
             }
@@ -1069,7 +1059,7 @@ Extractor.prototype = {
                 alts[val] = {pattern: patterns[val], positions: positions};
             }
         } catch (ex) {
-            this.acs.logStringMessage("Pattern not found: " + name);
+            this.acs.logStringMessage("[calExtract] Pattern not found: " + name);
         }
         return alts;
     },
@@ -1087,7 +1077,7 @@ Extractor.prototype = {
         // correctness checking
         for(i = 1; i <= count; i++) {
             if (positions[i] === undefined) {
-                Components.utils.reportError("Faulty extraction pattern " + name +
+                Components.utils.reportError("[calExtract] Faulty extraction pattern " + name +
                                              ", missing parameter %" + i + "$S");
             }
         }
