@@ -50,34 +50,34 @@
     </div>
     
       <h2>Extension</h2>
-      <p>You can download a recent version of the extension <a href="https://github.com/merike/event-extract/downloads">here</a></p>
+      <p>You can download a recent version of the standalone extension 
+        <a href="https://addons.mozilla.org/en-US/thunderbird/addon/event-extract/">here</a>.<br>
+        Testing one for localizers that enables UI to test patterns is available at 
+        <a href="tricky-bits.eu/event-extract.xpi">tricky-bits.eu/event-extract.xpi</a>.<br>
+         Old testing one is still available at <a href="https://github.com/merike/event-extract/downloads">downloads</a>.
+      </p>
       
-      <h3>Localizing</h3>
-      <p>The stress is on localizing not translating. You shouldn't follow en-US punctuation unless 
-      it makes sense in your language.</p>
-      <p>Also, patterns can be omitted (or commented out) if some make no sense in your language.</p>
-      <p>If for some pattern you can think of endless possibilities try to include most common ones.</p>
-      <p>Patterns are space-insensitive, "at %1$S pm" will match both "at 3 pm" and "at 3pm".</p>
+      <h3>Testing on Earlybird</h3>
+      <p>After translating all of calendar.dtd and calendar.properties and at least some of calendar-extract.properties 
+        you need to wait for the next nightly build at 
+        http://ftp.mozilla.org/pub/mozilla.org/calendar/lightning/nightly/latest-comm-aurora-l10n/ to appear 
+        and install the extension for localizers mentioned above (until UI is not yet available in nightly builds, 
+        see bug 886124).        
+      </p>
+      <p>You don't need to have invitations to test. You can write a draft invitation yourself. 
+      To add as an event or task right-click message header toolbar and add extraction buttons.</p>
+      <p>The extension will log some data to error console while converting which you might find useful. 
+      You can see it by pressing Ctrl+Shift+J</p>
       
       <h3>Expected behaviour</h3>
       <p>For events extract both start and end date and time from email.</p>
       <p>For tasks extract both date and time of due date from email and use email Date header as 
       start time.</p>
-      <p>Language chosen depends on dictionaries installed. 
-      A dictionary that matched the highest amount of email content determines the language. 
+      <p>Language chosen depends on dictionaries installed and locales included in Lightning (nightlies only have one). 
+      A dictionary that matched the highest amount of email content determines the patterns used. 
       If no dictionary gives a match of > 50% or no dictionaries are installed then application locale 
-      determines language used.</p>
+      determines the language used.</p>
       
-      <h3>Testing</h3>
-      <p>You don't need to have invitations to test. You can write a draft invitation yourself in 
-      any language you wish. 
-      To add as an event or task right-click the email/draft and choose "Extract as".</p>
-      <p>You can change application locale temporarily if using a language pack in about:config by 
-      changing general.useragent.locale</p>
-      <p>You can change patterns included in the extension by unzipping .xpi file, making 
-      appropriate changes in a patterns file and zipping it together again.</p>
-      <p>The extension will log some data to error console while converting which you might find useful.</p>
-      <p>Post your results to <a href="https://etherpad.mozilla.org/event-extract">etherpad</a> or email them.</p>
     <h2>Download</h2>
     <p>
       You can download this project in either
