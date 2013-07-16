@@ -148,14 +148,14 @@ Extractor.prototype = {
                     let t1 = (new Date()).getTime();
                     sp.dictionary = dicts[dict];
                     let dur = (new Date()).getTime() - t1;
-                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms");
                     patterns = dicts[dict];
                 // beginning of dictionary locale matches patterns locale
                 } else if (this.checkBundle(dicts[dict].substring(0, 2))) {
                     let t1 = (new Date()).getTime();
                     sp.dictionary = dicts[dict];
                     let dur = (new Date()).getTime() - t1;
-                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms\n");
+                    this.acs.logStringMessage("[calExtract] Loading " + dicts[dict] + " dictionary took " + dur + "ms");
                     patterns = dicts[dict].substring(0, 2);
                 // dictionary for which patterns aren't present
                 } else {
@@ -265,7 +265,7 @@ Extractor.prototype = {
         }
         this.dailyNumbers = this.numbers.join(this.marker);
 
-        this.hourlyNumbers =  this.numbers[0] + this.marker;
+        this.hourlyNumbers = this.numbers[0] + this.marker;
         for (let i = 1; i <= 22; i++) {
             this.hourlyNumbers += this.numbers[i] + this.marker;
         }
@@ -430,7 +430,7 @@ Extractor.prototype = {
                                     let item = new Date(this.now.getTime());
                                     while (true) {
                                         item.setDate(item.getDate() + 1);
-                                        if (item.getMonth() == date.month - 1  &&
+                                        if (item.getMonth() == date.month - 1 &&
                                             item.getDate() == date.day) {
                                             date.year = item.getFullYear();
                                             break;
@@ -470,7 +470,7 @@ Extractor.prototype = {
                             let item = new Date(this.now.getTime());
                             while (true) {
                                 item.setDate(item.getDate() + 1);
-                                if (item.getMonth() == date.month - 1  &&
+                                if (item.getMonth() == date.month - 1 &&
                                     item.getDate() == date.day) {
                                     date.year = item.getFullYear();
                                     break;
@@ -487,7 +487,7 @@ Extractor.prototype = {
         }
     },
 
-    extractDate: function extractDate (pattern, relation) {
+    extractDate: function extractDate(pattern, relation) {
         let alts = this.getRepPatterns(pattern,
                                        ["(\\d{1,2}" + this.marker + this.dailyNumbers + ")"]);
         let res;
@@ -976,7 +976,7 @@ Extractor.prototype = {
                 additions = this.cleanPatterns(additions).split("|");
                 for (let pattern in additions) {
                     vals.push(additions[pattern]);
-                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name + "\n");
+                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name);
                 }
             }
 
@@ -988,7 +988,7 @@ Extractor.prototype = {
                     let idx = vals.indexOf(removals[pattern]);
                     if (idx != -1) {
                         vals.splice(idx, 1);
-                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name + "\n");
+                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name);
                     }
                 }
             }
@@ -1021,7 +1021,7 @@ Extractor.prototype = {
                 additions = this.cleanPatterns(additions).split("|");
                 for (let pattern in additions) {
                     vals.push(additions[pattern]);
-                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name + "\n");
+                    this.acs.logStringMessage("[calExtract] Added " + additions[pattern] + " to " + name);
                 }
             }
 
@@ -1033,7 +1033,7 @@ Extractor.prototype = {
                     let idx = vals.indexOf(removals[pattern]);
                     if (idx != -1) {
                         vals.splice(idx, 1);
-                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name + "\n");
+                        this.acs.logStringMessage("[calExtract] Removed " + removals[pattern] + " from " + name);
                     }
                 }
             }
@@ -1092,7 +1092,7 @@ Extractor.prototype = {
     },
 
     isValidYear: function isValidYear(year) {
-        return (year >= 2000  && year <= 2050);
+        return (year >= 2000 && year <= 2050);
     },
 
     isValidMonth: function isValidMonth(month) {
