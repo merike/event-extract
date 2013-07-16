@@ -500,12 +500,11 @@ Extractor.prototype = {
                     let day = this.parseNumber(res[1], this.numbers);
                     if (this.isValidDay(day)) {
                         let item = new Date(this.now.getTime());
-                        if (this.now.getDate() > day) {
+                        if (this.now.getDate() != day) {
                             // find next nth date
                             while (true) {
                                 item.setDate(item.getDate() + 1);
-                                if (item.getMonth() != this.now.getMonth() &&
-                                    item.getDate() == day) {
+                                if (item.getDate() == day) {
                                     break;
                                 }
                             }
@@ -1215,6 +1214,9 @@ Extractor.prototype = {
 
     parseNumber: function parseNumber(number, numbers) {
         let r = parseInt(number, 10);
+        // number comes in as plain text, numbers are already adjusted for usage
+        // in regular expression
+        number = this.cleanPatterns(number);
         if (isNaN(r)) {
             for (let i = 0; i <= 31; i++) {
                 let ns = numbers[i].split("|");
