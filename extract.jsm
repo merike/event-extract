@@ -963,6 +963,7 @@ Extractor.prototype = {
         let def = "061dc19c-719f-47f3-b2b5-e767e6f02b7a";
         try {
             value = this.bundle.GetStringFromName(name);
+            this.checkForFaultyPatterns(value, name);
             if (value.trim() == "") {
                 this.acs.logStringMessage("[calExtract] Pattern not found: " + name);
                 return def;
@@ -1008,6 +1009,7 @@ Extractor.prototype = {
 
         try {
             let value = this.bundle.GetStringFromName(name);
+            this.checkForFaultyPatterns(value, name);
             if (value.trim() == "") {
                 cal.LOG("[calExtract] Pattern empty: " + name);
                 return alts;
@@ -1088,6 +1090,15 @@ Extractor.prototype = {
         let value = pattern.replace(/\s*\|\s*/g, "|");
         // allow matching for patterns with missing or excessive whitespace
         return value.replace(/\s+/g, "\\s*").sanitize();
+    },
+
+    checkForFaultyPatterns: function checkForFaultyPatterns(pattern, name) {
+        if (/^\s*\|/.exec(pattern) || /\|\s*$/.exec(pattern) || /\|\s*\|/.exec(pattern)) {
+            dump("[calExtract] Faulty extraction pattern " +
+                 pattern + " for " + name + "\n");
+            Components.utils.reportError("[calExtract] Faulty extraction pattern " +
+                                         pattern + " for " + name);
+        }
     },
 
     isValidYear: function isValidYear(year) {
