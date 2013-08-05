@@ -15,15 +15,11 @@ Components.utils.import("resource://calendar/modules/calUtils.jsm");
 * @param dayStart        ambiguous hours earlier than this are considered to
 *                            be in the afternoon, when null then by default
 *                            set to 6
+* @param fixedLang       whether to use only fallbackLocale for extraction
 */
-function Extractor(baseUrl, fallbackLocale, dayStart) {
+function Extractor(baseUrl, fallbackLocale, dayStart, fixedLang) {
     this.bundleUrl = baseUrl;
     this.fallbackLocale = fallbackLocale;
-
-    if (dayStart != null) {
-        this.dayStart = dayStart;
-    }
-
     this.email = "";
     this.marker = "--MARK--";
     this.collected = [];
@@ -39,6 +35,14 @@ function Extractor(baseUrl, fallbackLocale, dayStart) {
     this.fixedLang = true;
     this.acs = Components.classes["@mozilla.org/consoleservice;1"]
                          .getService(Components.interfaces.nsIConsoleService);
+
+    if (dayStart != null) {
+        this.dayStart = dayStart;
+    }
+
+    if (fixedLang != null) {
+        this.fixedLang = fixedLang;
+    }
 }
 
 Extractor.prototype = {
@@ -1076,7 +1080,7 @@ Extractor.prototype = {
         }
 
         // correctness checking
-        for(i = 1; i <= count; i++) {
+        for (i = 1; i <= count; i++) {
             if (positions[i] === undefined) {
                 Components.utils.reportError("[calExtract] Faulty extraction pattern " + name +
                                              ", missing parameter %" + i + "$S");

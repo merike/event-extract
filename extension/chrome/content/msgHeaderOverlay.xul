@@ -8,26 +8,46 @@
 
 <overlay id="msg-header-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/javascript" src="chrome://event-extract/content/event-extractor.js"/>
-  
+
   <toolbarpalette id="header-view-toolbar-palette">
-    <toolbarbutton id="hdrExtractEventButton" label="&calendar.extract.event.button;"
+    <toolbarbutton id="hdrExtractEventButton"
+                   type="menu-button"
+                   label="&calendar.extract.event.button;"
                    tooltiptext="&calendar.extract.event.button.tooltip;"
                    oncommand="extract.extractFromEmail(true)"
-                   class="toolbarbutton-1 msgHeaderView-button" removable="true" />
-    <toolbarbutton id="hdrExtractTaskButton" label="&calendar.extract.task.button;"
+                   class="toolbarbutton-1 msgHeaderView-button" removable="true">
+      <menupopup id="hdrExtractEventLocaleList" oncommand="extract.ExtractWithLocale(event, true);"
+                 onpopupshowing="extract.OnShowLocaleMenu(event.target);"/>
+    </toolbarbutton>
+    <toolbarbutton id="hdrExtractTaskButton"
+                   type="menu-button"
+                   label="&calendar.extract.task.button;"
                    tooltiptext="&calendar.extract.task.button.tooltip;"
                    oncommand="extract.extractFromEmail(false)"
-                   class="toolbarbutton-1 msgHeaderView-button" removable="true" />
+                   class="toolbarbutton-1 msgHeaderView-button" removable="true">
+      <menupopup id="hdrExtractTaskLocaleList" oncommand="extract.ExtractWithLocale(event, false);"
+                 onpopupshowing="extract.OnShowLocaleMenu(event.target);"/>
+    </toolbarbutton>
   </toolbarpalette>
-  
+
   <toolbarpalette id="MailToolbarPalette">
-    <toolbarbutton id="extractEventButton" label="&calendar.extract.event.button;"
+    <toolbarbutton id="extractEventButton"
+                   type="menu-button"
+                   label="&calendar.extract.event.button;"
                    tooltiptext="&calendar.extract.event.button.tooltip;"
                    oncommand="extract.extractFromEmail(true)"
-                   class="toolbarbutton-1" removable="true" />
-    <toolbarbutton id="extractTaskButton" label="&calendar.extract.task.button;"
+                   class="toolbarbutton-1" removable="true">
+      <menupopup id="extractEventLocaleList" oncommand="extract.ExtractWithLocale(event, true);"
+                 onpopupshowing="extract.OnShowLocaleMenu(event.target);"/>
+    </toolbarbutton>
+    <toolbarbutton id="extractTaskButton"
+                   type="menu-button"
+                   label="&calendar.extract.task.button;"
                    tooltiptext="&calendar.extract.event.button.tooltip;"
                    oncommand="extract.extractFromEmail(false)"
-                   class="toolbarbutton-1" removable="true" />
+                   class="toolbarbutton-1" removable="true">
+      <menupopup id="extractTaskLocaleList" oncommand="extract.ExtractWithLocale(event, true);"
+                 onpopupshowing="extract.OnShowLocaleMenu(event.target);"/>
+    </toolbarbutton>
   </toolbarpalette>
 </overlay>
