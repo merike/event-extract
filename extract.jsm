@@ -192,14 +192,19 @@ Extractor.prototype = {
 
             // using dictionaries for language recognition with non-latin letters doesn't work very well
             // possibly because of bug 471799
-            if (avgCharCode > 24000 && avgCharCode < 32000) {
-                this.acs.logStringMessage("[calExtract] Using zh-TW patterns");
+            if (avgCharCode > 48000 && avgCharCode < 50000) {
+                this.acs.logStringMessage("[calExtract] Using ko patterns based on charcodes");
+                this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ko", "g"));
+            // is it possible to differentiate zh-TW and zh-CN?
+            } else if (avgCharCode > 24000 && avgCharCode < 32000) {
+                this.acs.logStringMessage("[calExtract] Using zh-TW patterns based on charcodes");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "zh-TW", "g"));
             } else if (avgCharCode > 14000 && avgCharCode < 24000) {
-                this.acs.logStringMessage("[calExtract] Using ja patterns");
+                this.acs.logStringMessage("[calExtract] Using ja patterns based on charcodes");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ja", "g"));
+            // Bulgarian also looks like that
             } else if (avgCharCode > 1000 && avgCharCode < 1200) {
-                this.acs.logStringMessage("[calExtract] Using ru patterns");
+                this.acs.logStringMessage("[calExtract] Using ru patterns based on charcodes");
                 this.bundle = service.createBundle(this.bundleUrl.replace("LOCALE", "ru", "g"));
             // dictionary based
             } else if (most > 0) {
